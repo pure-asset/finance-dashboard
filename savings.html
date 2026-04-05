@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -917,10 +918,6 @@ function renderChart() {
 }
 
 // ── Monthly target settings (inline) ──
-document.querySelector('.monthly-header').innerHTML += `
-  <button class="nav-btn" onclick="openTargetModal()" style="font-size:11px;padding:5px 12px">⚙️ 월 목표 설정</button>
-`;
-
 document.body.insertAdjacentHTML('beforeend', `
   <div class="modal-overlay" id="target-modal">
     <div class="modal" style="width:360px">
