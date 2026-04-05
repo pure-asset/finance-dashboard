@@ -1,130 +1,288 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>생활비 정산</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Gowun+Dodum&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
+  :root {
+    --me: #ff6b9d;
+    --him: #5b8dee;
+    --me-soft: #fff0f5;
+    --him-soft: #f0f4ff;
+    --me-mid: #ffd6e7;
+    --him-mid: #d0dcff;
+    --shared: #a78bfa;
+    --shared-soft: #f3f0ff;
+    --shared-mid: #ddd6fe;
+    --bg: #fdf8ff;
+    --surface: #ffffff;
+    --border: #f0eaf5;
+    --text: #2d1f3d;
+    --text2: #9b8aaa;
+    --text3: #c9b8d8;
+    --shadow: 0 2px 20px rgba(180,130,210,0.1);
+    --shadow-hover: 0 8px 32px rgba(180,130,210,0.18);
+    --radius: 20px;
+  }
 
-/* 기존 스타일 그대로 */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root {
---me:#ff6b9d;
---him:#5b8dee;
---shared:#a78bfa;
---bg:#fdf8ff;
---surface:#ffffff;
---border:#f0eaf5;
---text:#2d1f3d;
---text2:#9b8aaa;
---shadow:0 2px 20px rgba(180,130,210,0.1);
---shadow-hover:0 8px 32px rgba(180,130,210,0.18);
---radius:20px;
-}
+  body {
+    background: var(--bg);
+    background-image: radial-gradient(circle at 15% 10%, #ffedf5 0%, transparent 35%),
+                      radial-gradient(circle at 85% 85%, #edf0ff 0%, transparent 35%);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    padding: 32px 16px 60px;
+  }
 
-body{
-background:var(--bg);
-font-family:'Noto Sans KR',sans-serif;
-padding:32px 16px 60px;
-color:var(--text);
-}
+  header {
+    max-width: 820px; margin: 0 auto 28px;
+    text-align: center; animation: fadeUp 0.5s ease both;
+  }
+  .header-emoji { font-size: 36px; margin-bottom: 8px; }
+  header h1 { font-family: 'Gowun Dodum', sans-serif; font-size: 26px; letter-spacing: -0.3px; margin-bottom: 4px; }
 
-header{
-max-width:820px;
-margin:0 auto 28px;
-text-align:center;
-}
+  .month-nav {
+    display: inline-flex; align-items: center; gap: 16px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 99px; padding: 8px 20px; margin-top: 16px;
+    box-shadow: var(--shadow);
+  }
+  .month-nav button { background: none; border: none; color: var(--text2); font-size: 16px; cursor: pointer; padding: 2px 6px; border-radius: 50%; transition: all 0.15s; }
+  .month-nav button:hover { background: var(--border); color: var(--text); }
+  .month-nav span { font-size: 15px; font-weight: 700; min-width: 90px; text-align: center; }
 
-.header-emoji{
-font-size:36px;
-margin-bottom:8px;
-}
+  .section-title {
+    max-width: 820px; margin: 0 auto 12px;
+    font-size: 11px; font-weight: 800; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text2);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-header h1{
-font-family:'Gowun Dodum';
-font-size:26px;
-margin-bottom:4px;
-}
+  .summary-grid {
+    max-width: 820px; margin: 0 auto 28px;
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
+  }
+  .sum-card {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 20px; border: 1.5px solid var(--border);
+    box-shadow: var(--shadow); text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .sum-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+  .sum-label { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text2); margin-bottom: 6px; }
+  .sum-amount { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
+  .sum-sub { font-size: 11px; color: var(--text2); margin-top: 4px; }
+  .sum-card.shared .sum-amount { color: var(--shared); }
+  .sum-card.him-extra .sum-amount { color: var(--him); }
+  .sum-card.settle-card {
+    background: linear-gradient(135deg, #f0f4ff, #e8f0ff);
+    border-color: var(--him-mid);
+  }
+  .sum-card.settle-card .sum-amount { color: var(--him); font-size: 26px; }
 
-.month-nav{
-display:inline-flex;
-align-items:center;
-gap:16px;
-background:var(--surface);
-border:1.5px solid var(--border);
-border-radius:99px;
-padding:8px 20px;
-margin-top:16px;
-box-shadow:var(--shadow);
-}
+  .split-wrap {
+    max-width: 820px; margin: 0 auto 28px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 18px 24px; box-shadow: var(--shadow);
+  }
+  .split-header { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
+  .split-header .l { color: var(--me); }
+  .split-header .r { color: var(--him); }
+  .split-bar { height: 12px; background: var(--him-mid); border-radius: 99px; overflow: hidden; }
+  .split-fill { height: 100%; background: linear-gradient(90deg, var(--me), #ff9bbf); border-radius: 99px; transition: width 0.6s cubic-bezier(0.34,1.2,0.64,1); }
 
-/* 추가된 네비 버튼 */
+  .shared-grid {
+    max-width: 820px; margin: 0 auto 28px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  }
 
-.nav-buttons{
-display:flex;
-justify-content:center;
-gap:10px;
-margin-top:14px;
-}
+  .shared-item {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 16px; padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 8px;
+    position: relative; transition: all 0.18s;
+  }
+  .shared-item:hover { transform: translateY(-1px); box-shadow: var(--shadow-hover); }
+  .shared-item.inactive { opacity: 0.52; }
 
-.nav-btn{
-background:var(--surface);
-border:1.5px solid var(--border);
-border-radius:999px;
-padding:8px 16px;
-font-size:13px;
-font-weight:700;
-color:var(--text2);
-text-decoration:none;
-box-shadow:var(--shadow);
-transition:all 0.15s;
-}
+  .shared-top { display: flex; align-items: center; gap: 8px; padding-right: 28px; }
+  .shared-emoji { font-size: 20px; }
+  .shared-name { font-size: 13px; font-weight: 600; }
 
-.nav-btn:hover{
-transform:translateY(-1px);
-box-shadow:var(--shadow-hover);
-color:var(--text);
-}
+  .shared-input {
+    background: var(--bg); border: 1.5px solid var(--border);
+    border-radius: 8px; color: var(--text); padding: 7px 10px;
+    font-size: 13px; font-family: inherit; outline: none; width: 100%;
+    font-weight: 700; transition: border-color 0.15s;
+  }
+  .shared-input:focus { border-color: var(--shared); box-shadow: 0 0 0 3px rgba(167,139,250,0.1); }
+  .shared-input:disabled { cursor: not-allowed; }
 
-/* 나머지 기존 CSS 그대로 */
+  .shared-each-label { font-size: 10px; color: var(--shared); font-weight: 700; min-height: 14px; }
 
+  .skip-badge {
+    font-size: 9px; font-weight: 700; color: var(--text3);
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 99px; padding: 1px 7px; display: inline-block; width: fit-content;
+  }
+
+  .toggle-wrap {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 2;
+  }
+  .mini-toggle {
+    -webkit-appearance: none;
+    appearance: none;
+    display: inline-block;
+    vertical-align: top;
+    position: relative;
+    width: 36px;
+    height: 20px;
+    min-width: 36px;
+    min-height: 20px;
+    padding: 0;
+    margin: 0;
+    border: none;
+    outline: none;
+    border-radius: 999px;
+    cursor: pointer;
+    background: #e8e1f6;
+    box-shadow: inset 0 0 0 1px rgba(167, 139, 250, 0.18);
+    transition: background 0.18s ease, box-shadow 0.18s ease;
+    overflow: hidden;
+  }
+  .mini-toggle.active {
+    background: #a78bfa;
+    box-shadow: inset 0 0 0 1px rgba(122, 98, 155, 0.08);
+  }
+  .mini-toggle-circle {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 1;
+    color: #b8adc9;
+    box-shadow: 0 1px 3px rgba(53, 27, 78, 0.16);
+    transition: transform 0.18s ease, color 0.18s ease;
+    pointer-events: none;
+  }
+  .mini-toggle.active .mini-toggle-circle {
+    transform: translateX(16px);
+    color: #9b87f5;
+  }
+
+  .him-section { max-width: 820px; margin: 0 auto 28px; }
+
+  .him-add-row {
+    display: grid; grid-template-columns: 1fr 130px auto;
+    gap: 10px; margin-bottom: 12px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  .fg { display: flex; flex-direction: column; gap: 5px; }
+  .fg label { font-size: 11px; color: var(--text2); font-weight: 700; letter-spacing: 0.04em; }
+  .fg input {
+    background: var(--bg); border: 1.5px solid var(--border);
+    border-radius: 12px; color: var(--text); padding: 10px 14px;
+    font-size: 13px; font-family: inherit; outline: none; width: 100%;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .fg input:focus { border-color: var(--him); box-shadow: 0 0 0 3px rgba(91,141,238,0.1); }
+
+  .add-btn {
+    background: linear-gradient(135deg, var(--him), #7aaeff);
+    color: #fff; border: none; border-radius: 12px;
+    padding: 10px 20px; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.18s; white-space: nowrap;
+    font-family: inherit; box-shadow: 0 4px 12px rgba(91,141,238,0.3);
+    align-self: flex-end;
+  }
+  .add-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .him-items { display: flex; flex-direction: column; gap: 8px; }
+
+  .him-card {
+    background: var(--surface); border: 1.5px solid var(--him-mid);
+    border-left: 4px solid var(--him); border-radius: 14px;
+    padding: 14px 16px; display: grid;
+    grid-template-columns: 1fr auto auto; align-items: center; gap: 12px;
+    box-shadow: var(--shadow); transition: all 0.18s;
+  }
+  .him-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-hover); }
+  .him-card-desc { font-size: 14px; font-weight: 600; }
+  .him-card-meta { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .him-card-amount { font-size: 16px; font-weight: 900; color: var(--him); }
+  .del-btn { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 14px; border-radius: 8px; padding: 4px 6px; transition: all 0.15s; }
+  .del-btn:hover { color: var(--me); background: var(--me-soft); }
+
+  .him-empty {
+    text-align: center; padding: 28px; color: var(--text3); font-size: 13px;
+    background: var(--surface); border: 1.5px dashed var(--border); border-radius: var(--radius);
+  }
+
+  .settle-banner {
+    max-width: 820px; margin: 8px auto 0;
+    border-radius: var(--radius); padding: 24px 28px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    background: linear-gradient(135deg, #f0f4ff 0%, #e8f0ff 100%);
+    border: 1.5px solid var(--him-mid);
+    box-shadow: 0 8px 32px rgba(91,141,238,0.15);
+  }
+  .settle-msg { font-size: 15px; font-weight: 700; line-height: 1.6; }
+  .settle-msg .h-him { color: var(--him); }
+  .settle-msg .h-me { color: var(--me); }
+  .settle-sub { font-size: 12px; color: var(--text2); margin-top: 4px; }
+  .settle-big { font-size: 32px; font-weight: 900; letter-spacing: -1px; color: var(--him); white-space: nowrap; }
+
+  .sync-note {
+    max-width: 820px; margin: 12px auto 0; text-align: center;
+    font-size: 12px; color: var(--text2);
+  }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+  input, select, textarea, button { font-size: 16px !important; }
+  input, select, button { min-height: 44px; }
+  input[type="number"] { font-size: 16px; }
+
+  @media (max-width: 600px) {
+    .summary-grid { grid-template-columns: 1fr 1fr; }
+    .shared-grid { grid-template-columns: 1fr 1fr; }
+    .him-add-row { grid-template-columns: 1fr 110px; }
+    .him-add-row .add-btn { grid-column: 1/-1; }
+    .settle-banner { flex-direction: column; text-align: center; }
+  }
 </style>
-
 </head>
-
 <body>
 
 <header>
-
-<div class="header-emoji">🏠💑</div>
-
-<h1>생활비 정산</h1>
-
-<div class="month-nav">
-<button onclick="changeMonth(-1)">◀</button>
-<span id="month-title"></span>
-<button onclick="changeMonth(1)">▶</button>
-</div>
-
-<!-- 추가된 버튼 -->
-<div class="nav-buttons">
-
-<a href="index.html" class="nav-btn">
-💳 개인 지출 관리
-</a>
-
-<a href="savings.html" class="nav-btn">
-💎 저축 & 투자
-</a>
-
-</div>
-
+  <div class="header-emoji">🏠💑</div>
+  <h1>생활비 정산</h1>
+  <div class="month-nav">
+    <button onclick="changeMonth(-1)">◀</button>
+    <span id="month-title"></span>
+    <button onclick="changeMonth(1)">▶</button>
+  </div>
 </header>
-
 
 <div class="section-title">이번 달 요약</div>
 <div class="summary-grid">
