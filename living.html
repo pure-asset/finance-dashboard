@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>생활비 정산</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Gowun+Dodum&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
     --me: #ff6b9d;
@@ -38,12 +37,13 @@
     color: var(--text);
     font-family: 'Noto Sans KR', sans-serif;
     min-height: 100vh;
-    padding: 32px 16px 60px;
+    padding: 32px 16px 80px;
   }
 
+  /* ── Header ── */
   header {
     max-width: 820px; margin: 0 auto 28px;
-    text-align: center; animation: fadeUp 0.5s ease both;
+    text-align: center;
   }
   .header-emoji { font-size: 36px; margin-bottom: 8px; }
   header h1 { font-family: 'Gowun Dodum', sans-serif; font-size: 26px; letter-spacing: -0.3px; margin-bottom: 4px; }
@@ -54,10 +54,32 @@
     border-radius: 99px; padding: 8px 20px; margin-top: 16px;
     box-shadow: var(--shadow);
   }
-  .month-nav button { background: none; border: none; color: var(--text2); font-size: 16px; cursor: pointer; padding: 2px 6px; border-radius: 50%; transition: all 0.15s; }
+  .month-nav button { background: none; border: none; color: var(--text2); font-size: 16px; cursor: pointer; padding: 2px 8px; border-radius: 50%; transition: all 0.15s; }
   .month-nav button:hover { background: var(--border); color: var(--text); }
   .month-nav span { font-size: 15px; font-weight: 700; min-width: 90px; text-align: center; }
 
+  /* ── Action bar ── */
+  .action-bar {
+    max-width: 820px; margin: 0 auto 22px;
+    display: flex; gap: 10px; justify-content: flex-end;
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 18px; border-radius: 99px; border: 1.5px solid var(--border);
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    background: var(--surface); color: var(--text2);
+    font-family: inherit; transition: all 0.18s; box-shadow: var(--shadow);
+  }
+  .btn:hover { border-color: var(--shared); color: var(--shared); transform: translateY(-1px); }
+  .btn.primary { background: linear-gradient(135deg, var(--me), #ff9bbf); color: #fff; border-color: transparent; box-shadow: 0 4px 12px rgba(255,107,157,0.3); }
+  .btn.primary:hover { opacity: 0.88; color: #fff; }
+  .btn.blue { background: linear-gradient(135deg, var(--him), #7aaeff); color: #fff; border-color: transparent; box-shadow: 0 4px 12px rgba(91,141,238,0.3); }
+  .btn.blue:hover { opacity: 0.88; color: #fff; }
+  .btn.danger { color: var(--me); }
+  .btn.danger:hover { border-color: var(--me); background: var(--me-soft); }
+
+  /* ── Section title ── */
   .section-title {
     max-width: 820px; margin: 0 auto 12px;
     font-size: 11px; font-weight: 800; letter-spacing: 0.1em;
@@ -66,15 +88,15 @@
   }
   .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
+  /* ── Summary ── */
   .summary-grid {
-    max-width: 820px; margin: 0 auto 28px;
+    max-width: 820px; margin: 0 auto 24px;
     display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
   }
   .sum-card {
     background: var(--surface); border-radius: var(--radius);
     padding: 20px; border: 1.5px solid var(--border);
-    box-shadow: var(--shadow); text-align: center;
-    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: var(--shadow); text-align: center; transition: transform 0.2s, box-shadow 0.2s;
   }
   .sum-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
   .sum-label { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text2); margin-bottom: 6px; }
@@ -82,28 +104,25 @@
   .sum-sub { font-size: 11px; color: var(--text2); margin-top: 4px; }
   .sum-card.shared .sum-amount { color: var(--shared); }
   .sum-card.him-extra .sum-amount { color: var(--him); }
-  .sum-card.settle-card {
-    background: linear-gradient(135deg, #f0f4ff, #e8f0ff);
-    border-color: var(--him-mid);
-  }
+  .sum-card.settle-card { background: linear-gradient(135deg, #f0f4ff, #e8f0ff); border-color: var(--him-mid); }
   .sum-card.settle-card .sum-amount { color: var(--him); font-size: 26px; }
 
+  /* ── Split bar ── */
   .split-wrap {
-    max-width: 820px; margin: 0 auto 28px;
+    max-width: 820px; margin: 0 auto 24px;
     background: var(--surface); border: 1.5px solid var(--border);
     border-radius: var(--radius); padding: 18px 24px; box-shadow: var(--shadow);
   }
   .split-header { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
-  .split-header .l { color: var(--me); }
-  .split-header .r { color: var(--him); }
+  .split-header .l { color: var(--me); } .split-header .r { color: var(--him); }
   .split-bar { height: 12px; background: var(--him-mid); border-radius: 99px; overflow: hidden; }
   .split-fill { height: 100%; background: linear-gradient(90deg, var(--me), #ff9bbf); border-radius: 99px; transition: width 0.6s cubic-bezier(0.34,1.2,0.64,1); }
 
+  /* ── Shared grid ── */
   .shared-grid {
-    max-width: 820px; margin: 0 auto 28px;
+    max-width: 820px; margin: 0 auto 24px;
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
   }
-
   .shared-item {
     background: var(--surface); border: 1.5px solid var(--border);
     border-radius: 16px; padding: 14px 16px;
@@ -111,12 +130,10 @@
     position: relative; transition: all 0.18s;
   }
   .shared-item:hover { transform: translateY(-1px); box-shadow: var(--shadow-hover); }
-  .shared-item.inactive { opacity: 0.52; }
-
+  .shared-item.inactive { opacity: 0.4; }
   .shared-top { display: flex; align-items: center; gap: 8px; padding-right: 28px; }
   .shared-emoji { font-size: 20px; }
   .shared-name { font-size: 13px; font-weight: 600; }
-
   .shared-input {
     background: var(--bg); border: 1.5px solid var(--border);
     border-radius: 8px; color: var(--text); padding: 7px 10px;
@@ -125,75 +142,61 @@
   }
   .shared-input:focus { border-color: var(--shared); box-shadow: 0 0 0 3px rgba(167,139,250,0.1); }
   .shared-input:disabled { cursor: not-allowed; }
-
   .shared-each-label { font-size: 10px; color: var(--shared); font-weight: 700; min-height: 14px; }
+  .skip-badge { font-size: 9px; font-weight: 700; color: var(--text3); background: var(--bg); border: 1px solid var(--border); border-radius: 99px; padding: 1px 7px; display: inline-block; width: fit-content; }
+  .toggle-btn { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 50%; border: none; cursor: pointer; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .toggle-btn.on { background: var(--shared-mid); color: var(--shared); }
+  .toggle-btn.off { background: var(--border); color: var(--text3); }
 
-  .skip-badge {
-    font-size: 9px; font-weight: 700; color: var(--text3);
-    background: var(--bg); border: 1px solid var(--border);
-    border-radius: 99px; padding: 1px 7px; display: inline-block; width: fit-content;
+  /* ── Essentials expanded card ── */
+  .shared-item.essentials-card {
+    grid-column: 1 / -1;
   }
+  .essentials-add-row {
+    display: grid; grid-template-columns: 100px 2fr 110px auto; gap: 8px; margin-top: 4px;
+  }
+  .essentials-input-sm {
+    background: var(--bg); border: 1.5px solid var(--border);
+    border-radius: 8px; color: var(--text); padding: 6px 10px;
+    font-size: 12px; font-family: inherit; outline: none; width: 100%;
+    transition: border-color 0.15s;
+  }
+  .essentials-input-sm:focus { border-color: var(--shared); }
+  .essentials-add-btn {
+    background: var(--shared-mid); color: var(--shared);
+    border: none; border-radius: 8px; padding: 6px 12px;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    font-family: inherit; transition: all 0.15s; white-space: nowrap;
+  }
+  .essentials-add-btn:hover { background: var(--shared); color: #fff; }
+  .essentials-list { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; }
+  .essentials-row {
+    display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 8px;
+    background: var(--bg); border-radius: 8px; padding: 6px 10px;
+    font-size: 12px;
+  }
+  .essentials-row-desc { color: var(--text); font-weight: 500; }
+  .essentials-row-amount { color: var(--shared); font-weight: 800; font-size: 12px; }
+  .essentials-del { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 12px; padding: 2px 4px; border-radius: 4px; transition: all 0.15s; }
+  .essentials-del:hover { color: var(--me); }
+  .essentials-place {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    background: var(--shared-mid); color: var(--shared);
+    border-radius: 99px; padding: 1px 7px; margin-right: 3px;
+  }
+  .essentials-total-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 0 0; border-top: 1px solid var(--border); margin-top: 4px;
+    font-size: 11px;
+  }
+  .essentials-total-label { color: var(--text2); font-weight: 600; }
+  .essentials-total-val { color: var(--shared); font-weight: 900; font-size: 13px; }
+  .essentials-empty { font-size: 11px; color: var(--text3); text-align: center; padding: 8px 0; }
 
-  .toggle-wrap {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    z-index: 2;
-  }
-  .mini-toggle {
-    -webkit-appearance: none;
-    appearance: none;
-    position: relative;
-    display: block;
-    width: 32px;
-    height: 16px;
-    min-width: 32px;
-    min-height: 16px;
-    padding: 0;
-    margin: 0;
-    border: none;
-    outline: none;
-    border-radius: 999px;
-    cursor: pointer;
-    background: #ebe5f7;
-    box-shadow: inset 0 0 0 1px rgba(167, 139, 250, 0.22);
-    transition: background 0.18s ease, box-shadow 0.18s ease;
-    overflow: hidden;
-    flex-shrink: 0;
-  }
-  .mini-toggle.active {
-    background: #a78bfa;
-    box-shadow: inset 0 0 0 1px rgba(122, 98, 155, 0.1);
-  }
-  .mini-toggle-circle {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 8px;
-    font-weight: 800;
-    line-height: 1;
-    color: #b8adc9;
-    box-shadow: 0 1px 2px rgba(53, 27, 78, 0.16);
-    transition: transform 0.18s ease, color 0.18s ease;
-    pointer-events: none;
-  }
-  .mini-toggle.active .mini-toggle-circle {
-    transform: translateX(16px);
-    color: #9b87f5;
-  }
-
-  .him-section { max-width: 820px; margin: 0 auto 28px; }
-
+  /* ── Him charges ── */
+  .him-section { max-width: 820px; margin: 0 auto 24px; }
   .him-add-row {
-    display: grid; grid-template-columns: 1fr 130px auto;
-    gap: 10px; margin-bottom: 12px;
+    display: grid; grid-template-columns: 1fr 130px auto; gap: 10px; margin-bottom: 12px;
     background: var(--surface); border: 1.5px solid var(--border);
     border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow);
   }
@@ -206,24 +209,19 @@
     transition: border-color 0.15s, box-shadow 0.15s;
   }
   .fg input:focus { border-color: var(--him); box-shadow: 0 0 0 3px rgba(91,141,238,0.1); }
-
-  .add-btn {
-    background: linear-gradient(135deg, var(--him), #7aaeff);
-    color: #fff; border: none; border-radius: 12px;
-    padding: 10px 20px; font-size: 13px; font-weight: 700;
-    cursor: pointer; transition: all 0.18s; white-space: nowrap;
+  .him-add-btn {
+    background: linear-gradient(135deg, var(--him), #7aaeff); color: #fff;
+    border: none; border-radius: 12px; padding: 10px 20px;
+    font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap;
     font-family: inherit; box-shadow: 0 4px 12px rgba(91,141,238,0.3);
-    align-self: flex-end;
+    align-self: flex-end; transition: all 0.18s;
   }
-  .add-btn:hover { opacity: 0.88; transform: translateY(-1px); }
-
+  .him-add-btn:hover { opacity: 0.88; transform: translateY(-1px); }
   .him-items { display: flex; flex-direction: column; gap: 8px; }
-
   .him-card {
     background: var(--surface); border: 1.5px solid var(--him-mid);
-    border-left: 4px solid var(--him); border-radius: 14px;
-    padding: 14px 16px; display: grid;
-    grid-template-columns: 1fr auto auto; align-items: center; gap: 12px;
+    border-left: 4px solid var(--him); border-radius: 14px; padding: 14px 16px;
+    display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 12px;
     box-shadow: var(--shadow); transition: all 0.18s;
   }
   .him-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-hover); }
@@ -232,75 +230,197 @@
   .him-card-amount { font-size: 16px; font-weight: 900; color: var(--him); }
   .del-btn { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 14px; border-radius: 8px; padding: 4px 6px; transition: all 0.15s; }
   .del-btn:hover { color: var(--me); background: var(--me-soft); }
+  .him-empty { text-align: center; padding: 28px; color: var(--text3); font-size: 13px; background: var(--surface); border: 1.5px dashed var(--border); border-radius: var(--radius); }
 
-  .him-empty {
-    text-align: center; padding: 28px; color: var(--text3); font-size: 13px;
-    background: var(--surface); border: 1.5px dashed var(--border); border-radius: var(--radius);
-  }
-
+  /* ── Settle banner ── */
   .settle-banner {
-    max-width: 820px; margin: 8px auto 0;
+    max-width: 820px; margin: 0 auto 28px;
     border-radius: var(--radius); padding: 24px 28px;
     display: flex; align-items: center; justify-content: space-between; gap: 16px;
-    background: linear-gradient(135deg, #f0f4ff 0%, #e8f0ff 100%);
+    background: linear-gradient(135deg, #f0f4ff, #e8f0ff);
     border: 1.5px solid var(--him-mid);
     box-shadow: 0 8px 32px rgba(91,141,238,0.15);
   }
   .settle-msg { font-size: 15px; font-weight: 700; line-height: 1.6; }
   .settle-msg .h-him { color: var(--him); }
-  .settle-msg .h-me { color: var(--me); }
   .settle-sub { font-size: 12px; color: var(--text2); margin-top: 4px; }
   .settle-big { font-size: 32px; font-weight: 900; letter-spacing: -1px; color: var(--him); white-space: nowrap; }
 
-  .sync-note {
-    max-width: 820px; margin: 12px auto 0; text-align: center;
-    font-size: 12px; color: var(--text2);
+  /* ── History ── */
+  .history-section { max-width: 820px; margin: 0 auto 24px; }
+  .history-list { display: flex; flex-direction: column; gap: 8px; }
+  .history-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 16px; padding: 16px 20px;
+    display: grid; grid-template-columns: 1fr auto auto auto;
+    align-items: center; gap: 16px;
+    box-shadow: var(--shadow); transition: all 0.18s;
   }
+  .history-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-hover); }
+  .history-month { font-size: 15px; font-weight: 800; }
+  .history-detail { font-size: 11px; color: var(--text2); margin-top: 3px; }
+  .history-amount { font-size: 18px; font-weight: 900; color: var(--him); }
+  .history-status { font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 99px; }
+  .status-saved { background: var(--shared-soft); color: var(--shared); border: 1px solid var(--shared-mid); }
+  .status-paid { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+  .history-btns { display: flex; gap: 6px; }
+  .icon-btn {
+    background: var(--bg); border: 1.5px solid var(--border);
+    border-radius: 8px; padding: 5px 10px; font-size: 12px;
+    cursor: pointer; transition: all 0.15s; color: var(--text2);
+    font-family: inherit; font-weight: 600;
+  }
+  .icon-btn:hover { border-color: var(--him); color: var(--him); }
+  .icon-btn.pdf:hover { border-color: var(--me); color: var(--me); }
+  .icon-btn.paid-toggle { }
+  .icon-btn.paid-toggle.is-paid { background: #f0fdf4; border-color: #bbf7d0; color: #16a34a; }
+  .history-empty { text-align: center; padding: 32px; color: var(--text3); font-size: 13px; background: var(--surface); border: 1.5px dashed var(--border); border-radius: var(--radius); }
+
+  /* ── Monthly chart ── */
+  .chart-wrap {
+    max-width: 820px; margin: 0 auto 24px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 24px 24px 16px;
+    box-shadow: var(--shadow);
+  }
+  .chart-inner {
+    display: flex; align-items: flex-end; gap: 5px;
+    height: 160px; padding-bottom: 30px; position: relative;
+    border-bottom: 1.5px solid var(--border);
+    overflow-x: auto;
+  }
+  .chart-col {
+    flex: 0 0 auto; width: 52px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-end;
+    height: 100%; position: relative;
+  }
+  .chart-bar-area { width: 100%; display: flex; align-items: flex-end; justify-content: center; flex: 1; }
+  .chart-bar {
+    width: 36px; border-radius: 6px 6px 0 0;
+    transition: height 0.5s cubic-bezier(0.34,1.1,0.64,1);
+    position: relative; cursor: default;
+  }
+  .chart-bar.paid   { background: linear-gradient(180deg, #7aaeff, var(--him)); }
+  .chart-bar.unpaid { background: linear-gradient(180deg, #c4b5fd, var(--shared)); opacity: 0.8; }
+  .chart-bar.empty  { background: var(--border); opacity: 0.5; min-height: 4px; border-radius: 3px; }
+  .chart-bar:hover .chart-tooltip { display: block; }
+  .chart-tooltip {
+    display: none; position: absolute; bottom: calc(100% + 6px); left: 50%;
+    transform: translateX(-50%); background: var(--text); color: #fff;
+    font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 6px;
+    white-space: nowrap; z-index: 10; pointer-events: none;
+  }
+  .chart-tooltip::after {
+    content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+    border: 4px solid transparent; border-top-color: var(--text);
+  }
+  .chart-month-label {
+    position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%);
+    font-size: 9px; color: var(--text3); white-space: nowrap; font-weight: 600;
+  }
+  .chart-col.current .chart-month-label { color: var(--me); font-weight: 800; }
+  .chart-col.current .chart-bar.paid { background: linear-gradient(180deg, #ff9bbf, var(--me)); }
+  .chart-col.current .chart-bar.unpaid { background: linear-gradient(180deg, #ff9bbf, var(--me)); opacity: 0.6; }
+  .chart-legend {
+    display: flex; gap: 16px; margin-top: 14px; flex-wrap: wrap;
+  }
+  .chart-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); }
+  .chart-legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+  #chart-tip {
+    position: fixed; background: #2d1f3d; color: #fff;
+    font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 8px;
+    white-space: nowrap; z-index: 999; pointer-events: none;
+    opacity: 0; transition: opacity 0.12s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  }
+  #chart-tip.show { opacity: 1; }
+
+  .him-section-total {
+    display: none;
+    background: #f0f4ff; border: 1px solid #d0dcff;
+    border-left: 4px solid #5b8dee;
+    border-radius: 10px; padding: 12px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .him-section-total .label { font-size: 12px; color: #9b8aaa; font-weight: 600; }
+  .him-section-total .val { font-size: 16px; font-weight: 900; color: #5b8dee; }
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: #2d1f3d; color: #fff; padding: 12px 24px; border-radius: 99px;
+    font-size: 13px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    transition: transform 0.3s cubic-bezier(0.34,1.2,0.64,1); z-index: 1000; white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── PRINT / PDF styles ── */
+  @media print {
+    @page { margin: 20mm 18mm; size: A4; }
+
+    body {
+      background: #fff !important; background-image: none !important;
+      padding: 0 !important; font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    header, .action-bar, .section-title::after,
+    .toggle-btn, .del-btn, .him-add-row, .him-add-btn,
+    .split-wrap, .history-section, .settle-banner,
+    .month-nav button { display: none !important; }
+
+    .no-print { display: none !important; }
+    .print-only { display: block !important; }
+
+    .pdf-header {
+      text-align: center; margin-bottom: 24px; padding-bottom: 16px;
+      border-bottom: 2px solid #e0d0f0;
+    }
+    .pdf-header h2 { font-size: 22px; font-weight: 900; color: #2d1f3d; margin-bottom: 4px; }
+    .pdf-header p { font-size: 13px; color: #9b8aaa; }
+
+    .section-title {
+      font-size: 10px; letter-spacing: 0.08em; color: #9b8aaa;
+      margin: 16px 0 10px !important; border-bottom: 1px solid #f0eaf5; padding-bottom: 4px;
+    }
+
+    .summary-grid { grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px !important; }
+    .sum-card { padding: 12px 16px; box-shadow: none; border: 1px solid #e0d0f0; border-radius: 10px; }
+    .sum-amount { font-size: 18px !important; }
+    .sum-card.settle-card { background: #f0f4ff !important; }
+
+    .shared-grid { display: none !important; }
+    #shared-section-total { display: flex !important; margin-bottom: 16px; }
+    #him-section-total { display: flex !important; }
+
+    .him-items { display: none !important; }
+    .him-section-total { display: block !important; }
+
+    .settle-pdf-box {
+      display: block !important;
+      background: #f0f4ff; border: 1.5px solid #d0dcff;
+      border-radius: 12px; padding: 16px 20px; margin-top: 16px;
+      text-align: center;
+    }
+    .settle-pdf-box .label { font-size: 11px; color: #9b8aaa; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+    .settle-pdf-box .big { font-size: 28px; font-weight: 900; color: #5b8dee; letter-spacing: -1px; }
+    .settle-pdf-box .sub { font-size: 12px; color: #9b8aaa; margin-top: 4px; }
+
+    .month-nav { display: none !important; }
+  }
+
+  .print-only { display: none; }
+  .settle-pdf-box { display: none; }
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-
-  input, select, textarea, button { font-size: 16px !important; }
-  input, select, button { min-height: 44px; }
-  input[type="number"] { font-size: 16px; }
-
-  
-  .nav-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 14px;
-    flex-wrap: wrap;
-  }
-
-  .nav-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    border-radius: 999px;
-    padding: 8px 16px;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text2);
-    text-decoration: none;
-    box-shadow: var(--shadow);
-    transition: all 0.15s;
-  }
-
-  .nav-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-hover);
-    color: var(--text);
-  }
-
 
   @media (max-width: 600px) {
     .summary-grid { grid-template-columns: 1fr 1fr; }
     .shared-grid { grid-template-columns: 1fr 1fr; }
     .him-add-row { grid-template-columns: 1fr 110px; }
-    .him-add-row .add-btn { grid-column: 1/-1; }
+    .him-add-row .him-add-btn { grid-column: 1/-1; }
     .settle-banner { flex-direction: column; text-align: center; }
+    .history-card { grid-template-columns: 1fr auto; }
+    .history-btns { grid-column: 1/-1; }
   }
 </style>
 </head>
@@ -314,13 +434,23 @@
     <span id="month-title"></span>
     <button onclick="changeMonth(1)">▶</button>
   </div>
-  <div class="nav-buttons">
-    <a href="index.html" class="nav-btn">💳 개인 지출 관리</a>
-    <a href="savings.html" class="nav-btn">💎 저축 & 투자</a>
-  </div>
-
 </header>
 
+<!-- Action bar -->
+<div class="action-bar no-print">
+  <a href="index.html" class="btn" style="text-decoration:none">💳 개인 지출</a>
+  <a href="savings.html" class="btn" style="text-decoration:none">💎 저축 & 투자</a>
+  <button class="btn primary" onclick="saveSnapshot()">💾 이달 정산 저장</button>
+  <button class="btn" onclick="exportPDF()">📄 PDF 저장</button>
+</div>
+
+<!-- PDF-only header (hidden on screen) -->
+<div class="print-only pdf-header">
+  <h2 id="pdf-title">생활비 정산</h2>
+  <p id="pdf-date"></p>
+</div>
+
+<!-- Summary -->
 <div class="section-title">이번 달 요약</div>
 <div class="summary-grid">
   <div class="sum-card shared">
@@ -329,31 +459,28 @@
     <div class="sum-sub">각자 부담 → <strong id="shared-each-top">¥0</strong></div>
   </div>
   <div class="sum-card him-extra">
-    <div class="sum-label">남친 청구 항목</div>
+    <div class="sum-label">Ad hoc 청구 항목</div>
     <div class="sum-amount" id="him-extra-total">¥0</div>
     <div class="sum-sub" id="him-extra-count">0건</div>
   </div>
   <div class="sum-card settle-card">
-    <div class="sum-label">💙 남친이 줄 총액</div>
+    <div class="sum-label">💙 Monthly Total</div>
     <div class="sum-amount" id="him-owes-total">¥0</div>
     <div class="sum-sub">반반 + 청구 항목</div>
   </div>
 </div>
 
-<div class="split-wrap">
-  <div class="split-header">
-    <span class="l">🩷 내 부담 <span id="me-pct">50</span>%</span>
-    <span class="r"><span id="him-pct">50</span>% 남친 부담 💙</span>
-  </div>
-  <div class="split-bar"><div class="split-fill" id="split-fill" style="width:50%"></div></div>
-</div>
 
+
+<!-- Shared -->
 <div class="section-title">🏠 공동 생활비 — 반반 부담</div>
 <div class="shared-grid" id="shared-grid"></div>
+<div class="him-section-total" id="shared-section-total" style="display:none"></div>
 
-<div class="section-title">💙 남친 청구 항목</div>
+<!-- Him charges -->
+<div class="section-title">💙 Ad hoc 청구 항목</div>
 <div class="him-section">
-  <div class="him-add-row">
+  <div class="him-add-row no-print">
     <div class="fg">
       <label>항목</label>
       <input type="text" id="him-desc" placeholder="예: 지난번 저녁 밥값">
@@ -362,42 +489,106 @@
       <label>금액 (¥)</label>
       <input type="number" id="him-amount" placeholder="0" min="0">
     </div>
-    <button class="add-btn" onclick="addHimItem()">+ 추가</button>
+    <button class="him-add-btn" onclick="addHimItem()">+ 추가</button>
   </div>
   <div class="him-items" id="him-items"></div>
+  <div class="him-section-total" id="him-section-total" style="display:none"></div>
 </div>
 
-<div class="settle-banner">
+<!-- Settle banner -->
+<div class="settle-banner no-print">
   <div>
     <div class="settle-msg" id="settle-msg">항목을 채우면 정산액이 나와요 🏠</div>
     <div class="settle-sub" id="settle-sub">공동 생활비 금액을 위에서 입력해보세요</div>
   </div>
   <div class="settle-big" id="settle-big">¥0</div>
 </div>
-<div class="sync-note">이 화면은 Supabase와 실시간 연결됩니다.</div>
+
+<!-- PDF settle box (print only) -->
+<div class="settle-pdf-box">
+  <div class="label">💙 남친이 줄 총액</div>
+  <div class="big" id="pdf-settle-big">¥0</div>
+  <div class="sub" id="pdf-settle-sub"></div>
+</div>
+
+<!-- History -->
+<div class="section-title no-print">📁 정산 히스토리</div>
+<div class="history-section no-print">
+  <div class="history-list" id="history-list"></div>
+</div>
+
+<!-- Monthly chart -->
+<div class="section-title no-print">📊 월별 정산 현황</div>
+<div class="chart-wrap no-print" id="chart-wrap"></div>
+
+<!-- Floating chart tooltip -->
+<div id="chart-tip"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
 
 <script>
-const SUPABASE_URL = 'https://plmzikgawehuegvbdcpx.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_lW-g-NljRVO4Ym2mp3eUQw_BbHcz3Ch';
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-const TABLE_NAME = 'shared_expense';
-
 const SHARED_DEF = [
-  { key: 'rent',       name: '집세',        emoji: '🏠', bimonthly: false },
-  { key: 'water',      name: '수도세',      emoji: '🚿', bimonthly: true  },
-  { key: 'electric',   name: '전기세',      emoji: '💡', bimonthly: false },
-  { key: 'internet',   name: '인터넷',      emoji: '📶', bimonthly: false },
-  { key: 'gas',        name: '가스사용료',  emoji: '🔥', bimonthly: false },
-  { key: 'netflix',    name: '넷플릭스',    emoji: '🎬', bimonthly: false },
-  { key: 'amazon',     name: '아마존 프라임', emoji: '📦', bimonthly: false },
-  { key: 'disney',     name: '디즈니플러스', emoji: '🏰', bimonthly: false },
-  { key: 'essentials', name: '생필품 쇼핑', emoji: '🛒', bimonthly: false },
+  { key: 'rent',       name: '집세',          emoji: '🏠', bimonthly: false },
+  { key: 'water',      name: '수도세',         emoji: '🚿', bimonthly: true  },
+  { key: 'electric',   name: '전기세',         emoji: '💡', bimonthly: false },
+  { key: 'internet',   name: '인터넷',          emoji: '📶', bimonthly: false },
+  { key: 'gas',        name: '가스사용료',      emoji: '🔥', bimonthly: false },
+  { key: 'essentials', name: '생필품/식재료 쇼핑', emoji: '🛒', bimonthly: false, listMode: true },
 ];
 
-let currentYear;
-let currentMonth;
-let monthRows = [];
-let realtimeChannel = null;
+let currentYear, currentMonth;
+
+function mk(suffix, y, m) {
+  const yr = y !== undefined ? y : currentYear;
+  const mo = m !== undefined ? m : currentMonth;
+  return `couple_${yr}_${String(mo+1).padStart(2,'0')}_${suffix}`;
+}
+
+function getAmounts(y, m)    { return JSON.parse(localStorage.getItem(mk('shared', y, m)) || '{}'); }
+function saveAmounts(o)      { localStorage.setItem(mk('shared'), JSON.stringify(o)); }
+function getEnabled(y, m) {
+  const stored = localStorage.getItem(mk('enabled', y, m));
+  if (stored) return JSON.parse(stored);
+  const yr = y !== undefined ? y : currentYear;
+  const mo = m !== undefined ? m : currentMonth;
+  const d = {};
+  SHARED_DEF.forEach(def => { d[def.key] = def.bimonthly ? (mo % 2 === 0) : true; });
+  return d;
+}
+function saveEnabled(o)      { localStorage.setItem(mk('enabled'), JSON.stringify(o)); }
+function getHimItems(y, m)   { return JSON.parse(localStorage.getItem(mk('him', y, m)) || '[]'); }
+function saveHimItems(a)     { localStorage.setItem(mk('him'), JSON.stringify(a)); }
+
+// Essentials sub-items
+function getEssentials(y, m)  { return JSON.parse(localStorage.getItem(mk('essentials', y, m)) || '[]'); }
+function saveEssentials(a)    { localStorage.setItem(mk('essentials'), JSON.stringify(a)); }
+
+function addEssentialItem() {
+  const place = document.getElementById('ess-place').value.trim();
+  const desc = document.getElementById('ess-desc').value.trim();
+  const amount = parseFloat(document.getElementById('ess-amount').value);
+  if (!desc || !amount || amount <= 0) return;
+  const items = getEssentials();
+  items.push({ id: Date.now(), place, desc, amount });
+  saveEssentials(items);
+  document.getElementById('ess-place').value = '';
+  document.getElementById('ess-desc').value = '';
+  document.getElementById('ess-amount').value = '';
+  renderSharedGrid();
+  recalc();
+}
+
+function deleteEssentialItem(id) {
+  saveEssentials(getEssentials().filter(i => i.id !== id));
+  renderSharedGrid();
+  recalc();
+}
+function getHistory() { return JSON.parse(localStorage.getItem('couple_history') || '[]'); }
+function saveHistory(h) { localStorage.setItem('couple_history', JSON.stringify(h)); }
+
+function fmt(n) { return '¥' + Math.abs(Math.round(n)).toLocaleString('ja-JP'); }
+function monthLabel(y, m) { return `${y}년 ${m+1}월`; }
 
 function initDate() {
   const now = new Date();
@@ -405,194 +596,316 @@ function initDate() {
   currentMonth = now.getMonth();
 }
 
-function monthKey() {
-  return `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
-}
-
-function fmt(n) {
-  return '¥' + Math.abs(Math.round(Number(n || 0))).toLocaleString('ja-JP');
-}
-
-function findRow(category) {
-  return monthRows.find(row => row.category === category) || null;
-}
-
-function getAmounts() {
-  const amounts = {};
-  SHARED_DEF.forEach(def => {
-    const row = findRow(def.key);
-    amounts[def.key] = row ? Number(row.amount || 0) : 0;
-  });
-  return amounts;
-}
-
-function getEnabled() {
-  const enabled = {};
-  SHARED_DEF.forEach(def => {
-    const row = findRow(def.key);
-    if (row) {
-      enabled[def.key] = !!row.enabled;
-    } else {
-      enabled[def.key] = def.bimonthly ? (currentMonth % 2 === 0) : true;
-    }
-  });
-  return enabled;
-}
-
-function getHimItems() {
-  return monthRows
-    .filter(row => row.category === 'him_charge')
-    .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
-}
-
-async function loadMonthData() {
-  const { data, error } = await supabaseClient
-    .from(TABLE_NAME)
-    .select('*')
-    .eq('month', monthKey())
-    .order('created_at', { ascending: true });
-
-  if (error) {
-    alert('생활비 데이터를 불러오지 못했어요: ' + error.message);
-    return;
-  }
-
-  monthRows = data || [];
+function changeMonth(d) {
+  currentMonth += d;
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
   render();
 }
 
-async function upsertSharedCategory(category, nextFields) {
-  const existing = findRow(category);
-  const payload = {
-    month: monthKey(),
-    category,
-    amount: Number(nextFields.amount ?? existing?.amount ?? 0),
-    enabled: Boolean(nextFields.enabled ?? existing?.enabled ?? true),
-    memo: nextFields.memo ?? existing?.memo ?? null,
-    synced: Boolean(nextFields.synced ?? existing?.synced ?? false),
-    personal_tx_id: nextFields.personal_tx_id ?? existing?.personal_tx_id ?? null,
-  };
-
-  let error;
-  if (existing) {
-    ({ error } = await supabaseClient
-      .from(TABLE_NAME)
-      .update(payload)
-      .eq('id', existing.id));
-  } else {
-    ({ error } = await supabaseClient
-      .from(TABLE_NAME)
-      .insert(payload));
-  }
-
-  if (error) {
-    alert('저장에 실패했어요: ' + error.message);
-    return false;
-  }
-  await loadMonthData();
-  return true;
+function toggleShared(key) {
+  const en = getEnabled();
+  en[key] = !en[key];
+  saveEnabled(en);
+  render();
 }
 
-async function toggleShared(key) {
-  const existing = findRow(key);
-  const currentEnabled = existing ? !!existing.enabled : (SHARED_DEF.find(def => def.key === key)?.bimonthly ? (currentMonth % 2 === 0) : true);
-  await upsertSharedCategory(key, {
-    enabled: !currentEnabled,
-    amount: existing ? Number(existing.amount || 0) : 0,
-  });
-}
-
-let updateTimers = {};
 function updateAmount(key, val) {
-  clearTimeout(updateTimers[key]);
-  updateTimers[key] = setTimeout(async () => {
-    const numeric = Number(val || 0);
-    const existing = findRow(key);
-    const enabled = existing ? !!existing.enabled : (SHARED_DEF.find(def => def.key === key)?.bimonthly ? (currentMonth % 2 === 0) : true);
-    await upsertSharedCategory(key, {
-      amount: Number.isFinite(numeric) ? numeric : 0,
-      enabled,
-    });
-  }, 250);
+  const amounts = getAmounts();
+  const n = parseFloat(val);
+  if (!isNaN(n) && n > 0) amounts[key] = n;
+  else delete amounts[key];
+  saveAmounts(amounts);
+  recalc();
 }
 
-async function addHimItem() {
+function addHimItem() {
   const desc = document.getElementById('him-desc').value.trim();
-  const amount = Number(document.getElementById('him-amount').value);
-  if (!desc || !amount || amount <= 0) {
-    alert('항목과 금액을 입력해주세요!');
-    return;
-  }
-
-  const { error } = await supabaseClient
-    .from(TABLE_NAME)
-    .insert({
-      month: monthKey(),
-      category: 'him_charge',
-      amount,
-      enabled: true,
-      memo: desc,
-      synced: false,
-      personal_tx_id: null,
-    });
-
-  if (error) {
-    alert('청구 항목 저장에 실패했어요: ' + error.message);
-    return;
-  }
-
+  const amount = parseFloat(document.getElementById('him-amount').value);
+  if (!desc || !amount || amount <= 0) { alert('항목과 금액을 입력해주세요!'); return; }
+  const items = getHimItems();
+  items.push({ id: Date.now(), desc, amount });
+  saveHimItems(items);
   document.getElementById('him-desc').value = '';
   document.getElementById('him-amount').value = '';
-  await loadMonthData();
+  renderHimItems();
+  recalc();
 }
 
-async function deleteHimItem(id) {
-  const { error } = await supabaseClient
-    .from(TABLE_NAME)
-    .delete()
-    .eq('id', id);
-
-  if (error) {
-    alert('삭제에 실패했어요: ' + error.message);
-    return;
-  }
-
-  await loadMonthData();
+function deleteHimItem(id) {
+  saveHimItems(getHimItems().filter(i => i.id !== id));
+  renderHimItems();
+  recalc();
 }
 
+// ── SAVE SNAPSHOT ──
+function saveSnapshot() {
+  const amounts = getAmounts();
+  const enabled = getEnabled();
+  const himItems = getHimItems();
+  const essItems = getEssentials();
+  const essTotal = essItems.reduce((s, i) => s + i.amount, 0);
+
+  let sharedTotal = 0;
+  SHARED_DEF.forEach(def => {
+    if (!enabled[def.key]) return;
+    if (def.listMode) sharedTotal += essTotal;
+    else if (amounts[def.key]) sharedTotal += amounts[def.key];
+  });
+  const sharedEach = sharedTotal / 2;
+  const himExtra = himItems.reduce((s, i) => s + i.amount, 0);
+  const himOwes = sharedEach + himExtra;
+
+  if (himOwes === 0) { showToast('금액을 먼저 입력해주세요!'); return; }
+
+  const history = getHistory();
+  const key = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}`;
+
+  // Update or add
+  const existing = history.findIndex(h => h.key === key);
+  const snap = {
+    key, year: currentYear, month: currentMonth,
+    sharedTotal, sharedEach, himExtra, himOwes,
+    amounts: { ...amounts }, enabled: { ...enabled },
+    himItems: [...himItems],
+    essItems: [...essItems],
+    savedAt: new Date().toISOString(),
+    paid: existing >= 0 ? history[existing].paid : false
+  };
+
+  if (existing >= 0) history[existing] = snap;
+  else history.unshift(snap);
+
+  saveHistory(history);
+  renderHistory();
+  showToast(`${monthLabel(currentYear, currentMonth)} 정산이 저장됐어요 💾`);
+}
+
+// ── TOGGLE PAID ──
+function togglePaid(key) {
+  const history = getHistory();
+  const idx = history.findIndex(h => h.key === key);
+  if (idx < 0) return;
+  history[idx].paid = !history[idx].paid;
+  saveHistory(history);
+  renderHistory();
+  showToast(history[idx].paid ? '✅ 정산 완료로 표시했어요!' : '↩️ 미완료로 변경했어요');
+}
+
+// ── DELETE SNAPSHOT ──
+function deleteSnapshot(key) {
+  if (!confirm('이 정산 기록을 삭제할까요?')) return;
+  saveHistory(getHistory().filter(h => h.key !== key));
+  renderHistory();
+  showToast('삭제됐어요');
+}
+
+// ── PDF EXPORT (current month) ──
+function exportPDF() {
+  const y = currentYear, m = currentMonth;
+  document.getElementById('pdf-title').textContent = `Monthly Living Expense — ${y}. ${m+1}`;
+  document.getElementById('pdf-date').textContent = `Saved: ${new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'})}`;
+  const himOwesEl = document.getElementById('him-owes-total').textContent;
+  document.getElementById('pdf-settle-big').textContent = himOwesEl;
+  document.getElementById('pdf-settle-sub').textContent = 'Split 50/50 + Ad hoc charges';
+  switchToPrintLang();
+  window.print();
+  restoreScreenLang();
+}
+
+// ── PDF EXPORT from history snapshot ──
+function exportHistoryPDF(key) {
+  const history = getHistory();
+  const snap = history.find(h => h.key === key);
+  if (!snap) return;
+
+  const origY = currentYear, origM = currentMonth;
+  currentYear = snap.year; currentMonth = snap.month;
+
+  const origShared = localStorage.getItem(mk('shared'));
+  const origEnabled = localStorage.getItem(mk('enabled'));
+  const origHim = localStorage.getItem(mk('him'));
+
+  saveAmounts(snap.amounts);
+  saveEnabled(snap.enabled);
+  saveHimItems(snap.himItems);
+  saveEssentials(snap.essItems || []);
+
+  render();
+
+  document.getElementById('pdf-title').textContent = `Monthly Living Expense — ${snap.year}. ${snap.month+1}`;
+  document.getElementById('pdf-date').textContent = `Saved: ${new Date(snap.savedAt).toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'})}`;
+  document.getElementById('pdf-settle-big').textContent = fmt(snap.himOwes);
+  document.getElementById('pdf-settle-sub').textContent = 'Split 50/50 + Ad hoc charges';
+
+  switchToPrintLang();
+  window.print();
+  restoreScreenLang();
+
+  currentYear = origY; currentMonth = origM;
+  if (origShared) localStorage.setItem(mk('shared', origY, origM), origShared);
+  if (origEnabled) localStorage.setItem(mk('enabled', origY, origM), origEnabled);
+  if (origHim) localStorage.setItem(mk('him', origY, origM), origHim);
+  render();
+}
+
+// ── LANGUAGE SWITCH FOR PDF ──
+const EN = {
+  // section titles
+  '이번 달 요약':               'Monthly Summary',
+  '🏠 공동 생활비 — 반반 부담': '🏠 Living Costs',
+  '💙 Ad hoc 청구 항목':        '💙 Ad hoc Charges',
+  // summary card labels
+  '공동 생활비 합계':            'Shared Total',
+  'Ad hoc 청구 항목':            'Ad hoc Charges',
+  '반반 + 청구 항목':            'Split 50/50 + Ad hoc',
+  // summary sub
+  '각자 부담 → ':               'Each → ',
+  // shared item names
+  '집세':          'Rent',
+  '수도세':        'Water',
+  '전기세':        'Electricity',
+  '인터넷':        'Internet',
+  '가스사용료':    'Gas',
+  '생필품/식재료 쇼핑': 'Groceries / Essentials',
+  // essentials total row
+  '합계': 'Total',
+  '각자 ': 'Each ',
+  // him card meta
+  '월': 'M',
+  // settle pdf box
+  '💙 남친이 줄 총액': '💙 Monthly Total',
+};
+
+function switchToPrintLang() {
+  document.querySelectorAll('.section-title').forEach(el => {
+    el._origText = el.childNodes[0]?.textContent || '';
+    const eng = EN[el._origText.trim()];
+    if (eng && el.childNodes[0]) el.childNodes[0].textContent = eng;
+  });
+  document.querySelectorAll('.sum-label').forEach(el => {
+    el._orig = el.textContent;
+    el.textContent = EN[el.textContent.trim()] || el.textContent;
+  });
+  document.querySelectorAll('.sum-sub').forEach(el => {
+    el._orig = el.innerHTML;
+    // "각자 부담 → ¥X" pattern
+    if (el.innerHTML.includes('각자 부담')) {
+      el.innerHTML = el.innerHTML.replace('각자 부담 → ', 'Each → ');
+    } else {
+      el.textContent = EN[el.textContent.trim()] || el.textContent;
+    }
+  });
+  document.querySelectorAll('.shared-name').forEach(el => {
+    el._orig = el.textContent;
+    el.textContent = EN[el.textContent.trim()] || el.textContent;
+  });
+  document.querySelectorAll('.shared-each-label').forEach(el => {
+    el._orig = el.textContent;
+    if (el.textContent.startsWith('각자 ')) el.textContent = 'Each ' + el.textContent.slice(3);
+  });
+  document.querySelectorAll('.essentials-total-label').forEach(el => {
+    el._orig = el.textContent; el.textContent = 'Total';
+  });
+  document.querySelectorAll('.essentials-total-val').forEach(el => {
+    el._orig = el.textContent;
+    el.textContent = el.textContent.replace('각자 ', 'Each ');
+  });
+  document.querySelectorAll('.skip-badge').forEach(el => {
+    el._orig = el.textContent; el.textContent = 'Bimonthly · Odd months';
+  });
+  document.querySelectorAll('.him-card-meta').forEach(el => {
+    el._orig = el.textContent;
+    el.textContent = el.textContent.replace(/(\d+)년 (\d+)월/, '$1. $2');
+  });
+  const settleLbl = document.querySelector('.settle-pdf-box .label');
+  if (settleLbl) { settleLbl._orig = settleLbl.textContent; settleLbl.textContent = '💙 Monthly Total'; }
+}
+
+function restoreScreenLang() {
+  document.querySelectorAll('.section-title').forEach(el => {
+    if (el._origText !== undefined && el.childNodes[0]) el.childNodes[0].textContent = el._origText;
+  });
+  document.querySelectorAll('.sum-label').forEach(el => { if (el._orig) el.textContent = el._orig; });
+  document.querySelectorAll('.sum-sub').forEach(el => { if (el._orig) el.innerHTML = el._orig; });
+  document.querySelectorAll('.shared-name').forEach(el => { if (el._orig) el.textContent = el._orig; });
+  document.querySelectorAll('.shared-each-label').forEach(el => { if (el._orig) el.textContent = el._orig; });
+  document.querySelectorAll('.essentials-total-label').forEach(el => { if (el._orig) el.textContent = el._orig; });
+  document.querySelectorAll('.essentials-total-val').forEach(el => { if (el._orig) el.textContent = el._orig; });
+  document.querySelectorAll('.skip-badge').forEach(el => { if (el._orig) el.textContent = el._orig; });
+  document.querySelectorAll('.him-card-meta').forEach(el => { if (el._orig) el.textContent = el._orig; });
+  const settleLbl = document.querySelector('.settle-pdf-box .label');
+  if (settleLbl?._orig) settleLbl.textContent = settleLbl._orig;
+}
+
+// ── RENDER SHARED GRID ──
 function renderSharedGrid() {
   const amounts = getAmounts();
   const enabled = getEnabled();
+  const essItems = getEssentials();
+  const essTotal = essItems.reduce((s, i) => s + i.amount, 0);
   const grid = document.getElementById('shared-grid');
   grid.innerHTML = '';
 
   SHARED_DEF.forEach(def => {
     const isOn = !!enabled[def.key];
-    const amountValue = amounts[def.key] || 0;
-    const each = (isOn && amountValue > 0) ? fmt(amountValue / 2) : '';
-
     const div = document.createElement('div');
-    div.className = 'shared-item' + (isOn ? '' : ' inactive');
-    div.innerHTML = `
-      <div class="toggle-wrap">
-        <button class="mini-toggle ${isOn ? 'active' : ''}" type="button" aria-label="${def.name} ${isOn ? '포함' : '제외'}" onclick="toggleShared('${def.key}')">
-          <span class="mini-toggle-circle">${isOn ? '✔' : ''}</span>
-        </button>
-      </div>
-      <div class="shared-top">
-        <span class="shared-emoji">${def.emoji}</span>
-        <span class="shared-name">${def.name}</span>
-      </div>
-      ${def.bimonthly ? '<span class="skip-badge">격월 · 홀수달</span>' : ''}
-      <input class="shared-input" type="number" placeholder="금액 입력" value="${amountValue > 0 ? amountValue : ''}"
-        ${isOn ? '' : 'disabled'}
-        oninput="updateAmount('${def.key}', this.value)">
-      <div class="shared-each-label" id="each-${def.key}">${each ? '각자 ' + each : ''}</div>
-    `;
+
+    if (def.listMode) {
+      // ── Essentials: full-width list card ──
+      div.className = 'shared-item essentials-card' + (isOn ? '' : ' inactive');
+      const listHTML = essItems.length
+        ? essItems.map(item => `
+            <div class="essentials-row">
+              <span class="essentials-row-desc">${item.place ? `<span class="essentials-place">${item.place}</span> ` : ''}${item.desc}</span>
+              <span class="essentials-row-amount">${fmt(item.amount)}</span>
+              <button class="essentials-del no-print" onclick="deleteEssentialItem(${item.id})">✕</button>
+            </div>`).join('')
+        : `<div class="essentials-empty">아직 항목이 없어요</div>`;
+
+      div.innerHTML = `
+        <button class="toggle-btn ${isOn ? 'on' : 'off'}" onclick="toggleShared('${def.key}')">${isOn ? '✓' : '–'}</button>
+        <div class="shared-top">
+          <span class="shared-emoji">${def.emoji}</span>
+          <span class="shared-name">${def.name}</span>
+        </div>
+        <div class="essentials-add-row no-print">
+          <input class="essentials-input-sm" type="text" id="ess-place" placeholder="장소 (예: 돈키호테)" ${isOn ? '' : 'disabled'}>
+          <input class="essentials-input-sm" type="text" id="ess-desc" placeholder="내용 (예: 샴푸, 세제)" ${isOn ? '' : 'disabled'}>
+          <input class="essentials-input-sm" type="number" id="ess-amount" placeholder="금액" min="0" ${isOn ? '' : 'disabled'}
+            onkeydown="if(event.key==='Enter') addEssentialItem()">
+          <button class="essentials-add-btn" onclick="addEssentialItem()" ${isOn ? '' : 'disabled'}>+ 추가</button>
+        </div>
+        <div class="essentials-list">${listHTML}</div>
+        ${essItems.length ? `
+        <div class="essentials-total-row">
+          <span class="essentials-total-label">합계</span>
+          <span class="essentials-total-val">${fmt(essTotal)} → 각자 ${fmt(essTotal/2)}</span>
+        </div>` : ''}
+        <div class="shared-each-label" id="each-${def.key}"></div>
+      `;
+    } else {
+      // ── Regular: single amount input ──
+      const val = amounts[def.key] || '';
+      div.className = 'shared-item' + (isOn ? '' : ' inactive');
+      div.innerHTML = `
+        <button class="toggle-btn ${isOn ? 'on' : 'off'}" onclick="toggleShared('${def.key}')">${isOn ? '✓' : '–'}</button>
+        <div class="shared-top">
+          <span class="shared-emoji">${def.emoji}</span>
+          <span class="shared-name">${def.name}</span>
+        </div>
+        ${def.bimonthly ? '<span class="skip-badge">격월 · 홀수달</span>' : ''}
+        <input class="shared-input" type="number" placeholder="금액 입력" value="${val}"
+          ${isOn ? '' : 'disabled'}
+          oninput="updateAmount('${def.key}', this.value)">
+        <div class="shared-each-label" id="each-${def.key}">${(isOn && val) ? '각자 ' + fmt(val / 2) : ''}</div>
+      `;
+    }
     grid.appendChild(div);
   });
 }
 
+// ── RENDER HIM ITEMS ──
 function renderHimItems() {
   const items = getHimItems();
   const container = document.getElementById('him-items');
@@ -600,39 +913,73 @@ function renderHimItems() {
     container.innerHTML = '<div class="him-empty">💙 남친에게 청구할 항목을 추가해보세요</div>';
     return;
   }
-
-  container.innerHTML = items.map(item => `
+  container.innerHTML = items.slice().reverse().map(item => `
     <div class="him-card">
       <div>
-        <div class="him-card-desc">${item.memo || '청구 항목'}</div>
+        <div class="him-card-desc">${item.desc}</div>
         <div class="him-card-meta">${currentYear}년 ${currentMonth + 1}월</div>
       </div>
       <div class="him-card-amount">${fmt(item.amount)}</div>
-      <button class="del-btn" onclick="deleteHimItem('${item.id}')">✕</button>
+      <button class="del-btn no-print" onclick="deleteHimItem(${item.id})">✕</button>
     </div>
   `).join('');
 }
 
+// ── RENDER HISTORY ──
+function renderHistory() {
+  const history = getHistory();
+  const container = document.getElementById('history-list');
+  if (!history.length) {
+    container.innerHTML = '<div class="history-empty">💾 정산을 저장하면 여기에 기록이 남아요</div>';
+    return;
+  }
+  container.innerHTML = history.map(snap => `
+    <div class="history-card">
+      <div>
+        <div class="history-month">${monthLabel(snap.year, snap.month)}</div>
+        <div class="history-detail">
+          공동 반반 ${fmt(snap.sharedEach)}
+          ${snap.himExtra > 0 ? ' + 청구 ' + fmt(snap.himExtra) : ''}
+          · ${new Date(snap.savedAt).toLocaleDateString('ko-KR')} 저장
+        </div>
+      </div>
+      <div class="history-amount">${fmt(snap.himOwes)}</div>
+      <span class="history-status ${snap.paid ? 'status-paid' : 'status-saved'}">${snap.paid ? '✅ 완료' : '⏳ 미완료'}</span>
+      <div class="history-btns">
+        <button class="icon-btn paid-toggle ${snap.paid ? 'is-paid' : ''}" onclick="togglePaid('${snap.key}')" title="${snap.paid ? '미완료로 변경' : '완료로 표시'}">
+          ${snap.paid ? '↩️ 취소' : '✅ 완료'}
+        </button>
+        <button class="icon-btn pdf" onclick="exportHistoryPDF('${snap.key}')" title="PDF 저장">📄 PDF</button>
+        <button class="icon-btn" onclick="deleteSnapshot('${snap.key}')" title="삭제" style="color:var(--me)">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── RECALC (numbers only) ──
 function recalc() {
   const amounts = getAmounts();
   const enabled = getEnabled();
   const himItems = getHimItems();
+  const essItems = getEssentials();
+  const essTotal = essItems.reduce((s, i) => s + i.amount, 0);
 
   let sharedTotal = 0;
   SHARED_DEF.forEach(def => {
-    if (enabled[def.key] && amounts[def.key]) {
-      sharedTotal += Number(amounts[def.key] || 0);
+    if (!enabled[def.key]) return;
+    if (def.listMode) {
+      sharedTotal += essTotal;
+    } else if (amounts[def.key]) {
+      sharedTotal += amounts[def.key];
     }
     const el = document.getElementById('each-' + def.key);
-    if (el) {
-      el.textContent = (enabled[def.key] && amounts[def.key] > 0)
-        ? '각자 ' + fmt(amounts[def.key] / 2)
-        : '';
+    if (el && !def.listMode) {
+      el.textContent = (enabled[def.key] && amounts[def.key]) ? '각자 ' + fmt(amounts[def.key] / 2) : '';
     }
   });
 
   const sharedEach = sharedTotal / 2;
-  const himExtra = himItems.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const himExtra = himItems.reduce((s, i) => s + i.amount, 0);
   const himOwes = sharedEach + himExtra;
 
   document.getElementById('shared-total').textContent = fmt(sharedTotal);
@@ -641,62 +988,174 @@ function recalc() {
   document.getElementById('him-extra-count').textContent = himItems.length + '건';
   document.getElementById('him-owes-total').textContent = fmt(himOwes);
 
+  // Update print-only shared total
+  const sharedTotalEl = document.getElementById('shared-section-total');
+  if (sharedTotalEl) {
+    const rent = (enabled['rent'] && amounts['rent']) ? amounts['rent'] : 0;
+    const bills = ['water','electric','internet','gas'].reduce((s, k) =>
+      s + (enabled[k] && amounts[k] ? amounts[k] : 0), 0);
+    const rows = [
+      { label: 'Living Costs Total (each)', val: fmt(sharedEach), bold: true },
+      { label: '└ Rent (each)', val: fmt(rent / 2) },
+      { label: '└ Bills (each)', val: fmt(bills / 2) },
+      { label: '└ Groceries / Essentials (each)', val: fmt(essTotal / 2) },
+    ];
+    sharedTotalEl.innerHTML = `
+      <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+        ${rows.map((r, i) => `
+          <div style="display:flex;justify-content:space-between;align-items:center;
+            ${i > 0 ? 'padding-top:8px;border-top:1px solid #e0d0f0;' : ''}">
+            <span class="label" ${r.bold ? 'style="font-weight:800;color:#2d1f3d"' : ''}>${r.label}</span>
+            <span class="val" ${r.bold ? '' : 'style="font-size:13px"'}>${r.val}</span>
+          </div>`).join('')}
+      </div>
+    `;
+  }
+
+  // Update print-only ad hoc total
+  const himTotalEl = document.getElementById('him-section-total');
+  if (himTotalEl) himTotalEl.innerHTML = `<span class="label">Ad hoc Total</span><span class="val">${fmt(himExtra)}</span>`;
+
   const total = sharedEach + himOwes;
   const myPct = total > 0 ? Math.round(sharedEach / total * 100) : 50;
-  document.getElementById('split-fill').style.width = myPct + '%';
-  document.getElementById('me-pct').textContent = myPct;
-  document.getElementById('him-pct').textContent = 100 - myPct;
+  const splitFill = document.getElementById('split-fill');
+  if (splitFill) {
+    splitFill.style.width = myPct + '%';
+    document.getElementById('me-pct').textContent = myPct;
+    document.getElementById('him-pct').textContent = 100 - myPct;
+  }
 
   if (himOwes === 0) {
-    document.getElementById('settle-msg').innerHTML = '아직 금액이 없어요 🏠';
+    document.getElementById('settle-msg').innerHTML = '항목을 채우면 정산액이 나와요 🏠';
     document.getElementById('settle-sub').textContent = '공동 생활비 금액을 위에서 입력해보세요';
     document.getElementById('settle-big').textContent = '¥0';
   } else {
-    document.getElementById('settle-msg').innerHTML = `남친이 이번 달 <span class="h-him">${fmt(himOwes)}</span> 낼 차례예요 💙`;
-    const parts = [];
-    if (sharedEach > 0) parts.push(`공동 반반 ${fmt(sharedEach)}`);
-    if (himExtra > 0) parts.push(`청구 항목 ${fmt(himExtra)}`);
-    document.getElementById('settle-sub').textContent = parts.join(' + ');
+    document.getElementById('settle-msg').innerHTML = `이번 달 Invoice 금액 💙`;
+    document.getElementById('settle-sub').textContent = fmt(himOwes);
     document.getElementById('settle-big').textContent = fmt(himOwes);
   }
+}
+
+// ── RENDER CHART ──
+function renderChart() {
+  const container = document.getElementById('chart-wrap');
+  if (!container) return;
+  const history = getHistory();
+
+  // Build months from 2026-01 to current month
+  const startYear = 2026, startMonth = 0; // Jan 2026
+  const now = new Date();
+  const endYear = now.getFullYear(), endMonth = now.getMonth();
+
+  const months = [];
+  let y = startYear, m = startMonth;
+  while (y < endYear || (y === endYear && m <= endMonth)) {
+    months.push({ y, m });
+    m++; if (m > 11) { m = 0; y++; }
+  }
+
+  if (!months.length) { container.innerHTML = ''; return; }
+
+  // Map history by key
+  const histMap = {};
+  history.forEach(h => { histMap[h.key] = h; });
+
+  // Find max for scaling
+  const maxVal = Math.max(...months.map(({ y, m }) => {
+    const key = `${y}-${String(m+1).padStart(2,'0')}`;
+    return histMap[key] ? histMap[key].himOwes : 0;
+  }), 1);
+
+  const bars = months.map(({ y, m }) => {
+    const key = `${y}-${String(m+1).padStart(2,'0')}`;
+    const snap = histMap[key];
+    const isCurrent = y === currentYear && m === currentMonth;
+    const label = `${m+1}월`;
+    const yearLabel = m === 0 ? `${y}` : '';
+
+    if (!snap) {
+      return `
+        <div class="chart-col${isCurrent ? ' current' : ''}">
+          <div class="chart-bar-area">
+            <div class="chart-bar empty" style="height:4px"></div>
+          </div>
+          <span class="chart-month-label">${yearLabel ? yearLabel + '<br>' : ''}${label}</span>
+        </div>`;
+    }
+
+    const heightPct = Math.max(4, Math.round((snap.himOwes / maxVal) * 140));
+    const cls = snap.paid ? 'paid' : 'unpaid';
+    const tipText = `${label} ${fmt(snap.himOwes)}${snap.paid ? ' ✅' : ' ⏳'}`;
+
+    return `
+      <div class="chart-col${isCurrent ? ' current' : ''}">
+        <div class="chart-bar-area">
+          <div class="chart-bar ${cls}" style="height:${heightPct}px" data-tip="${tipText}"></div>
+        </div>
+        <span class="chart-month-label">${yearLabel ? yearLabel + ' ' : ''}${label}</span>
+      </div>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="chart-inner">${bars}</div>
+    <div class="chart-legend">
+      <div class="chart-legend-item">
+        <div class="chart-legend-dot" style="background:var(--him)"></div>
+        완료된 정산
+      </div>
+      <div class="chart-legend-item">
+        <div class="chart-legend-dot" style="background:var(--shared);opacity:0.8"></div>
+        미완료 정산
+      </div>
+      <div class="chart-legend-item">
+        <div class="chart-legend-dot" style="background:var(--border)"></div>
+        기록 없음
+      </div>
+    </div>
+  `;
+
+  // Attach JS tooltip events
+  const tip = document.getElementById('chart-tip');
+  container.querySelectorAll('.chart-bar[data-tip]').forEach(bar => {
+    bar.addEventListener('mouseenter', e => {
+      tip.textContent = bar.dataset.tip;
+      tip.classList.add('show');
+    });
+    bar.addEventListener('mousemove', e => {
+      tip.style.left = (e.clientX + 12) + 'px';
+      tip.style.top  = (e.clientY - 36) + 'px';
+    });
+    bar.addEventListener('mouseleave', () => {
+      tip.classList.remove('show');
+    });
+  });
+
+  // Scroll to end (current month)
+  const inner = container.querySelector('.chart-inner');
+  if (inner) inner.scrollLeft = inner.scrollWidth;
 }
 
 function render() {
   document.getElementById('month-title').textContent = `${currentYear}년 ${currentMonth + 1}월`;
   renderSharedGrid();
   renderHimItems();
+  renderHistory();
+  renderChart();
   recalc();
 }
 
-async function changeMonth(delta) {
-  currentMonth += delta;
-  if (currentMonth < 0) { currentMonth = 11; currentYear -= 1; }
-  if (currentMonth > 11) { currentMonth = 0; currentYear += 1; }
-  await loadMonthData();
+// ── TOAST ──
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
 }
-
-function setupRealtime() {
-  if (realtimeChannel) return;
-  realtimeChannel = supabaseClient
-    .channel('shared-expense-realtime')
-    .on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: TABLE_NAME,
-    }, async () => {
-      await loadMonthData();
-    })
-    .subscribe();
-}
-
-window.addEventListener('focus', loadMonthData);
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') loadMonthData();
-});
 
 initDate();
-setupRealtime();
-loadMonthData();
+render();
 </script>
 </body>
 </html>
