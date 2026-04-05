@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -58,7 +59,7 @@
     display: inline-flex; align-items: center; gap: 6px;
     background: var(--surface); border: 1.5px solid var(--border);
     border-radius: 99px; padding: 7px 16px;
-    font-size: 12px; font-weight: 700; color: var(--text2);
+    font-size: 10px; font-weight: 700; color: var(--text2);
     text-decoration: none; box-shadow: var(--shadow); transition: all 0.15s; cursor: pointer;
     font-family: inherit;
   }
@@ -66,7 +67,7 @@
 
   .section-title {
     max-width: 860px; margin: 0 auto 12px;
-    font-size: 11px; font-weight: 800; letter-spacing: 0.1em;
+    font-size: 10px; font-weight: 800; letter-spacing: 0.1em;
     text-transform: uppercase; color: var(--text2);
     display: flex; align-items: center; gap: 8px;
   }
@@ -84,9 +85,9 @@
     transition: transform 0.2s, box-shadow 0.2s;
   }
   .sum-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
-  .sum-label { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text2); margin-bottom: 6px; }
+  .sum-label { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text2); margin-bottom: 6px; }
   .sum-amount { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
-  .sum-sub { font-size: 11px; color: var(--text2); margin-top: 4px; }
+  .sum-sub { font-size: 10px; color: var(--text2); margin-top: 4px; }
   .sum-card.savings .sum-amount { color: var(--green); }
   .sum-card.invest .sum-amount { color: var(--blue); }
   .sum-card.total { background: linear-gradient(135deg, #fffbeb, #fef3c7); border-color: var(--gold-mid); }
@@ -99,9 +100,9 @@
     border-radius: var(--radius); padding: 22px 24px; box-shadow: var(--shadow);
   }
   .goals-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-  .goals-header h3 { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); }
+  .goals-header h3 { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); }
   .add-goal-btn {
-    font-size: 12px; font-weight: 700; background: var(--gold-soft);
+    font-size: 10px; font-weight: 700; background: var(--gold-soft);
     border: 1.5px solid var(--gold-mid); border-radius: 99px;
     padding: 5px 14px; cursor: pointer; color: var(--gold);
     font-family: inherit; transition: all 0.15s;
@@ -118,23 +119,45 @@
   .goal-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
   .goal-emoji { font-size: 22px; }
   .goal-name { font-size: 14px; font-weight: 700; flex: 1; }
-  .goal-pct { font-size: 13px; font-weight: 900; color: var(--gold); }
-  .goal-amounts { display: flex; justify-content: space-between; font-size: 11px; color: var(--text2); margin-bottom: 8px; }
+  .goal-pct { font-size: 12px; font-weight: 900; color: var(--gold); }
+  .goal-amounts { display: flex; justify-content: space-between; font-size: 10px; color: var(--text2); margin-bottom: 8px; }
   .goal-amounts strong { color: var(--text); font-weight: 700; }
   .goal-bar-track { height: 8px; background: var(--border); border-radius: 99px; overflow: hidden; margin-bottom: 6px; }
-  .goal-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--gold), #fbbf24); transition: width 0.6s cubic-bezier(0.34,1.1,0.64,1); }
+  .goal-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 45%, #34d399 100%); transition: width 0.6s cubic-bezier(0.34,1.1,0.64,1); }
   .goal-bar-fill.done { background: linear-gradient(90deg, var(--green), #34d399); }
   .goal-remaining { font-size: 10px; color: var(--text3); }
-  .goal-del { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--text3); cursor: pointer; font-size: 13px; padding: 3px 5px; border-radius: 6px; transition: all 0.15s; }
-  .goal-del:hover { color: var(--red); background: var(--red-soft); }
+  .goal-deadline { font-size: 10px; margin-top: 6px; color: var(--text2); }
+  .goal-eta { font-size: 10px; margin-top: 3px; color: var(--text3); }
+  .goal-actions { display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+  .goal-action-btn{
+    font-size:11px;font-weight:600;border-radius:7px;
+    padding:5px 9px;cursor:pointer;font-family:inherit;
+    border:1.2px solid transparent;min-height:30px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .goal-edit-btn {
+    font-size: 10px; font-weight: 700; background: var(--purple-soft);
+    border: 1.5px solid var(--purple-mid); border-radius: 8px;
+    padding: 4px 10px; cursor: pointer; color: var(--purple);
+    font-family: inherit; transition: all 0.15s;
+  }
+  .goal-edit-btn:hover { background: var(--purple); color: #fff; }
+  .goal-eta { font-size: 10px; margin-top: 3px; color: var(--text3); }
+  .goal-del {
+    position: absolute; top: 10px; right: 10px;
+    width: 28px; height: 28px; display:flex; align-items:center; justify-content:center;
+    background: #fff; border: 1px solid #fecaca; color: var(--red); cursor: pointer;
+    font-size: 14px; padding: 0; border-radius: 8px; transition: all 0.15s;
+  }
+  .goal-del:hover { background: var(--red-soft); color: var(--red); }
   .goal-add-btn {
-    font-size: 11px; font-weight: 700; background: var(--green-soft);
+    font-size: 10px; font-weight: 700; background: var(--green-soft);
     border: 1.5px solid var(--green-mid); border-radius: 8px;
     padding: 4px 10px; cursor: pointer; color: var(--green);
     font-family: inherit; transition: all 0.15s; margin-top: 4px;
   }
   .goal-add-btn:hover { background: var(--green); color: #fff; }
-  .goals-empty { font-size: 13px; color: var(--text3); text-align: center; padding: 20px; }
+  .goals-empty { font-size: 12px; color: var(--text3); text-align: center; padding: 20px; }
 
   /* ── Monthly savings target ── */
   .monthly-section {
@@ -143,7 +166,7 @@
     border-radius: var(--radius); padding: 22px 24px; box-shadow: var(--shadow);
   }
   .monthly-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-  .monthly-header h3 { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); }
+  .monthly-header h3 { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); }
 
   .month-nav {
     display: inline-flex; align-items: center; gap: 14px;
@@ -156,7 +179,7 @@
 
   .monthly-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .monthly-item { }
-  .monthly-item-label { font-size: 11px; color: var(--text2); font-weight: 700; letter-spacing: 0.04em; margin-bottom: 8px; text-transform: uppercase; }
+  .monthly-item-label { font-size: 10px; color: var(--text2); font-weight: 700; letter-spacing: 0.04em; margin-bottom: 8px; text-transform: uppercase; }
   .monthly-input-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
   .monthly-input {
     flex: 1; background: var(--bg); border: 1.5px solid var(--border);
@@ -188,7 +211,7 @@
     border-radius: var(--radius); padding: 22px 24px; box-shadow: var(--shadow);
   }
   .portfolio-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-  .portfolio-header h3 { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); }
+  .portfolio-header h3 { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); }
   .add-portfolio-btn {
     font-size: 12px; font-weight: 700; background: var(--blue-soft);
     border: 1.5px solid var(--blue-mid); border-radius: 99px;
@@ -206,7 +229,7 @@
   }
   .portfolio-row:hover { border-color: var(--blue-mid); }
   .portfolio-type { font-size: 18px; text-align: center; }
-  .portfolio-name { font-size: 13px; font-weight: 700; }
+  .portfolio-name { font-size: 12px; font-weight: 700; }
   .portfolio-sub { font-size: 10px; color: var(--text2); margin-top: 1px; }
   .portfolio-amount { font-size: 14px; font-weight: 800; color: var(--blue); text-align: right; }
   .portfolio-input {
@@ -223,9 +246,9 @@
   .portfolio-gain.pos { color: var(--green); background: var(--green-soft); }
   .portfolio-gain.neg { color: var(--red); background: var(--red-soft); }
   .portfolio-gain.neu { color: var(--text3); background: var(--bg); }
-  .p-del-btn { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 13px; padding: 3px 5px; border-radius: 6px; transition: all 0.15s; }
+  .p-del-btn { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 12px; padding: 3px 5px; border-radius: 6px; transition: all 0.15s; }
   .p-del-btn:hover { color: var(--red); background: var(--red-soft); }
-  .portfolio-empty { font-size: 13px; color: var(--text3); text-align: center; padding: 24px; }
+  .portfolio-empty { font-size: 12px; color: var(--text3); text-align: center; padding: 24px; }
 
   /* ── History chart ── */
   .chart-section {
@@ -233,7 +256,7 @@
     background: var(--surface); border: 1.5px solid var(--border);
     border-radius: var(--radius); padding: 22px 24px; box-shadow: var(--shadow);
   }
-  .chart-section h3 { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); margin-bottom: 20px; }
+  .chart-section h3 { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text2); margin-bottom: 20px; }
   .chart-inner { display: flex; align-items: flex-end; gap: 6px; height: 150px; border-bottom: 1.5px solid var(--border); padding-bottom: 28px; overflow-x: auto; }
   .chart-col { flex: 0 0 auto; width: 56px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; position: relative; }
   .chart-col-bars { width: 100%; display: flex; gap: 3px; align-items: flex-end; justify-content: center; flex: 1; }
@@ -242,7 +265,7 @@
   .chart-mlabel { position: absolute; bottom: -22px; font-size: 9px; color: var(--text3); font-weight: 600; white-space: nowrap; left: 50%; transform: translateX(-50%); }
   .chart-col.cur .chart-mlabel { color: var(--gold); font-weight: 800; }
   .chart-legend { display: flex; gap: 14px; margin-top: 14px; }
-  .chart-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); }
+  .chart-legend-item { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--text2); }
   .chart-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
 
   /* ── Modals ── */
@@ -251,16 +274,16 @@
   .modal { background: var(--surface); border: 1.5px solid var(--border); border-radius: 20px; padding: 28px; width: 420px; max-width: 95vw; box-shadow: 0 20px 60px rgba(0,0,0,0.12); }
   .modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
   .modal-row { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
-  .modal-row label { font-size: 11px; color: var(--text2); font-weight: 700; letter-spacing: 0.04em; }
+  .modal-row label { font-size: 10px; color: var(--text2); font-weight: 700; letter-spacing: 0.04em; }
   .modal-row input, .modal-row select {
     background: var(--bg); border: 1.5px solid var(--border);
     border-radius: 10px; color: var(--text); padding: 9px 12px;
-    font-size: 13px; font-family: inherit; outline: none;
+    font-size: 12px; font-family: inherit; outline: none;
     transition: border-color 0.15s;
   }
   .modal-row input:focus, .modal-row select:focus { border-color: var(--gold); }
   .modal-btns { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
-  .modal-btns button { padding: 9px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; }
+  .modal-btns button { padding: 9px 20px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; }
   .btn-cancel { background: var(--bg); color: var(--text2); border: 1.5px solid var(--border) !important; }
   .btn-save-gold { background: linear-gradient(135deg, var(--gold), #fbbf24); color: #fff; }
   .btn-save-blue { background: linear-gradient(135deg, var(--blue), #60a5fa); color: #fff; }
@@ -269,10 +292,10 @@
   .deposit-modal { width: 340px; }
 
   /* ── Toast ── */
-  .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1c1a0f; color: #fff; padding: 12px 24px; border-radius: 99px; font-size: 13px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,0.2); transition: transform 0.3s cubic-bezier(0.34,1.2,0.64,1); z-index: 1000; white-space: nowrap; }
+  .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1c1a0f; color: #fff; padding: 12px 24px; border-radius: 99px; font-size: 12px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,0.2); transition: transform 0.3s cubic-bezier(0.34,1.2,0.64,1); z-index: 1000; white-space: nowrap; }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
-  #chart-tip { position: fixed; background: #1c1a0f; color: #fff; font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 8px; white-space: nowrap; z-index: 999; pointer-events: none; opacity: 0; transition: opacity 0.12s; box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+  #chart-tip { position: fixed; background: #1c1a0f; color: #fff; font-size: 10px; font-weight: 700; padding: 5px 10px; border-radius: 8px; white-space: nowrap; z-index: 999; pointer-events: none; opacity: 0; transition: opacity 0.12s; box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
   #chart-tip.show { opacity: 1; }
 
   @media (max-width: 640px) {
@@ -391,9 +414,9 @@
   <div class="modal">
     <h3>🎯 저축 목표 추가</h3>
     <div class="modal-row"><label>목표 이름</label><input type="text" id="g-name" placeholder="예: 비상금, 여행, 맥북"></div>
-    <div class="modal-row"><label>이모지</label><input type="text" id="g-emoji" placeholder="예: 🏖️ 💻 🏥" maxlength="4"></div>
-    <div class="modal-row"><label>목표 금액 (¥)</label><input type="number" id="g-target" placeholder="0" min="0"></div>
+        <div class="modal-row"><label>목표 금액 (¥)</label><input type="number" id="g-target" placeholder="0" min="0"></div>
     <div class="modal-row"><label>월 저축 목표 (¥)</label><input type="number" id="g-monthly" placeholder="매달 얼마씩?" min="0"></div>
+    <div class="modal-row"><label>목표 기한</label><input type="month" id="g-deadline"></div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeGoalModal()">취소</button>
       <button class="btn-save-gold" onclick="saveGoal()">저장</button>
@@ -479,6 +502,29 @@ function saveMonthlyTargets(o){ localStorage.setItem('si_monthly_targets', JSON.
 function fmt(n) { return '¥' + Math.abs(Math.round(Number(n || 0))).toLocaleString('ja-JP'); }
 function monthKey(y = currentYear, m = currentMonth) { return `${y}-${String(m+1).padStart(2,'0')}`; }
 
+
+function formatDeadline(deadline) {
+  if (!deadline) return '';
+  const [y, m] = deadline.split('-');
+  if (!y || !m) return '';
+  return `${y}년 ${Number(m)}월`;
+}
+function monthsUntilDeadline(deadline) {
+  if (!deadline) return null;
+  const [y, m] = deadline.split('-').map(Number);
+  if (!y || !m) return null;
+  return (y - currentYear) * 12 + (m - (currentMonth + 1));
+}
+function estimateCompletionMonth(saved, target, monthly) {
+  if (!monthly || monthly <= 0) return '';
+  const remaining = Math.max(0, target - saved);
+  if (remaining <= 0) return '예상 달성: 달성 완료';
+  const monthsNeeded = Math.ceil(remaining / monthly);
+  const base = new Date(currentYear, currentMonth, 1);
+  base.setMonth(base.getMonth() + monthsNeeded);
+  return `예상 달성: ${base.getFullYear()}년 ${base.getMonth() + 1}월`;
+}
+
 function initDate() {
   const now = new Date();
   currentYear = now.getFullYear();
@@ -550,20 +596,21 @@ async function syncToPersonalExpense(cat, amount, desc) {
 function openGoalModal() { document.getElementById('goal-modal').classList.add('open'); }
 function closeGoalModal() {
   document.getElementById('goal-modal').classList.remove('open');
-  ['g-name','g-emoji','g-target','g-monthly'].forEach(id => document.getElementById(id).value = '');
+  ['g-name','g-target','g-monthly','g-deadline'].forEach(id => document.getElementById(id).value = '');
 }
 function saveGoal() {
   const name = document.getElementById('g-name').value.trim();
-  const emoji = document.getElementById('g-emoji').value.trim() || '🎯';
+  const emoji = '';
   const target = parseFloat(document.getElementById('g-target').value);
   const monthly = parseFloat(document.getElementById('g-monthly').value) || 0;
+  const deadline = document.getElementById('g-deadline').value || '';
   if (!name || !target) { alert('이름과 목표 금액을 입력해주세요!'); return; }
   const goals = getGoals();
-  goals.push({ id: Date.now(), name, emoji, target, monthly });
+  goals.push({ id: Date.now(), name, emoji, target, monthly, deadline });
   saveGoals(goals);
   closeGoalModal();
   render();
-  showToast('목표가 추가됐어요 🎯');
+  showToast('목표가 추가됐어요');
 }
 function deleteGoal(id) {
   if (!confirm('이 목표를 삭제할까요?')) return;
@@ -766,11 +813,46 @@ function renderSummary() {
   }
 }
 
+
+let editingGoalId = null;
+function openEditGoalModal(id) {
+  const goal = getGoals().find(g => g.id === id);
+  if (!goal) return;
+  editingGoalId = id;
+  document.getElementById('eg-name').value = goal.name || '';
+  document.getElementById('eg-target').value = goal.target || '';
+  document.getElementById('eg-monthly').value = goal.monthly || '';
+  document.getElementById('eg-deadline').value = goal.deadline || '';
+  document.getElementById('edit-goal-modal').classList.add('open');
+}
+function closeEditGoalModal() {
+  document.getElementById('edit-goal-modal').classList.remove('open');
+  ['eg-name','eg-target','eg-monthly','eg-deadline'].forEach(id => document.getElementById(id).value = '');
+  editingGoalId = null;
+}
+function saveEditGoal() {
+  if (editingGoalId === null) return;
+  const name = document.getElementById('eg-name').value.trim();
+  const target = parseFloat(document.getElementById('eg-target').value);
+  const monthly = parseFloat(document.getElementById('eg-monthly').value) || 0;
+  const deadline = document.getElementById('eg-deadline').value || '';
+  if (!name || !target) { alert('이름과 목표 금액을 입력해주세요!'); return; }
+  const goals = getGoals();
+  const idx = goals.findIndex(g => g.id === editingGoalId);
+  if (idx >= 0) {
+    goals[idx] = { ...goals[idx], name, target, monthly, deadline, emoji: '' };
+    saveGoals(goals);
+    closeEditGoalModal();
+    render();
+    showToast('목표를 수정했어요');
+  }
+}
+
 function renderGoals() {
   const goals = getGoals();
   const grid = document.getElementById('goals-grid');
   if (!goals.length) {
-    grid.innerHTML = '<div class="goals-empty" style="grid-column:1/-1">목표를 추가해보세요 🎯</div>';
+    grid.innerHTML = '<div class="goals-empty" style="grid-column:1/-1">목표를 추가해보세요</div>';
     return;
   }
   grid.innerHTML = goals.map(g => {
@@ -779,11 +861,19 @@ function renderGoals() {
     const done = pct >= 100;
     const remaining = Math.max(0, g.target - saved);
     const monthsLeft = g.monthly > 0 ? Math.ceil(remaining / g.monthly) : null;
+    const deadlineDiff = monthsUntilDeadline(g.deadline);
+    const deadlineText = formatDeadline(g.deadline);
+    const deadlineMessage = deadlineText
+      ? (deadlineDiff === null
+          ? `기한 ${deadlineText}`
+          : deadlineDiff < 0
+            ? `기한 ${deadlineText} · 기한 지남`
+            : `기한 ${deadlineText} · ${deadlineDiff}개월 남음`)
+      : '';
+    const etaText = estimateCompletionMonth(saved, g.target, g.monthly);
     return `
       <div class="goal-card">
-        <button class="goal-del" onclick="deleteGoal(${g.id})">✕</button>
         <div class="goal-top">
-          <span class="goal-emoji">${g.emoji}</span>
           <span class="goal-name">${g.name}</span>
           <span class="goal-pct" style="${done ? 'color:var(--green)' : ''}">${pct}%</span>
         </div>
@@ -795,11 +885,15 @@ function renderGoals() {
           <div class="goal-bar-fill${done ? ' done' : ''}" style="width:${pct}%"></div>
         </div>
         <div class="goal-remaining">
-          ${done ? '🎉 목표 달성!' : `남은 금액 ${fmt(remaining)}${monthsLeft ? ` · 약 ${monthsLeft}개월` : ''}`}
+          ${done ? '목표 달성!' : `남은 금액 ${fmt(remaining)}${monthsLeft ? ` · 약 ${monthsLeft}개월` : ''}`}
         </div>
-        <div style="display:flex;gap:6px;margin-top:4px;">
-          <button class="goal-add-btn" onclick="openDepositModal(${g.id})">+ 저축 추가</button>
-          <button class="goal-add-btn" style="background:var(--red-soft);border-color:#fca5a5;color:var(--red)" onclick="openWithdrawModal(${g.id})">− 인출</button>
+        ${deadlineMessage ? `<div class="goal-deadline">${deadlineMessage}</div>` : ''}
+        ${etaText ? `<div class="goal-eta">${etaText}</div>` : ''}
+        <div class="goal-actions">
+          <button class="goal-action-btn" style="background:#ecfdf5;border-color:#86efac;color:#059669" onclick="openDepositModal(${g.id})">+ 저축 추가</button>
+          <button class="goal-action-btn" style="background:#fef2f2;border-color:#fca5a5;color:#dc2626" onclick="openWithdrawModal(${g.id})">− 인출</button>
+          <button class="goal-action-btn" style="background:#f3f0ff;border-color:#c4b5fd;color:#6d28d9" onclick="openEditGoalModal(${g.id})">수정</button>
+          <button class="goal-action-btn" style="background:#fff;border-color:#fecaca;color:#dc2626" onclick="deleteGoal(${g.id})">✕</button>
         </div>
       </div>`;
   }).join('');
@@ -993,6 +1087,21 @@ fetchSavingsRows().then(() => {
   render();
 });
 </script>
+
+
+<div class="modal-overlay" id="edit-goal-modal">
+  <div class="modal">
+    <h3>저축 목표 수정</h3>
+    <div class="modal-row"><label>목표 이름</label><input type="text" id="eg-name" placeholder="예: 비상금, 여행, 맥북"></div>
+    <div class="modal-row"><label>목표 금액 (¥)</label><input type="number" id="eg-target" placeholder="0" min="0"></div>
+    <div class="modal-row"><label>월 저축 목표 (¥)</label><input type="number" id="eg-monthly" placeholder="매달 얼마씩?" min="0"></div>
+    <div class="modal-row"><label>목표 기한</label><input type="month" id="eg-deadline"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeEditGoalModal()">취소</button>
+      <button class="modal-save" onclick="saveEditGoal()">저장</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
