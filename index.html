@@ -42,32 +42,35 @@
   }
 
   /* ── Header ── */
-  header { max-width: 820px; margin: 0 auto 28px; text-align: center; }
+  header { max-width: 860px; margin: 0 auto 28px; text-align: center; }
   .header-emoji { font-size: 36px; margin-bottom: 8px; }
   header h1 { font-family: 'Gowun Dodum', sans-serif; font-size: 26px; letter-spacing: -0.3px; margin-bottom: 4px; }
-
-  .header-nav {
-    display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 14px; flex-wrap: wrap;
-  }
 
   .month-nav {
     display: inline-flex; align-items: center; gap: 16px;
     background: var(--surface); border: 1.5px solid var(--border);
-    border-radius: 99px; padding: 8px 20px; box-shadow: var(--shadow);
+    border-radius: 99px; padding: 8px 20px; margin-top: 14px;
+    box-shadow: var(--shadow);
   }
   .month-nav button { background: none; border: none; color: var(--text2); font-size: 16px; cursor: pointer; padding: 2px 8px; border-radius: 50%; transition: all 0.15s; }
   .month-nav button:hover { background: var(--border); color: var(--text); }
   .month-nav span { font-size: 15px; font-weight: 700; min-width: 90px; text-align: center; }
 
-  .back-btn {
+  .header-nav {
+    display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 12px; flex-wrap: wrap;
+  }
+
+  .nav-btn {
     display: inline-flex; align-items: center; gap: 6px;
     background: var(--surface); border: 1.5px solid var(--border);
-    border-radius: 99px; padding: 8px 16px;
+    border-radius: 99px; padding: 7px 16px;
     font-size: 12px; font-weight: 700; color: var(--text2);
     text-decoration: none; box-shadow: var(--shadow);
-    transition: all 0.15s;
+    transition: all 0.15s; cursor: pointer; font-family: inherit;
   }
-  .back-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+
 
   /* ── Section title ── */
   .section-title {
@@ -191,16 +194,6 @@
   }
   .add-btn:hover { opacity: 0.88; transform: translateY(-1px); }
 
-  .quick-actions {
-    display:flex; gap:10px; align-items:center; margin-top:14px; flex-wrap:wrap;
-  }
-  .ghost-btn {
-    background: var(--bg); border: 1.5px solid var(--border); border-radius: 12px;
-    padding: 10px 14px; font-size: 12px; font-weight: 700; color: var(--text2);
-    cursor: pointer; font-family: inherit; transition: all 0.15s;
-  }
-  .ghost-btn:hover { border-color: var(--accent2); color: var(--accent2); }
-
   /* ── Transaction list ── */
   .tx-section {
     max-width: 820px; margin: 0 auto 24px;
@@ -300,14 +293,14 @@ input[type="number"] {
 <header>
   <div class="header-emoji">💳</div>
   <h1>개인 지출 관리</h1>
-  <div class="month-nav" style="margin-top:14px">
+  <div class="month-nav">
     <button onclick="changeMonth(-1)">◀</button>
     <span id="month-title"></span>
     <button onclick="changeMonth(1)">▶</button>
   </div>
-  <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px;">
-    <a href="https://pure-asset.github.io/finance-dashboard/living.html" class="back-btn">🏠 생활비 정산</a>
-    <a href="https://pure-asset.github.io/finance-dashboard/savings.html" class="back-btn">💎 저축 & 투자</a>
+  <div class="header-nav">
+    <a href="living.html" class="nav-btn">🏠 생활비 정산</a>
+    <a href="savings.html" class="nav-btn">💎 저축 & 투자</a>
   </div>
 </header>
 
@@ -387,9 +380,6 @@ input[type="number"] {
       </div>
     </div>
     <button class="add-btn" onclick="addTx()">+ 추가</button>
-  </div>
-  <div class="quick-actions">
-    <button class="ghost-btn" onclick="importLastMonthSubscriptions()">🔁 지난달 구독 불러오기</button>
   </div>
 </div>
 
@@ -600,89 +590,6 @@ async function syncSavingsFromPersonal(txId, cat, amount, desc) {
   if (error) {
     console.error('syncSavingsFromPersonal error:', error);
     throw error;
-  }
-}
-
-function previousMonthInfo() {
-  const d = new Date(currentYear, currentMonth, 1);
-  d.setMonth(d.getMonth() - 1);
-  return { year: d.getFullYear(), month: d.getMonth() };
-}
-
-async function importLastMonthSubscriptions() {
-  try {
-    const prev = previousMonthInfo();
-    const prevRange = monthRange(prev.year, prev.month);
-    const currRange = monthRange(currentYear, currentMonth);
-
-    const { data: prevSubs, error: prevErr } = await supabaseClient
-      .from('personal_transactions')
-      .select('memo, amount, category, type')
-      .gte('date', prevRange.start)
-      .lt('date', prevRange.end)
-      .eq('type', 'expense')
-      .eq('category', '구독')
-      .order('created_at', { ascending: false });
-    if (prevErr) throw prevErr;
-
-    const uniquePrev = [];
-    const seen = new Set();
-    for (const row of (prevSubs || [])) {
-      const name = (row.memo || '').trim();
-      if (!name) continue;
-      const key = `${row.category}__${name}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      uniquePrev.push(row);
-    }
-
-    if (!uniquePrev.length) {
-      showToast('지난달 구독 내역이 없어요');
-      return;
-    }
-
-    const { data: currSubs, error: currErr } = await supabaseClient
-      .from('personal_transactions')
-      .select('memo, category, type')
-      .gte('date', currRange.start)
-      .lt('date', currRange.end)
-      .eq('type', 'expense')
-      .eq('category', '구독');
-    if (currErr) throw currErr;
-
-    const existing = new Set((currSubs || []).map(r => `${r.category}__${(r.memo || '').trim()}`));
-    const today = new Date();
-    const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(Math.min(today.getDate(), 28)).padStart(2,'0')}`;
-
-    const toInsert = uniquePrev
-      .filter(row => !existing.has(`${row.category}__${(row.memo || '').trim()}`))
-      .map(row => ({
-        id: crypto.randomUUID(),
-        date: dateStr,
-        type: 'expense',
-        category: '구독',
-        subcategory: null,
-        amount: Number(row.amount || 0),
-        memo: row.memo,
-        source: 'manual',
-        source_id: null
-      }));
-
-    if (!toInsert.length) {
-      showToast('이번 달에 이미 같은 구독이 있어요');
-      return;
-    }
-
-    const { error: insertErr } = await supabaseClient
-      .from('personal_transactions')
-      .insert(toInsert);
-    if (insertErr) throw insertErr;
-
-    await render();
-    showToast(`구독 ${toInsert.length}건을 불러왔어요`);
-  } catch (err) {
-    console.error('importLastMonthSubscriptions error:', err);
-    alert('구독 불러오기 중 오류가 발생했어요.');
   }
 }
 
