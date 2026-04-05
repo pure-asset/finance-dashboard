@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -411,6 +412,15 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLI
 let txType = 'expense';
 let currentYear, currentMonth;
 let renderToken = 0;
+let txRealtimeChannel = null;
+let realtimeRefreshTimer = null;
+
+function scheduleRender(delay = 120) {
+  clearTimeout(realtimeRefreshTimer);
+  realtimeRefreshTimer = setTimeout(() => {
+    render();
+  }, delay);
+}
 
 function mk(suffix, y, m) {
   const yr = y !== undefined ? y : currentYear;
@@ -854,12 +864,40 @@ function showToast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+function setupRealtime() {
+  if (txRealtimeChannel) return;
+
+  txRealtimeChannel = supabaseClient
+    .channel('personal-transactions-realtime')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'personal_transactions' },
+      () => {
+        scheduleRender(80);
+      }
+    )
+    .subscribe((status) => {
+      console.log('Realtime status:', status);
+    });
+}
+
 document.getElementById('budget-modal').addEventListener('click', function(e) {
   if (e.target === this) closeBudgetModal();
 });
 
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    scheduleRender(0);
+  }
+});
+
+window.addEventListener('focus', () => {
+  scheduleRender(0);
+});
+
 initDate();
 populateCats();
+setupRealtime();
 render();
 </script>
 </body>
