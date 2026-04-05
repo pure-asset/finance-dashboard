@@ -962,7 +962,7 @@ function renderSharedGrid() {
           <span class="shared-name">${def.name}</span>
         </div>
         <div class="essentials-add-row no-print">
-          <input class="essentials-input-sm" type="text" id="ess-place" placeholder="장소 (예: 돈키호테)" ${isOn ? '' : 'disabled'}>
+          <input class="essentials-input-sm" type="text" id="ess-place" placeholder="장소 (예:Amazon)" ${isOn ? '' : 'disabled'}>
           <input class="essentials-input-sm" type="text" id="ess-desc" placeholder="내용 (예: 샴푸, 세제)" ${isOn ? '' : 'disabled'}>
           <input class="essentials-input-sm" type="number" id="ess-amount" placeholder="금액" min="0" ${isOn ? '' : 'disabled'}
             onkeydown="if(event.key==='Enter') addEssentialItem()">
