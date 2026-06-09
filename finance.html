@@ -4,6 +4,7 @@
 
 
 
+
 <!doctype html>
 <html lang="ko">
 <head>
@@ -2686,10 +2687,10 @@ document.addEventListener('DOMContentLoaded', function(){
       
       <div class="quick-actions">
         <button class="quick-btn active" data-tab="summary" onclick="openPage('summary')">📊 요약</button>
-        <button class="quick-btn" data-tab="expense" onclick="openPage('expense')">🛒 지출</button>
-        <button class="quick-btn" data-tab="debt" onclick="openPage('debt')">💳 부채</button>
         <button class="quick-btn" data-tab="asset" onclick="openPage('asset')">🏛️ 자산</button>
+        <button class="quick-btn" data-tab="expense" onclick="openPage('expense')">🛒 지출</button>
         <button class="quick-btn" data-tab="subs" onclick="openPage('subs')">🧾 구독</button>
+        <button class="quick-btn" data-tab="debt" onclick="openPage('debt')">💳 부채</button>
       </div>
     </div>
   </div>
@@ -2708,7 +2709,7 @@ document.addEventListener('DOMContentLoaded', function(){
       </div>
       <div class="kpi-card">
         <div class="icon-circle icon-purple">💼</div>
-        <div class="kpi-label">순자산</div>
+        <div class="kpi-label">총 자산</div>
         <div class="kpi-value purple" id="net-worth">¥0</div>
         <div class="net-meta">
           <div class="net-line"><span>전월 대비</span><span class="net-change" id="net-change-month">➖ ¥0</span></div>
@@ -2940,7 +2941,7 @@ let lastCloudDataString = '';
 
 function cloudDocRef(){
   if(!db || !currentUser) return null;
-  return db.collection('users').doc(currentUser.uid).collection('dashboards').doc('pure-asset');
+  return db.collection('users').doc(currentUser.uid).collection('dashboards').doc('finance-dashboard');
 }
 
 function updateSyncUI(status, userText){
@@ -2989,7 +2990,7 @@ async function saveCloudNow(){
   try{
     localStorage.setItem(STORAGE_KEY, serialized);
     await ref.set({
-      finance: { data: serialized },
+      data: serialized,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge:true });
     lastCloudDataString = serialized;
@@ -3017,17 +3018,9 @@ async function loadCloudData(){
     updateSyncUI('클라우드 불러오는 중...', currentUser.email || '로그인됨');
     const snap = await ref.get();
 
-    if(snap.exists && snap.data() && (snap.data().finance?.data || snap.data().data)){
-      const cloudPayload = snap.data();
-      const cloudString = cloudPayload.finance?.data || cloudPayload.data;
+    if(snap.exists && snap.data() && snap.data().data){
+      const cloudString = snap.data().data;
       lastCloudDataString = cloudString;
-
-      // Apply living data too, so linked living expense works across devices.
-      if(cloudPayload.living?.data){
-        Object.entries(cloudPayload.living.data || {}).forEach(([key, value]) => {
-          if(key === 'couple_history' || key.startsWith('couple_')) localStorage.setItem(key, value);
-        });
-      }
 
       localStorage.setItem(STORAGE_KEY, cloudString);
       appData = JSON.parse(cloudString);
@@ -3335,7 +3328,7 @@ function parseMoney(value){
 }
 
 function escapeHtml(value){
-  return String(value || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#039;');
+  return String(value || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 
@@ -3528,8 +3521,8 @@ function getTotalExpense(){
   return getLivingExpenseTotal() + getSubscriptionExpenseTotal() + getNormalExpenseTotal();
 }
 
-function getIncomeTotal(){
-  return sum(getMonthData().income);
+function getIncomeTotal(data=getMonthData()){
+  return sum(data.income || []);
 }
 
 
@@ -3568,9 +3561,10 @@ function getAdjustedDebtItems(data=getMonthData()){
   }));
 }
 
-function getAssetTotal(type=null){
-  const assets = getMonthData().assets || [];
-  return sum(type ? assets.filter(a => a.type === type) : assets);
+function getAssetTotal(type=null, data=getMonthData()){
+  const assets = data.assets || [];
+  if(type) return sum(assets.filter(a => a.type === type));
+  return sum(assets) + getIncomeTotal(data);
 }
 
 function getDebtTotal(type=null){
@@ -3582,6 +3576,25 @@ function getNetWorth(){
   return getAssetTotal() - getDebtTotal();
 }
 
+function getTotalAsset(){
+  return getAssetTotal();
+}
+
+function getPreviousTotalAsset(){
+  const previous = getPreviousMonthData();
+  if(!previous) return null;
+  return getAssetTotal(null, previous);
+}
+
+function getYearStartTotalAsset(){
+  for(let m=0; m<12; m++){
+    const data = appData.months[monthKey(currentYear, m)];
+    if(data) return getAssetTotal(null, data);
+  }
+  return getTotalAsset();
+}
+
+
 function getPreviousMonthData(){
   const y = currentMonth === 0 ? currentYear - 1 : currentYear;
   const m = currentMonth === 0 ? 11 : currentMonth - 1;
@@ -3591,13 +3604,13 @@ function getPreviousMonthData(){
 function getPreviousNetWorth(){
   const previous = getPreviousMonthData();
   if(!previous) return null;
-  return sum(previous.assets) - sum(getAdjustedDebtItems(previous));
+  return getAssetTotal(null, previous) - sum(getAdjustedDebtItems(previous));
 }
 
 function getYearStartNetWorth(){
   for(let m=0; m<12; m++){
     const data = appData.months[monthKey(currentYear, m)];
-    if(data) return sum(data.assets) - sum(getAdjustedDebtItems(data));
+    if(data) return getAssetTotal(null, data) - sum(getAdjustedDebtItems(data));
   }
   return getNetWorth();
 }
@@ -4083,7 +4096,7 @@ function getYearSeries(type){
   for(let m=0; m<12; m++){
     const data = appData.months[monthKey(currentYear, m)];
     if(data){
-      lastValue = type === 'asset' ? sum(data.assets) : sum(data.debts);
+      lastValue = type === 'asset' ? getAssetTotal(null, data) : sum(getAdjustedDebtItems(data));
     }
     arr.push(lastValue);
   }
@@ -4097,7 +4110,7 @@ function renderTrendChart(){
   const months = Array.from({length: currentMonth + 1}, (_, i) => i);
   const assetValues = months.map(m => {
     const data = appData.months[monthKey(currentYear, m)];
-    return data ? sum((data.assets || []).filter(a => a.type === 'liquid')) : 0;
+    return data ? getAssetTotal(null, data) : 0;
   });
   const debtValues = months.map(m => {
     const data = appData.months[monthKey(currentYear, m)];
@@ -4162,17 +4175,17 @@ if(window.appData && window.appData !== appData) appData = window.appData;
 
   const income = getIncomeTotal();
   const totalExpense = getTotalExpense();
-  const netWorth = getNetWorth();
-  const previousNetWorth = getPreviousNetWorth();
-  const netChangeMonth = previousNetWorth === null ? 0 : netWorth - previousNetWorth;
-  const netChangeYear = netWorth - getYearStartNetWorth();
+  const totalAsset = getTotalAsset();
+  const previousTotalAsset = getPreviousTotalAsset();
+  const netChangeMonth = previousTotalAsset === null ? 0 : totalAsset - previousTotalAsset;
+  const netChangeYear = totalAsset - getYearStartTotalAsset();
   const remainingBudget = md.monthBudget - totalExpense;
   const dailyBudget = remainingBudget / remainingDays;
   const rate = md.monthBudget > 0 ? Math.round(remainingBudget / md.monthBudget * 1000) / 10 : 0;
 
   document.getElementById('income-total').textContent = fmt(income);
   document.getElementById('expense-total').textContent = fmt(totalExpense);
-  document.getElementById('net-worth').textContent = fmt(netWorth);
+  document.getElementById('net-worth').textContent = fmt(totalAsset);
   setNetChangeElement('net-change-month', netChangeMonth);
   setNetChangeElement('net-change-year', netChangeYear);
 
@@ -4189,8 +4202,8 @@ if(window.appData && window.appData !== appData) appData = window.appData;
   document.getElementById('current-debt').textContent = fmt(getDebtTotal());
 
   const previous = getPreviousMonthData();
-  const assetChange = previous ? getAssetTotal() - sum(previous.assets) : 0;
-  const debtChange = previous ? getDebtTotal() - sum(previous.debts) : 0;
+  const assetChange = previous ? getAssetTotal() - getAssetTotal(null, previous) : 0;
+  const debtChange = previous ? getDebtTotal() - sum(getAdjustedDebtItems(previous)) : 0;
   setChangeElement('asset-change', assetChange);
   setChangeElement('debt-change', debtChange);
 
