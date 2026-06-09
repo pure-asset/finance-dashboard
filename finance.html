@@ -4,6 +4,8 @@
 
 
 
+
+
 <!doctype html>
 <html lang="ko">
 <head>
@@ -1303,7 +1305,7 @@ button,input{font-family:inherit}
   </div>
 
   <section class="inline-panel" id="inline-expense">
-    <div class="inline-head"><h2>지출 입력</h2><span class="inline-note">일반 지출 + 구독비가 총 지출에 반영</span></div>
+    <div class="inline-head"><h2>지출 입력</h2><span class="inline-note">생활비·구독비는 고정비, 나머지는 일반 지출로 반영</span></div>
     <div class="detail-grid">
       <div class="detail-card">
         <div class="detail-title">월 예산 설정</div>
@@ -1319,8 +1321,9 @@ button,input{font-family:inherit}
 
       <div class="detail-card">
         <div class="detail-title">지출 요약</div>
+        <div class="row"><span>생활비 (고정비)</span><span id="expense-living-total">¥0</span></div>
+        <div class="row"><span>구독비 (고정비)</span><span id="expense-subscription-total">¥0</span></div>
         <div class="row"><span>일반 지출</span><span id="expense-normal-total">¥0</span></div>
-        <div class="row"><span>구독비</span><span id="expense-subscription-total">¥0</span></div>
         <div class="row"><span>이번 달 총 지출</span><span id="expense-grand-total">¥0</span></div>
       </div>
 
@@ -1736,12 +1739,23 @@ function syncLivingExpenseFromLivingPage(){
   saveAppData();
 }
 
+function getLivingExpenseTotal(){
+  return sum((getMonthData().expenses || []).filter(item => item.source === 'living'));
+}
+
+function getSubscriptionExpenseTotal(){
+  return sum((getMonthData().expenses || []).filter(item => item.source === 'subscription'));
+}
+
 function getNormalExpenseTotal(){
-  return sum((getMonthData().expenses || []).filter(item => item.source !== 'subscription'));
+  return sum((getMonthData().expenses || [])
+    .filter(item => item.source !== 'living')
+    .filter(item => item.source !== 'subscription')
+  );
 }
 
 function getTotalExpense(){
-  return getNormalExpenseTotal() + getSubscriptionTotal();
+  return getLivingExpenseTotal() + getSubscriptionExpenseTotal() + getNormalExpenseTotal();
 }
 
 function getIncomeTotal(){
@@ -1816,8 +1830,12 @@ function renderExpenses(){
   if(!list) return;
 
   list.innerHTML = expenseInputRows();
+
+  const livingEl = document.getElementById('expense-living-total');
+  if(livingEl) livingEl.textContent = fmt(getLivingExpenseTotal());
+
+  document.getElementById('expense-subscription-total').textContent = fmt(getSubscriptionExpenseTotal());
   document.getElementById('expense-normal-total').textContent = fmt(getNormalExpenseTotal());
-  document.getElementById('expense-subscription-total').textContent = fmt(getSubscriptionTotal());
   document.getElementById('expense-grand-total').textContent = fmt(getTotalExpense());
 }
 
