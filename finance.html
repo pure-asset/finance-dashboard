@@ -6,6 +6,9 @@
 
 
 
+
+
+
 <!doctype html>
 <html lang="ko">
 <head>
@@ -1223,6 +1226,66 @@ button,input{font-family:inherit}
   .linked-actions .x-btn{width:100%!important}
 }
 
+
+/* subscription visible-current-month layout fix */
+.subs-input-row{
+  grid-template-columns:minmax(0,1fr) 90px 120px 120px 42px!important;
+}
+.subs-add-grid{
+  grid-template-columns:minmax(0,1fr) 90px 120px 120px!important;
+}
+@media(max-width:700px){
+  .subs-input-row,
+  .subs-add-grid{
+    grid-template-columns:1fr!important;
+  }
+}
+
+
+/* simple inline subscription add row */
+.subs-input-row select{
+  min-height:42px;
+  width:100%;
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  background:var(--bg);
+  color:var(--text);
+  padding:8px 10px;
+  font-size:13px;
+  font-family:inherit;
+}
+.subs-add-inline{
+  margin-top:8px;
+}
+.subs-add-inline .subs-delete{
+  font-size:18px;
+}
+
+
+/* net worth change direction colors */
+.net-line{
+  display:flex!important;
+  justify-content:space-between!important;
+  align-items:center!important;
+  grid-template-columns:none!important;
+}
+.net-line .arrow{
+  display:none!important;
+}
+.net-change{
+  font-weight:700;
+  text-align:right;
+}
+.net-up{
+  color:var(--red)!important;
+}
+.net-down{
+  color:var(--him)!important;
+}
+.net-flat{
+  color:var(--text2)!important;
+}
+
 </style>
 </head>
 <body>
@@ -1276,8 +1339,8 @@ button,input{font-family:inherit}
         <div class="kpi-label">순자산</div>
         <div class="kpi-value purple" id="net-worth">¥0</div>
         <div class="net-meta">
-          <div class="net-line"><span>전월 대비</span><span class="arrow">↑</span><span class="amount" id="net-change-month">+¥0</span></div>
-          <div class="net-line"><span>연초 대비</span><span class="arrow">↑</span><span class="amount" id="net-change-year">+¥0</span></div>
+          <div class="net-line"><span>전월 대비</span><span class="net-change" id="net-change-month">➖ ¥0</span></div>
+          <div class="net-line"><span>연초 대비</span><span class="net-change" id="net-change-year">➖ ¥0</span></div>
         </div>
       </div>
     </section>
@@ -1451,7 +1514,7 @@ button,input{font-family:inherit}
   </section>
 
   <section class="inline-panel" id="inline-subs">
-    <div class="inline-head"><h2>구독 현황</h2><span class="inline-note">월간은 매달 반영 · 연간은 갱신월에만 반영</span></div>
+    <div class="inline-head"><h2>구독 현황</h2><span class="inline-note">월간은 매달 표시 · 연간은 해당 월에만 표시</span></div>
     <div class="subs-layout">
       <div class="detail-card subs-summary-card">
         <div class="detail-title">이번 달 구독 요약</div>
@@ -1465,17 +1528,18 @@ button,input{font-family:inherit}
         <div class="detail-title">구독 입력</div>
         <div class="subs-input-list" id="subs-input-list"></div>
 
-        <div class="subs-add-box">
-          <div class="subs-add-grid">
+        <div class="subs-input-list" style="margin-top:8px">
+          <div class="subs-input-row subs-add-inline">
             <input id="sub-name-input" placeholder="항목명">
+            <select id="sub-cycle-input">
+              <option value="월간">월간</option>
+              <option value="연간">연간</option>
+            </select>
             <input id="sub-date-input" placeholder="갱신일">
             <input class="amount" id="sub-amount-input" placeholder="금액">
-            <input id="sub-cycle-input" placeholder="월간/연간">
+            <button class="subs-delete" onclick="addSubscription()">＋</button>
           </div>
-          <input id="sub-memo-input" placeholder="메모">
         </div>
-
-        <button class="add-btn" onclick="addSubscription()">+ 구독 항목 추가</button>
       </div>
     </div>
   </section>
@@ -1566,7 +1630,7 @@ function loadAppData(){
 
 let appData = loadAppData();
 
-const SUBS_VERSION_KEY = 'finance_subscriptions_version_v2_current_list';
+const SUBS_VERSION_KEY = 'finance_subscriptions_version_v3_active_month_only';
 if(localStorage.getItem(SUBS_VERSION_KEY) !== '1'){
   appData.global.subscriptions = structuredClone(defaultSubscriptions);
   localStorage.setItem(SUBS_VERSION_KEY, '1');
@@ -1866,6 +1930,39 @@ function getYearStartNetWorth(){
   return getNetWorth();
 }
 
+
+function formatNetChange(value){
+  const rounded = Math.round(Number(value || 0));
+  const absText = fmt(Math.abs(rounded));
+
+  if(rounded > 0){
+    return {
+      text:'🔺 +' + absText,
+      className:'net-change net-up'
+    };
+  }
+
+  if(rounded < 0){
+    return {
+      text:'🔻 -' + absText,
+      className:'net-change net-down'
+    };
+  }
+
+  return {
+    text:'➖ ¥0',
+    className:'net-change net-flat'
+  };
+}
+
+function setNetChangeElement(id, value){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const formatted = formatNetChange(value);
+  el.textContent = formatted.text;
+  el.className = formatted.className;
+}
+
 function itemRows(items, updateFn, deleteFn){
   return (items || []).map((item, index)=>{
     const name = escapeHtml(item.name);
@@ -1940,18 +2037,22 @@ function deleteExpenseItem(index){
 
 function subscriptionInputRows(){
   const visibleSubs = sortSubscriptionsByDate(
-    appData.global.subscriptions.map((sub, index) => ({...sub, originalIndex:index}))
+    appData.global.subscriptions
+      .map((sub, index) => ({...sub, originalIndex:index}))
+      .filter(isSubActiveThisMonth)
   );
 
   return visibleSubs.map((sub)=>{
     const index = sub.originalIndex;
     const name = escapeHtml(sub.name);
+    const cycle = escapeHtml(sub.cycle || '월간');
     const date = escapeHtml(sub.date);
     const amount = Number(sub.amount || 0).toLocaleString('ja-JP');
 
     return `
       <div class="subs-input-row">
         <input value="${name}" onchange="updateSubscription(${index}, 'name', this.value)" placeholder="항목명">
+        <input value="${cycle}" onchange="updateSubscription(${index}, 'cycle', this.value)" placeholder="월간/연간">
         <input value="${date}" onchange="updateSubscription(${index}, 'date', this.value)" placeholder="갱신일">
         <input class="amount" value="${amount}" onchange="updateSubscription(${index}, 'amount', this.value)" placeholder="금액">
         <button class="subs-delete" onclick="deleteSubscription(${index})">×</button>
@@ -1961,7 +2062,7 @@ function subscriptionInputRows(){
 }
 
 function renderSubscriptions(){
-  const active = getActiveSubscriptions();
+  const active = sortSubscriptionsByDate(getActiveSubscriptions());
   const monthly = appData.global.subscriptions.filter(s => s.cycle === '월간');
   const annualThisMonth = appData.global.subscriptions.filter(s => s.cycle === '연간' && isSubActiveThisMonth(s));
 
@@ -1984,33 +2085,31 @@ function updateSubscription(index, key, value){
 }
 
 function addSubscription(){
-  const addBox = document.querySelector('.subs-add-box');
   const nameInput = document.getElementById('sub-name-input');
+  const cycleInput = document.getElementById('sub-cycle-input');
+  const dateInput = document.getElementById('sub-date-input');
   const amountInput = document.getElementById('sub-amount-input');
 
-  if(addBox && !addBox.classList.contains('active')){
-    addBox.classList.add('active');
-    if(nameInput) nameInput.focus();
-    return;
-  }
-
   const name = nameInput.value.trim();
-  const cycle = document.getElementById('sub-cycle-input').value.trim() || '월간';
-  const date = document.getElementById('sub-date-input').value.trim();
+  const cycle = cycleInput.value.trim() || '월간';
+  const date = dateInput.value.trim();
   const amount = parseMoney(amountInput.value);
-  const memo = document.getElementById('sub-memo-input').value.trim();
 
   if(!name || !amount) return;
 
-  appData.global.subscriptions.push({name, cycle, date, amount, memo});
+  appData.global.subscriptions.push({
+    name,
+    cycle,
+    date,
+    amount,
+    memo:''
+  });
 
   nameInput.value = '';
-  document.getElementById('sub-cycle-input').value = '';
-  document.getElementById('sub-date-input').value = '';
+  cycleInput.value = '월간';
+  dateInput.value = '';
   amountInput.value = '';
-  document.getElementById('sub-memo-input').value = '';
 
-  if(addBox) addBox.classList.remove('active');
   saveAppData();
   render();
 }
@@ -2323,8 +2422,8 @@ function render(){
   document.getElementById('income-total').textContent = fmt(income);
   document.getElementById('expense-total').textContent = fmt(totalExpense);
   document.getElementById('net-worth').textContent = fmt(netWorth);
-  document.getElementById('net-change-month').textContent = (netChangeMonth >= 0 ? '+' : '') + fmt(netChangeMonth);
-  document.getElementById('net-change-year').textContent = (netChangeYear >= 0 ? '+' : '') + fmt(netChangeYear);
+  setNetChangeElement('net-change-month', monthNetChange);
+  setNetChangeElement('net-change-year', yearNetChange);
 
   document.getElementById('month-budget').textContent = fmt(md.monthBudget);
   const budgetInput = document.getElementById('budget-input');
