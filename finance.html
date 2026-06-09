@@ -1318,27 +1318,802 @@ button,input{font-family:inherit}
   box-sizing:border-box!important;
 }
 
+
+/* cloud sync / auth panel */
+.cloud-panel{
+  max-width:820px;
+  margin:0 auto 18px;
+  background:rgba(255,255,255,.92);
+  border:1.5px solid var(--border);
+  border-radius:24px;
+  box-shadow:var(--shadow);
+  padding:18px 20px;
+}
+.cloud-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  flex-wrap:wrap;
+}
+.cloud-status{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  color:var(--text2);
+  font-size:14px;
+}
+.cloud-status strong{
+  color:var(--shared);
+  font-weight:700;
+}
+.cloud-actions{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.cloud-actions button{
+  min-height:38px;
+  padding:8px 16px;
+  border:1.5px solid var(--border);
+  border-radius:999px;
+  background:#fff;
+  color:var(--text2);
+  cursor:pointer;
+  font-family:inherit;
+  box-shadow:var(--shadow);
+}
+.cloud-actions button:hover{
+  border-color:var(--shared);
+  color:var(--shared);
+}
+.cloud-actions .logout-btn{
+  color:var(--me);
+}
+.cloud-actions .login-btn{
+  color:var(--shared);
+}
+.cloud-user{
+  color:var(--text2);
+}
+.cloud-divider{
+  color:var(--text3);
+}
+@media(max-width:700px){
+  .cloud-row{align-items:stretch}
+  .cloud-status,.cloud-actions{width:100%;justify-content:center}
+  .cloud-actions button{flex:1}
+}
+
+
+/* finance cloud bar aligned with living.html sync-bar */
+.cloud-panel,
+.sync-bar{
+  width:min(820px, calc(100% - 0px))!important;
+  max-width:820px!important;
+  margin:0 auto 40px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:14px!important;
+  background:rgba(255,255,255,0.92)!important;
+  border:1.5px solid var(--border)!important;
+  border-radius:24px!important;
+  padding:14px 16px!important;
+  box-shadow:var(--shadow)!important;
+  font-size:12px!important;
+  color:var(--text2)!important;
+}
+.cloud-row,
+.sync-row{
+  width:100%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:14px!important;
+  flex-wrap:nowrap!important;
+}
+.cloud-status,
+.sync-left{
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+  min-width:0!important;
+  flex:1 1 auto!important;
+  font-size:12px!important;
+}
+.cloud-status strong,
+.sync-status{
+  font-weight:900!important;
+  color:var(--shared)!important;
+  white-space:nowrap!important;
+  min-width:0!important;
+}
+.cloud-user,
+.sync-user{
+  font-size:11px!important;
+  color:var(--text2)!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  min-width:0!important;
+}
+.cloud-divider{display:none!important}
+.cloud-user::before{
+  content:'|'!important;
+  color:var(--border)!important;
+  margin-right:12px!important;
+  font-weight:700!important;
+}
+.cloud-actions,
+.sync-actions{
+  display:flex!important;
+  gap:8px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex-wrap:nowrap!important;
+  flex:0 0 auto!important;
+}
+.cloud-actions button,
+.sync-actions .btn{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px!important;
+  box-shadow:none!important;
+  padding:5px 11px!important;
+  min-height:32px!important;
+  height:auto!important;
+  font-size:12px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+  border-radius:99px!important;
+  border:1.5px solid var(--border)!important;
+  background:var(--surface)!important;
+  color:var(--text2)!important;
+  font-family:inherit!important;
+  cursor:pointer!important;
+}
+.cloud-actions .login-btn{color:var(--shared)!important}
+.cloud-actions .logout-btn{color:var(--me)!important}
+.cloud-actions button:hover{
+  border-color:var(--shared)!important;
+  color:var(--shared)!important;
+}
+.cloud-actions .logout-btn:hover{
+  border-color:var(--me)!important;
+  color:var(--me)!important;
+}
+@media(max-width:700px){
+  .cloud-panel,.sync-bar{
+    margin-bottom:24px!important;
+  }
+  .cloud-row,.sync-row{
+    flex-direction:column!important;
+    align-items:stretch!important;
+    gap:10px!important;
+  }
+  .cloud-status,.cloud-actions{
+    width:100%!important;
+    justify-content:center!important;
+  }
+  .cloud-actions button{
+    flex:1 1 0!important;
+  }
+}
+
+
+
+
+
+/* v42: restore living.html-style top sync bar and centered header */
+.sync-bar{
+  width:min(820px, calc(100% - 0px))!important;
+  max-width:820px!important;
+  margin:0 auto 40px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:14px!important;
+  background:rgba(255,255,255,0.92)!important;
+  border:1.5px solid var(--border)!important;
+  border-radius:24px!important;
+  padding:14px 16px!important;
+  box-shadow:var(--shadow)!important;
+  font-size:12px!important;
+  color:var(--text2)!important;
+}
+.sync-left{
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+  min-width:0!important;
+  flex:1 1 auto!important;
+}
+.sync-status{
+  font-weight:400!important;
+  color:var(--shared)!important;
+  white-space:nowrap!important;
+  min-width:0!important;
+}
+.sync-user{
+  font-size:11px!important;
+  color:var(--text2)!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  min-width:0!important;
+}
+.sync-user::before{
+  content:'|'!important;
+  color:var(--border)!important;
+  margin-right:12px!important;
+  font-weight:400!important;
+}
+.sync-actions{
+  display:flex!important;
+  gap:8px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex-wrap:nowrap!important;
+  flex:0 0 auto!important;
+}
+.sync-actions .btn{
+  box-shadow:none!important;
+  padding:5px 11px!important;
+  min-height:32px!important;
+  font-size:12px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+}
+header.dashboard-hero,
+.dashboard-hero{
+  max-width:820px!important;
+  margin:0 auto 28px!important;
+  text-align:center!important;
+  display:block!important;
+  background:transparent!important;
+  border:none!important;
+  box-shadow:none!important;
+  padding:0!important;
+}
+.dashboard-hero .hero-icon{
+  font-size:36px!important;
+  line-height:1!important;
+  margin-bottom:8px!important;
+}
+.dashboard-hero .hero-title{
+  font-family:'Gowun Dodum', sans-serif!important;
+  font-size:26px!important;
+  font-weight:400!important;
+  letter-spacing:-0.3px!important;
+  color:var(--text)!important;
+  margin:0 0 4px!important;
+  text-align:center!important;
+}
+.dashboard-hero .hero-month-nav{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:16px!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+  padding:8px 22px!important;
+  margin:16px auto 0!important;
+  background:var(--surface)!important;
+  border:1.5px solid var(--border)!important;
+  border-radius:99px!important;
+  box-shadow:var(--shadow)!important;
+}
+.dashboard-hero .hero-month-nav button{
+  background:none!important;
+  border:none!important;
+  color:var(--text2)!important;
+  font-size:16px!important;
+  cursor:pointer!important;
+  padding:2px 8px!important;
+  border-radius:50%!important;
+  min-height:auto!important;
+  height:auto!important;
+  line-height:1.2!important;
+  box-shadow:none!important;
+}
+.dashboard-hero .hero-month-nav span{
+  display:inline-block!important;
+  font-size:16px!important;
+  font-weight:400!important;
+  min-width:90px!important;
+  text-align:center!important;
+  line-height:1.2!important;
+  color:var(--text)!important;
+}
+.dashboard-hero .hero-links{
+  max-width:820px!important;
+  margin:22px auto 0!important;
+  display:flex!important;
+  gap:10px!important;
+  justify-content:center!important;
+}
+@media(max-width:700px){
+  .sync-bar{
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:10px!important;
+    margin:0 auto 34px!important;
+    padding:13px 12px!important;
+    border-radius:22px!important;
+  }
+  .sync-left{
+    width:100%!important;
+    justify-content:center!important;
+    gap:8px!important;
+    line-height:1.25!important;
+  }
+  .sync-status{
+    font-size:12px!important;
+    max-width:52%!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+  .sync-user{
+    font-size:11px!important;
+    max-width:42%!important;
+  }
+  .sync-user::before{margin-right:8px!important}
+  .sync-actions{
+    width:100%!important;
+    justify-content:center!important;
+    gap:8px!important;
+  }
+  .sync-actions .btn{
+    min-height:32px!important;
+    padding:5px 11px!important;
+    font-size:12px!important;
+  }
+}
+
+
+/* v43: match living.html header, month navigator, sync bar */
+header{
+  max-width:820px!important;
+  margin:0 auto 28px!important;
+  text-align:center!important;
+  display:block!important;
+  background:transparent!important;
+  border:none!important;
+  box-shadow:none!important;
+  padding:0!important;
+}
+.header-emoji{
+  font-size:36px!important;
+  margin-bottom:8px!important;
+  line-height:1!important;
+}
+header h1{
+  font-family:'Gowun Dodum', sans-serif!important;
+  font-size:26px!important;
+  font-weight:400!important;
+  letter-spacing:-0.3px!important;
+  margin:0 0 4px!important;
+  color:var(--text)!important;
+}
+.month-nav{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:16px!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+  background:var(--surface)!important;
+  border:1.5px solid var(--border)!important;
+  border-radius:99px!important;
+  padding:8px 22px!important;
+  margin-top:16px!important;
+  box-shadow:var(--shadow)!important;
+}
+.month-nav button{
+  background:none!important;
+  border:none!important;
+  color:var(--text2)!important;
+  font-size:16px!important;
+  cursor:pointer!important;
+  padding:2px 8px!important;
+  border-radius:50%!important;
+  min-height:auto!important;
+  height:auto!important;
+  line-height:1.2!important;
+  box-shadow:none!important;
+}
+.month-nav button:hover{
+  background:var(--border)!important;
+  color:var(--text)!important;
+}
+.month-nav span{
+  display:inline-block!important;
+  font-size:16px!important;
+  font-weight:400!important;
+  min-width:90px!important;
+  text-align:center!important;
+  line-height:1.2!important;
+  color:var(--text)!important;
+}
+.action-bar{
+  max-width:820px!important;
+  margin:0 auto 22px!important;
+  display:flex!important;
+  gap:10px!important;
+  justify-content:center!important;
+}
+.sync-bar{
+  width:min(820px, calc(100% - 0px))!important;
+  max-width:820px!important;
+  margin:0 auto 40px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:14px!important;
+  background:rgba(255,255,255,0.92)!important;
+  border:1.5px solid var(--border)!important;
+  border-radius:24px!important;
+  padding:14px 16px!important;
+  box-shadow:var(--shadow)!important;
+  font-size:12px!important;
+  color:var(--text2)!important;
+}
+.sync-left{
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+  min-width:0!important;
+  flex:1 1 auto!important;
+}
+.sync-status{
+  font-weight:400!important;
+  color:var(--shared)!important;
+  white-space:nowrap!important;
+  min-width:0!important;
+}
+.sync-user{
+  font-size:11px!important;
+  color:var(--text2)!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  min-width:0!important;
+}
+.sync-user::before{
+  content:'|'!important;
+  color:var(--border)!important;
+  margin-right:12px!important;
+  font-weight:400!important;
+}
+.sync-actions{
+  display:flex!important;
+  gap:8px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex-wrap:nowrap!important;
+  flex:0 0 auto!important;
+}
+.sync-actions .btn{
+  box-shadow:none!important;
+  padding:5px 11px!important;
+  min-height:32px!important;
+  font-size:12px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+}
+.sync-actions .btn.blue{
+  background:linear-gradient(135deg,var(--him),#7aaeff)!important;
+  color:#fff!important;
+  border-color:transparent!important;
+}
+.sync-actions .btn.danger{
+  color:var(--me)!important;
+}
+.dashboard-hero,
+.hero-icon,
+.hero-title,
+.hero-month-nav,
+.hero-links,
+.cloud-panel,
+.cloud-row,
+.cloud-status,
+.cloud-actions{
+  all:unset;
+}
+@media(max-width:700px){
+  .sync-bar{
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:10px!important;
+    margin:0 auto 34px!important;
+    padding:13px 12px!important;
+    border-radius:22px!important;
+  }
+  .sync-left{
+    width:100%!important;
+    justify-content:center!important;
+    gap:8px!important;
+    line-height:1.25!important;
+  }
+  .sync-status{
+    font-size:12px!important;
+    max-width:52%!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+  .sync-user{
+    font-size:11px!important;
+    max-width:42%!important;
+  }
+  .sync-user::before{margin-right:8px!important}
+  .sync-actions{
+    width:100%!important;
+    justify-content:center!important;
+    gap:8px!important;
+  }
+  .sync-actions .btn{
+    min-height:32px!important;
+    padding:5px 11px!important;
+    font-size:12px!important;
+  }
+  .action-bar{
+    gap:8px!important;
+  }
+  .action-bar .btn{
+    flex:1!important;
+    padding:8px 10px!important;
+  }
+}
+
+
+/* v44 repair: living-style header, clean sync bar, clickable tabs */
+header{
+  max-width:820px!important;
+  margin:0 auto 28px!important;
+  text-align:center!important;
+  display:block!important;
+  background:transparent!important;
+  border:none!important;
+  box-shadow:none!important;
+  padding:0!important;
+}
+.header-emoji{
+  font-size:36px!important;
+  margin-bottom:8px!important;
+  line-height:1!important;
+}
+header h1{
+  font-family:'Gowun Dodum', sans-serif!important;
+  font-size:26px!important;
+  font-weight:400!important;
+  letter-spacing:-0.3px!important;
+  margin:0 0 4px!important;
+  color:var(--text)!important;
+}
+.month-nav{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:16px!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+  background:var(--surface)!important;
+  border:1.5px solid var(--border)!important;
+  border-radius:99px!important;
+  padding:8px 22px!important;
+  margin-top:16px!important;
+  box-shadow:var(--shadow)!important;
+}
+.month-nav button{
+  background:none!important;
+  border:none!important;
+  color:var(--text2)!important;
+  font-size:16px!important;
+  cursor:pointer!important;
+  padding:2px 8px!important;
+  border-radius:50%!important;
+  min-height:auto!important;
+  height:auto!important;
+  line-height:1.2!important;
+  box-shadow:none!important;
+}
+.month-nav span{
+  display:inline-block!important;
+  font-size:16px!important;
+  font-weight:400!important;
+  min-width:90px!important;
+  text-align:center!important;
+  line-height:1.2!important;
+  color:var(--text)!important;
+}
+.action-bar{
+  max-width:820px!important;
+  margin:0 auto 22px!important;
+  display:flex!important;
+  gap:10px!important;
+  justify-content:center!important;
+}
+.sync-bar{
+  width:min(820px, calc(100% - 0px))!important;
+  max-width:820px!important;
+  margin:0 auto 40px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:14px!important;
+  background:rgba(255,255,255,0.92)!important;
+  border:1.5px solid var(--border)!important;
+  border-radius:24px!important;
+  padding:14px 16px!important;
+  box-shadow:var(--shadow)!important;
+  font-size:12px!important;
+  color:var(--text2)!important;
+}
+.sync-left{
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+  min-width:0!important;
+  flex:1 1 auto!important;
+}
+.sync-status{
+  font-weight:400!important;
+  color:var(--shared)!important;
+  white-space:nowrap!important;
+  min-width:0!important;
+}
+.sync-user{
+  font-size:11px!important;
+  color:var(--text2)!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  min-width:0!important;
+}
+.sync-user::before{
+  content:'|'!important;
+  color:var(--border)!important;
+  margin-right:12px!important;
+  font-weight:400!important;
+}
+.sync-actions{
+  display:flex!important;
+  gap:8px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex-wrap:nowrap!important;
+  flex:0 0 auto!important;
+}
+.sync-actions .btn{
+  box-shadow:none!important;
+  padding:5px 11px!important;
+  min-height:32px!important;
+  font-size:12px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+}
+.sync-actions .btn.blue{
+  background:linear-gradient(135deg,var(--him),#7aaeff)!important;
+  color:#fff!important;
+  border-color:transparent!important;
+}
+.sync-actions .btn.danger{
+  color:var(--me)!important;
+}
+.quick-actions,
+.quick-btn,
+.month-nav button,
+.x-btn,
+.subs-delete,
+button{
+  pointer-events:auto!important;
+}
+.summary-card,
+.summary-head,
+.summary-view,
+.inline-panel{
+  position:relative!important;
+  z-index:1!important;
+}
+@media(max-width:700px){
+  .sync-bar{
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:10px!important;
+    margin:0 auto 34px!important;
+    padding:13px 12px!important;
+    border-radius:22px!important;
+  }
+  .sync-left{
+    width:100%!important;
+    justify-content:center!important;
+    gap:8px!important;
+    line-height:1.25!important;
+  }
+  .sync-status{
+    font-size:12px!important;
+    max-width:52%!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+  .sync-user{
+    font-size:11px!important;
+    max-width:42%!important;
+  }
+  .sync-user::before{margin-right:8px!important}
+  .sync-actions{
+    width:100%!important;
+    justify-content:center!important;
+    gap:8px!important;
+  }
+  .sync-actions .btn{
+    min-height:32px!important;
+    padding:5px 11px!important;
+    font-size:12px!important;
+  }
+  .action-bar{
+    gap:8px!important;
+  }
+  .action-bar .btn{
+    flex:1!important;
+    padding:8px 10px!important;
+  }
+}
+
 </style>
+
+<script>
+/*
+window.FINANCE_FIREBASE_CONFIG = {
+  apiKey: "생활비 정산 페이지와 동일한 값",
+  authDomain: "생활비 정산 페이지와 동일한 값",
+  projectId: "생활비 정산 페이지와 동일한 값",
+  storageBucket: "생활비 정산 페이지와 동일한 값",
+  messagingSenderId: "생활비 정산 페이지와 동일한 값",
+  appId: "생활비 정산 페이지와 동일한 값"
+};
+*/
+</script>
+
 </head>
 <body>
 
+<!-- Firebase Sync -->
+<div class="sync-bar no-print">
+  <div class="sync-left">
+    <div class="sync-status" id="cloud-status-text">로컬 저장 모드</div>
+    <div class="sync-user" id="cloud-user-email">Google 로그인하면 기기 간 동기화됩니다.</div>
+  </div>
+  <div class="sync-actions">
+    <button class="btn blue" id="login-btn" onclick="signInWithGoogle()">Google 로그인</button>
+    <button class="btn" id="sync-btn" onclick="syncNow()" style="display:none">☁️ 지금 동기화</button>
+    <button class="btn danger" id="logout-btn" onclick="signOutUser()" style="display:none">로그아웃</button>
+  </div>
+</div>
 
-<header class="dashboard-hero shell">
-  <div class="hero-icon">💰🌱</div>
-  <h1 class="hero-title">재무관리 대시보드</h1>
-
-  <div class="month-nav hero-month-nav">
+<header>
+  <div class="header-emoji">💰🌱</div>
+  <h1>재무관리 대시보드</h1>
+  <div class="month-nav">
     <button onclick="changeMonth(-1)">◀</button>
     <span id="month-title"></span>
     <button onclick="changeMonth(1)">▶</button>
   </div>
-
-  <div class="top-links hero-links">
-    <a href="living.html" class="btn">🏠 생활비 정산</a>
-    <a href="yearly.html" class="btn">📊 연도별 서머리</a>
-    
-  </div>
 </header>
+
+<div class="action-bar no-print">
+  <a href="living.html" class="btn" style="text-decoration:none">🏠 생활비 정산</a>
+  <a href="yearly.html" class="btn" style="text-decoration:none">📊 연도별 서머리</a>
+</div>
 
 <main class="summary-card shell">
   <div class="summary-head">
@@ -1505,7 +2280,6 @@ button,input{font-family:inherit}
             <button class="x-btn" onclick="addIncomeItem()">＋</button>
           </div>
         </div>
-        <button class="add-btn" onclick="addIncomeItem()">+ 수입 항목 추가</button>
       </div>
 
       <div class="detail-card">
@@ -1518,7 +2292,6 @@ button,input{font-family:inherit}
             <button class="x-btn" onclick="addAssetItem('liquid')">＋</button>
           </div>
         </div>
-        <button class="add-btn" onclick="addAssetItem('liquid')">+ 자산 항목 추가</button>
       </div>
 
       <div class="detail-card">
@@ -1531,7 +2304,6 @@ button,input{font-family:inherit}
             <button class="x-btn" onclick="addAssetItem('investment')">＋</button>
           </div>
         </div>
-        <button class="add-btn" onclick="addAssetItem('investment')">+ 저축/투자 항목 추가</button>
       </div>
     </div>
   </section>
@@ -1595,6 +2367,12 @@ const defaultSubscriptions = [
 
 const seededMonthKey = currentDate.getFullYear() + '-' + String(currentDate.getMonth() + 1).padStart(2, '0');
 
+
+function setDisplayedMonthTitle(){
+  const el = document.getElementById('month-title');
+  if(el) el.textContent = `${currentYear}년 ${currentMonth + 1}월`;
+}
+
 function monthKey(year=currentYear, month=currentMonth){
   return year + '-' + String(month + 1).padStart(2, '0');
 }
@@ -1641,15 +2419,13 @@ function defaultMonthData(seed=false){
       {name:'Rakuten-캐싱리보', amount:0},
       {name:'Rakuten-할부', amount:0},
       {name:'Amex-리보', amount:0},
-      {name:'Amex-할부', amount:0},
-      {name:'Saison-할부', amount:0}
+      {name:'Amex-할부', amount:0}
     ] : [
       {name:'Rakuten-쇼핑리보', amount:0},
       {name:'Rakuten-캐싱리보', amount:0},
       {name:'Rakuten-할부', amount:0},
       {name:'Amex-리보', amount:0},
-      {name:'Amex-할부', amount:0},
-      {name:'Saison-할부', amount:0}
+      {name:'Amex-할부', amount:0}
     ]
   };
 }
@@ -1670,19 +2446,46 @@ function loadAppData(){
 }
 
 let appData = loadAppData();
+window.appData = appData;
 
-const SUBS_VERSION_KEY = 'finance_subscriptions_version_v3_active_month_only';
-if(localStorage.getItem(SUBS_VERSION_KEY) !== '1'){
+const SUBS_VERSION_KEY = 'finance_subscriptions_version_v4_restore_defaults';
+if(
+  localStorage.getItem(SUBS_VERSION_KEY) !== '1' ||
+  !appData.global.subscriptions ||
+  appData.global.subscriptions.length === 0
+){
   appData.global.subscriptions = structuredClone(defaultSubscriptions);
   localStorage.setItem(SUBS_VERSION_KEY, '1');
   saveAppData();
 }
 
 
+let cloudSaveTimer = null;
+
 function saveAppData(){
+  window.appData = appData;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+
+  if(typeof window.financeSaveCloudData === 'function'){
+    clearTimeout(cloudSaveTimer);
+    cloudSaveTimer = setTimeout(() => {
+      window.financeSaveCloudData();
+    }, 800);
+  }
 }
 
+
+
+const REMOVE_SAISON_PAYMENT_KEY = 'finance_remove_saison_payment_v1';
+if(localStorage.getItem(REMOVE_SAISON_PAYMENT_KEY) !== '1'){
+  Object.values(appData.months || {}).forEach(md => {
+    if(Array.isArray(md.payments)){
+      md.payments = md.payments.filter(p => p.name !== 'Saison-리보' && p.name !== 'Saison-할부');
+    }
+  });
+  localStorage.setItem(REMOVE_SAISON_PAYMENT_KEY, '1');
+  saveAppData();
+}
 
 function ensureMonthlyAssetIncomeDefaults(md){
   if(!Array.isArray(md.income)) md.income = [];
@@ -1727,7 +2530,7 @@ function ensureMonthlyDebtDefaults(md){
     'Rakuten-할부',
     'Amex-리보',
     'Amex-할부',
-    'Saison-할부'
+    'Saison-리보'
   ];
 
   debtDefaults.forEach(def => {
@@ -1743,6 +2546,14 @@ function ensureMonthlyDebtDefaults(md){
       md.payments.push({name, amount:0});
     }
   });
+}
+
+
+const DEBT_VERSION_KEY = 'finance_debt_defaults_v2_current';
+if(localStorage.getItem(DEBT_VERSION_KEY) !== '1'){
+  Object.values(appData.months || {}).forEach(md => ensureMonthlyDebtDefaults(md));
+  localStorage.setItem(DEBT_VERSION_KEY, '1');
+  saveAppData();
 }
 
 function getMonthData(){
@@ -1976,13 +2787,49 @@ function getIncomeTotal(){
   return sum(getMonthData().income);
 }
 
+
+function normalizeDebtName(name){
+  return String(name || '')
+    .replace(/\s+/g, '')
+    .replace(/리보/g, '')
+    .replace(/할부/g, '')
+    .replace(/분할/g, '');
+}
+
+function paymentMatchesDebt(payment, debt){
+  const p = normalizeDebtName(payment.name);
+  const d = normalizeDebtName(debt.name);
+  if(!p || !d) return false;
+
+  const type = debt.type || '';
+  const paymentName = String(payment.name || '');
+
+  if(type === 'ribo' && /할부|분할/.test(paymentName)) return false;
+  if(type === 'installment' && /리보/.test(paymentName)) return false;
+
+  return p.includes(d) || d.includes(p);
+}
+
+function getDebtPaymentTotalFor(debt, data=getMonthData()){
+  return sum((data.payments || []).filter(payment => paymentMatchesDebt(payment, debt)));
+}
+
+function getAdjustedDebtItems(data=getMonthData()){
+  return (data.debts || []).map(debt => ({
+    ...debt,
+    rawAmount:Number(debt.amount || 0),
+    paymentAmount:getDebtPaymentTotalFor(debt, data),
+    amount:Math.max(0, Number(debt.amount || 0) - getDebtPaymentTotalFor(debt, data))
+  }));
+}
+
 function getAssetTotal(type=null){
   const assets = getMonthData().assets || [];
   return sum(type ? assets.filter(a => a.type === type) : assets);
 }
 
 function getDebtTotal(type=null){
-  const debts = getMonthData().debts || [];
+  const debts = getAdjustedDebtItems();
   return sum(type ? debts.filter(d => d.type === type) : debts);
 }
 
@@ -1999,13 +2846,13 @@ function getPreviousMonthData(){
 function getPreviousNetWorth(){
   const previous = getPreviousMonthData();
   if(!previous) return null;
-  return sum(previous.assets) - sum(previous.debts);
+  return sum(previous.assets) - sum(getAdjustedDebtItems(previous));
 }
 
 function getYearStartNetWorth(){
   for(let m=0; m<12; m++){
     const data = appData.months[monthKey(currentYear, m)];
-    if(data) return sum(data.assets) - sum(data.debts);
+    if(data) return sum(data.assets) - sum(getAdjustedDebtItems(data));
   }
   return getNetWorth();
 }
@@ -2084,12 +2931,6 @@ function updateExpenseItem(index, key, value){
   items[index][key] = key === 'amount' ? parseMoney(value) : value;
   saveAppData();
   
-const DEBT_VERSION_KEY = 'finance_debt_defaults_v2_current';
-if(localStorage.getItem(DEBT_VERSION_KEY) !== '1'){
-  Object.values(appData.months || {}).forEach(md => ensureMonthlyDebtDefaults(md));
-  localStorage.setItem(DEBT_VERSION_KEY, '1');
-  saveAppData();
-}
 
 render();
 }
@@ -2241,7 +3082,8 @@ function filteredRows(items, type, updateFn, deleteFn){
     .map(item=>{
       const index = item.originalIndex;
       const name = escapeHtml(item.name);
-      const amount = Number(item.amount || 0) === 0 ? '' : Number(item.amount || 0).toLocaleString('ja-JP');
+      const displayAmount = Object.prototype.hasOwnProperty.call(item, 'displayAmount') ? item.displayAmount : item.amount;
+      const amount = Number(displayAmount || 0) === 0 ? '' : Number(displayAmount || 0).toLocaleString('ja-JP');
       return `
         <div class="input-row">
           <input value="${name}" onchange="${updateFn}(${index}, 'name', this.value)" placeholder="항목명">
@@ -2298,13 +3140,37 @@ function renderDebts(){
   const installmentList = document.getElementById('installment-list');
   const paymentList = document.getElementById('payment-list');
 
-  if(riboList) riboList.innerHTML = filteredRows(md.debts, 'ribo', 'updateDebtItem', 'deleteDebtItem');
-  if(installmentList) installmentList.innerHTML = filteredRows(md.debts, 'installment', 'updateDebtItem', 'deleteDebtItem');
+  const adjustedDebts = getAdjustedDebtItems(md).map((item, index) => ({
+    ...item,
+    displayAmount:item.amount,
+    amount:md.debts[index] ? md.debts[index].amount : item.amount,
+    originalIndex:index
+  }));
+
+  const debtRows = (items, type) => (items || [])
+    .filter(item => item.type === type)
+    .map(item=>{
+      const index = item.originalIndex;
+      const name = escapeHtml(item.name);
+      const amountValue = Object.prototype.hasOwnProperty.call(item, 'displayAmount') ? item.displayAmount : item.amount;
+      const amount = Number(amountValue || 0) === 0 ? '' : Number(amountValue || 0).toLocaleString('ja-JP');
+      const title = item.paymentAmount ? `상환 반영 전: ${fmt(item.rawAmount)} / 상환: ${fmt(item.paymentAmount)}` : '';
+      return `
+        <div class="input-row">
+          <input value="${name}" onchange="updateDebtItem(${index}, 'name', this.value)" placeholder="항목명">
+          <input class="amount" value="${amount}" title="${title}" onchange="updateDebtItem(${index}, 'amount', this.value)" placeholder="잔액">
+          <button class="x-btn" onclick="deleteDebtItem(${index})">×</button>
+        </div>
+      `;
+    }).join('');
+
+  if(riboList) riboList.innerHTML = debtRows(adjustedDebts, 'ribo');
+  if(installmentList) installmentList.innerHTML = debtRows(adjustedDebts, 'installment');
   if(paymentList) paymentList.innerHTML = itemRows(md.payments, 'updatePaymentItem', 'deletePaymentItem');
 
   const totalDebt = getDebtTotal();
   const previous = getPreviousMonthData();
-  const previousDebt = previous ? sum(previous.debts || []) : null;
+  const previousDebt = previous ? sum(getAdjustedDebtItems(previous)) : null;
   const monthChange = previousDebt === null ? 0 : totalDebt - previousDebt;
 
   document.getElementById('debt-total-row').textContent = fmt(totalDebt);
@@ -2488,7 +3354,7 @@ function renderTrendChart(){
   });
   const debtValues = months.map(m => {
     const data = appData.months[monthKey(currentYear, m)];
-    return data ? sum(data.debts || []) : 0;
+    return data ? sum(getAdjustedDebtItems(data)) : 0;
   });
 
   const W = 680, H = 300;
@@ -2538,6 +3404,8 @@ function renderTrendChart(){
 }
 
 function render(){
+  setDisplayedMonthTitle();
+if(window.appData && window.appData !== appData) appData = window.appData;
   syncLivingExpenseFromLivingPage();
   const md = getMonthData();
   const today = new Date();
@@ -2634,6 +3502,135 @@ document.addEventListener('DOMContentLoaded', () => {
   updateMonthTitle();
   render();
 });
+</script>
+
+
+<script type="module">
+/*
+  Firebase 클라우드 저장을 쓰려면 아래 firebaseConfig를 생활비 정산 페이지와 같은 값으로 채워 넣으세요.
+  현재 파일은 Firebase 설정값이 없으면 localStorage만 사용합니다.
+*/
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const firebaseConfig = window.FINANCE_FIREBASE_CONFIG || null;
+
+let firebaseApp = null;
+let firebaseAuth = null;
+let firebaseDb = null;
+let currentUser = null;
+let cloudReady = false;
+
+function setCloudStatus(text, email=''){
+  const statusEl = document.getElementById('cloud-status-text');
+  const emailEl = document.getElementById('cloud-user-email');
+  const loginBtn = document.getElementById('login-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+  const syncBtn = document.getElementById('sync-btn');
+
+  if(statusEl) statusEl.textContent = text;
+  if(emailEl) emailEl.textContent = email || 'Google 로그인하면 기기 간 동기화됩니다.';
+
+  if(loginBtn) loginBtn.style.display = currentUser ? 'none' : 'inline-flex';
+  if(logoutBtn) logoutBtn.style.display = currentUser ? 'inline-flex' : 'none';
+  if(syncBtn) syncBtn.style.display = currentUser ? 'inline-flex' : 'none';
+}
+
+async function initCloud(){
+  if(!firebaseConfig){
+    setCloudStatus('로컬 저장 모드');
+    return;
+  }
+
+  try{
+    firebaseApp = initializeApp(firebaseConfig);
+    firebaseAuth = getAuth(firebaseApp);
+    firebaseDb = getFirestore(firebaseApp);
+    cloudReady = true;
+
+    onAuthStateChanged(firebaseAuth, async (user) => {
+      currentUser = user;
+      if(user){
+        setCloudStatus('클라우드 동기화 준비', user.email || '');
+        await loadCloudData();
+      }else{
+        setCloudStatus('로컬 저장 모드');
+      }
+    });
+  }catch(e){
+    console.error(e);
+    setCloudStatus('클라우드 초기화 실패');
+  }
+}
+
+function financeDocRef(){
+  if(!cloudReady || !currentUser) return null;
+  return doc(firebaseDb, 'users', currentUser.uid, 'apps', 'financeDashboard');
+}
+
+async function loadCloudData(){
+  const ref = financeDocRef();
+  if(!ref) return;
+
+  try{
+    const snap = await getDoc(ref);
+    if(snap.exists() && snap.data().payload){
+      const cloudData = snap.data().payload;
+      if(cloudData && cloudData.months && cloudData.global){
+        window.appData = cloudData;
+        localStorage.setItem('financeDashboardMonthlyV1', JSON.stringify(window.appData));
+        setCloudStatus('클라우드 동기화 완료', currentUser.email || '');
+        if(typeof window.render === 'function') window.render();
+      }
+    }else{
+      await saveCloudData();
+    }
+  }catch(e){
+    console.error(e);
+    setCloudStatus('클라우드 불러오기 실패', currentUser?.email || '');
+  }
+}
+
+async function saveCloudData(){
+  const ref = financeDocRef();
+  if(!ref) return;
+
+  try{
+    await setDoc(ref, {
+      payload: window.appData,
+      updatedAt: serverTimestamp()
+    }, {merge:true});
+    setCloudStatus('클라우드 동기화 완료', currentUser.email || '');
+  }catch(e){
+    console.error(e);
+    setCloudStatus('클라우드 저장 실패', currentUser?.email || '');
+  }
+}
+
+window.signInWithGoogle = async function(){
+  if(!cloudReady){
+    alert('Firebase 설정이 아직 연결되지 않았습니다. 생활비 정산 페이지의 firebaseConfig를 finance에도 넣어주세요.');
+    return;
+  }
+  const provider = new GoogleAuthProvider();
+  await signInWithPopup(firebaseAuth, provider);
+};
+
+window.signOutUser = async function(){
+  if(firebaseAuth) await signOut(firebaseAuth);
+};
+
+window.syncNow = async function(){
+  if(!currentUser){
+    alert('먼저 로그인해 주세요.');
+    return;
+  }
+  await saveCloudData();
+};
+
+window.financeSaveCloudData = saveCloudData;
+initCloud();
 </script>
 
 </body>
