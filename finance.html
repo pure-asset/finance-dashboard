@@ -5,6 +5,8 @@
 
 
 
+
+
 <!doctype html>
 <html lang="ko">
 <head>
@@ -2634,6 +2636,18 @@ body.auth-ready #login-btn{
   }
 }
 
+
+
+/* v60 undo button */
+.undo-btn{
+  color:var(--shared)!important;
+}
+.undo-btn:disabled{
+  opacity:.45!important;
+  cursor:not-allowed!important;
+  transform:none!important;
+}
+
 </style>
 
 
@@ -2679,6 +2693,7 @@ document.addEventListener('DOMContentLoaded', function(){
 <div class="action-bar no-print">
   <a href="living.html" class="btn" style="text-decoration:none">🏠 생활비 정산</a>
   <a href="yearly.html" class="btn" style="text-decoration:none">📊 연도별 서머리</a>
+  <button class="btn undo-btn" id="undo-btn" onclick="undoLastChange()" disabled>↶ 되돌리기</button>
 </div>
 
 <main class="summary-card shell">
@@ -2758,6 +2773,7 @@ document.addEventListener('DOMContentLoaded', function(){
         <div class="detail-title">지출 요약</div>
         <div class="row"><span>생활비 (고정비)</span><span id="expense-living-total">¥0</span></div>
         <div class="row"><span>구독비 (고정비)</span><span id="expense-subscription-total">¥0</span></div>
+        <div class="row"><span>부채 상환 (고정비)</span><span id="expense-debt-payment-total">¥0</span></div>
         <div class="row"><span>일반 지출</span><span id="expense-normal-total">¥0</span></div>
         <div class="row"><span>이번 달 총 지출</span><span id="expense-grand-total">¥0</span></div>
       </div>
@@ -3198,6 +3214,49 @@ function saveAppData(){
   if(!isApplyingCloud && typeof queueCloudSave === 'function') queueCloudSave();
 }
 
+const UNDO_LIMIT = 50;
+let undoStack = [];
+let isUndoRestoring = false;
+
+function cloneDataForUndo(){
+  try{ return structuredClone(appData); }
+  catch(e){ return JSON.parse(JSON.stringify(appData)); }
+}
+
+function updateUndoButton(){
+  const btn = document.getElementById('undo-btn');
+  if(btn) btn.disabled = undoStack.length === 0;
+}
+
+function pushUndoState(){
+  if(isUndoRestoring) return;
+  undoStack.push(cloneDataForUndo());
+  if(undoStack.length > UNDO_LIMIT) undoStack.shift();
+  updateUndoButton();
+}
+
+function undoLastChange(){
+  const previous = undoStack.pop();
+  if(!previous) return;
+  isUndoRestoring = true;
+  appData = previous;
+  window.appData = appData;
+  saveAppData();
+  isUndoRestoring = false;
+  updateUndoButton();
+  render();
+}
+
+window.undoLastChange = undoLastChange;
+
+document.addEventListener('keydown', function(event){
+  const key = String(event.key || '').toLowerCase();
+  if((event.metaKey || event.ctrlKey) && !event.shiftKey && key === 'z'){
+    event.preventDefault();
+    undoLastChange();
+  }
+});
+
 
 
 const REMOVE_SAISON_PAYMENT_KEY = 'finance_remove_saison_payment_v1';
@@ -3475,17 +3534,22 @@ function syncLivingExpenseFromLivingPage(){
 
   const livingTotal = calculateLivingExpenseTotal();
   const subscriptionTotal = getSubscriptionTotal();
+  const debtPaymentTotal = getDebtPaymentTotal(md);
   const label = monthLabel();
 
   md.expenses = (md.expenses || [])
     .filter(item => item.source !== 'living')
     .filter(item => item.source !== 'subscription')
+    .filter(item => item.source !== 'debtPayment')
     .filter(item => !(item.name === '생활비 정산'))
     .filter(item => !(item.name === '생활비 정산 Monthly Total'))
     .filter(item => !(item.name === '구독료'))
     .filter(item => !(item.name === '구독료 자동 반영'))
+    .filter(item => !(item.name === '부채 상환'))
+    .filter(item => !(item.name === '부채 상환 자동 반영'))
     .filter(item => !/^\d+월 생활비$/.test(item.name || ''))
-    .filter(item => !/^\d+월 구독료$/.test(item.name || ''));
+    .filter(item => !/^\d+월 구독료$/.test(item.name || ''))
+    .filter(item => !/^\d+월 부채 상환$/.test(item.name || ''));
 
   if(livingTotal > 0 && !isLinkedHidden('living')){
     md.expenses = md.expenses.filter(item => !(item.name === '생활비' && Number(item.amount || 0) === 80000 && !item.source));
@@ -3494,6 +3558,10 @@ function syncLivingExpenseFromLivingPage(){
 
   if(subscriptionTotal > 0 && !isLinkedHidden('subscription')){
     md.expenses.unshift({name: label + ' 구독료', amount: subscriptionTotal, source:'subscription'});
+  }
+
+  if(debtPaymentTotal > 0 && !isLinkedHidden('debtPayment')){
+    md.expenses.unshift({name: label + ' 부채 상환', amount: debtPaymentTotal, source:'debtPayment'});
   }
 
   const after = JSON.stringify(md.expenses || []);
@@ -3510,15 +3578,24 @@ function getSubscriptionExpenseTotal(){
   return sum((getMonthData().expenses || []).filter(item => item.source === 'subscription'));
 }
 
+function getDebtPaymentTotal(data=getMonthData()){
+  return sum(data.payments || []);
+}
+
+function getDebtPaymentExpenseTotal(){
+  return sum((getMonthData().expenses || []).filter(item => item.source === 'debtPayment'));
+}
+
 function getNormalExpenseTotal(){
   return sum((getMonthData().expenses || [])
     .filter(item => item.source !== 'living')
     .filter(item => item.source !== 'subscription')
+    .filter(item => item.source !== 'debtPayment')
   );
 }
 
 function getTotalExpense(){
-  return getLivingExpenseTotal() + getSubscriptionExpenseTotal() + getNormalExpenseTotal();
+  return getLivingExpenseTotal() + getSubscriptionExpenseTotal() + getDebtPaymentExpenseTotal() + getNormalExpenseTotal();
 }
 
 function getIncomeTotal(data=getMonthData()){
@@ -3644,7 +3721,7 @@ function itemRows(items, updateFn, deleteFn){
   return (items || []).map((item, index)=>{
     const name = escapeHtml(item.name);
     const amount = Number(item.amount || 0) === 0 ? '' : Number(item.amount || 0).toLocaleString('ja-JP');
-    const isLinked = item.source === 'living' || item.source === 'subscription';
+    const isLinked = item.source === 'living' || item.source === 'subscription' || item.source === 'debtPayment';
     const rowClass = isLinked ? 'input-row linked-row' : 'input-row';
     const readonly = isLinked ? 'readonly title="자동 연동 항목입니다"' : '';
 
@@ -3679,13 +3756,16 @@ function renderExpenses(){
   if(livingEl) livingEl.textContent = fmt(getLivingExpenseTotal());
 
   document.getElementById('expense-subscription-total').textContent = fmt(getSubscriptionExpenseTotal());
+  const debtPayEl = document.getElementById('expense-debt-payment-total');
+  if(debtPayEl) debtPayEl.textContent = fmt(getDebtPaymentExpenseTotal());
   document.getElementById('expense-normal-total').textContent = fmt(getNormalExpenseTotal());
   document.getElementById('expense-grand-total').textContent = fmt(getTotalExpense());
 }
 
 function updateExpenseItem(index, key, value){
+  pushUndoState();
   const items = getMonthData().expenses;
-  if(!items[index] || items[index].source === 'living' || items[index].source === 'subscription') return;
+  if(!items[index] || items[index].source === 'living' || items[index].source === 'subscription' || items[index].source === 'debtPayment') return;
   items[index][key] = key === 'amount' ? parseMoney(value) : value;
   saveAppData();
   
@@ -3694,6 +3774,7 @@ render();
 }
 
 function addExpenseItem(){
+  pushUndoState();
   const nameInput = document.getElementById('expense-name-input');
   const amountInput = document.getElementById('expense-amount-input');
   const name = nameInput.value.trim();
@@ -3707,8 +3788,9 @@ function addExpenseItem(){
 }
 
 function deleteExpenseItem(index){
+  pushUndoState();
   const items = getMonthData().expenses;
-  if(!items[index] || items[index].source === 'living' || items[index].source === 'subscription') return;
+  if(!items[index] || items[index].source === 'living' || items[index].source === 'subscription' || items[index].source === 'debtPayment') return;
   items.splice(index, 1);
   saveAppData();
   render();
@@ -3756,6 +3838,7 @@ function renderSubscriptions(){
 }
 
 function updateSubscription(index, key, value){
+  pushUndoState();
   const item = appData.global.subscriptions[index];
   if(!item) return;
   item[key] = key === 'amount' ? parseMoney(value) : value;
@@ -3764,6 +3847,7 @@ function updateSubscription(index, key, value){
 }
 
 function addSubscription(){
+  pushUndoState();
   const nameInput = document.getElementById('sub-name-input');
   const cycleInput = document.getElementById('sub-cycle-input');
   const dateInput = document.getElementById('sub-date-input');
@@ -3794,6 +3878,7 @@ function addSubscription(){
 }
 
 function deleteSubscription(index){
+  pushUndoState();
   appData.global.subscriptions.splice(index, 1);
   saveAppData();
   render();
@@ -3807,6 +3892,7 @@ function renderIncome(){
 }
 
 function updateIncomeItem(index, key, value){
+  pushUndoState();
   const items = getMonthData().income;
   if(!items[index]) return;
   items[index][key] = key === 'amount' ? parseMoney(value) : value;
@@ -3815,6 +3901,7 @@ function updateIncomeItem(index, key, value){
 }
 
 function addIncomeItem(){
+  pushUndoState();
   const nameInput = document.getElementById('income-name-input');
   const amountInput = document.getElementById('income-amount-input');
   const name = nameInput.value.trim();
@@ -3828,6 +3915,7 @@ function addIncomeItem(){
 }
 
 function deleteIncomeItem(index){
+  pushUndoState();
   getMonthData().income.splice(index, 1);
   saveAppData();
   render();
@@ -3865,6 +3953,7 @@ function renderAssets(){
 }
 
 function updateAssetItem(index, key, value){
+  pushUndoState();
   const items = getMonthData().assets;
   if(!items[index]) return;
   items[index][key] = key === 'amount' ? parseMoney(value) : value;
@@ -3873,6 +3962,7 @@ function updateAssetItem(index, key, value){
 }
 
 function addAssetItem(type){
+  pushUndoState();
   const id = type === 'liquid' ? 'liquid-asset' : 'saving-invest';
   const nameInput = document.getElementById(id + '-name-input');
   const amountInput = document.getElementById(id + '-amount-input');
@@ -3887,6 +3977,7 @@ function addAssetItem(type){
 }
 
 function deleteAssetItem(index){
+  pushUndoState();
   getMonthData().assets.splice(index, 1);
   saveAppData();
   render();
@@ -3938,6 +4029,7 @@ function renderDebts(){
 }
 
 function updateDebtItem(index, key, value){
+  pushUndoState();
   const items = getMonthData().debts;
   if(!items[index]) return;
   items[index][key] = key === 'amount' ? parseMoney(value) : value;
@@ -3946,6 +4038,7 @@ function updateDebtItem(index, key, value){
 }
 
 function addDebtItem(type){
+  pushUndoState();
   const id = type === 'ribo' ? 'ribo' : 'installment';
   const nameInput = document.getElementById(id + '-name-input');
   const amountInput = document.getElementById(id + '-amount-input');
@@ -3960,12 +4053,14 @@ function addDebtItem(type){
 }
 
 function deleteDebtItem(index){
+  pushUndoState();
   getMonthData().debts.splice(index, 1);
   saveAppData();
   render();
 }
 
 function updatePaymentItem(index, key, value){
+  pushUndoState();
   const items = getMonthData().payments;
   if(!items[index]) return;
   items[index][key] = key === 'amount' ? parseMoney(value) : value;
@@ -3974,6 +4069,7 @@ function updatePaymentItem(index, key, value){
 }
 
 function addPaymentItem(){
+  pushUndoState();
   const nameInput = document.getElementById('payment-name-input');
   const amountInput = document.getElementById('payment-amount-input');
   const name = nameInput.value.trim();
@@ -3987,6 +4083,7 @@ function addPaymentItem(){
 }
 
 function deletePaymentItem(index){
+  pushUndoState();
   getMonthData().payments.splice(index, 1);
   saveAppData();
   render();
@@ -4027,6 +4124,7 @@ function openPage(id){
 }
 
 function saveBudget(){
+  pushUndoState();
   const input = document.getElementById('budget-input');
   if(!input) return;
   getMonthData().monthBudget = parseMoney(input.value);
@@ -4039,6 +4137,7 @@ function saveBudget(){
 
 
 function refreshLinkedExpense(source){
+  pushUndoState();
   const md = getMonthData();
   const label = monthLabel();
 
@@ -4071,13 +4170,27 @@ function refreshLinkedExpense(source){
     }
   }
 
+  if(source === 'debtPayment'){
+    const debtPaymentTotal = getDebtPaymentTotal(md);
+    md.expenses = (md.expenses || [])
+      .filter(item => item.source !== 'debtPayment')
+      .filter(item => !(item.name === '부채 상환'))
+      .filter(item => !(item.name === '부채 상환 자동 반영'))
+      .filter(item => !/^\d+월 부채 상환$/.test(item.name || ''));
+
+    if(debtPaymentTotal > 0){
+      md.expenses.unshift({name: label + ' 부채 상환', amount: debtPaymentTotal, source:'debtPayment'});
+    }
+  }
+
   saveAppData();
   render();
 }
 
 function deleteLinkedExpense(index){
+  pushUndoState();
   const items = getMonthData().expenses;
-  if(!items[index] || !(items[index].source === 'living' || items[index].source === 'subscription')) return;
+  if(!items[index] || !(items[index].source === 'living' || items[index].source === 'subscription' || items[index].source === 'debtPayment')) return;
   hideLinkedSource(items[index].source);
   items.splice(index, 1);
   saveAppData();
@@ -4085,6 +4198,7 @@ function deleteLinkedExpense(index){
 }
 
 function refreshLinkedExpenses(){
+  pushUndoState();
   setHiddenLinkedSources([]);
   syncLivingExpenseFromLivingPage();
   render();
@@ -4164,6 +4278,7 @@ function renderTrendChart(){
 }
 
 function render(){
+  updateUndoButton();
   setDisplayedMonthTitle();
 if(window.appData && window.appData !== appData) appData = window.appData;
   syncLivingExpenseFromLivingPage();
