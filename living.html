@@ -1,12 +1,4 @@
 
-
-
-
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -364,11 +356,36 @@
     border-radius: var(--radius); padding: 24px 24px 16px;
     box-shadow: var(--shadow);
   }
+  .chart-plot {
+    display: grid;
+    grid-template-columns: 68px minmax(0, 1fr);
+    gap: 10px;
+    align-items: end;
+  }
+  .chart-y-axis {
+    height: 160px;
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    color: var(--text3);
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+  }
   .chart-inner {
     display: flex; align-items: flex-end; gap: 5px;
-    height: 160px; padding-bottom: 30px; position: relative;
+    height: 190px; padding-top: 22px; padding-bottom: 30px; position: relative;
     border-bottom: 1.5px solid var(--border);
     overflow-x: auto;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 39px,
+      rgba(240,234,245,0.78) 40px
+    );
   }
   .chart-col {
     flex: 0 0 auto; width: 52px;
@@ -385,6 +402,19 @@
   .chart-bar.paid   { background: linear-gradient(180deg, #7aaeff, var(--him)); }
   .chart-bar.unpaid { background: linear-gradient(180deg, #c4b5fd, var(--shared)); opacity: 0.8; }
   .chart-bar.empty  { background: var(--border); opacity: 0.5; min-height: 4px; border-radius: 3px; }
+  .chart-value-label {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--him);
+    font-size: 10px;
+    font-weight: 900;
+    white-space: nowrap;
+    letter-spacing: -0.04em;
+  }
+  .chart-bar.unpaid .chart-value-label { color: var(--shared); }
+  .chart-col.current .chart-value-label { color: var(--me); }
   .chart-bar:hover .chart-tooltip { display: block; }
   .chart-tooltip {
     display: none; position: absolute; bottom: calc(100% + 6px); left: 50%;
@@ -721,6 +751,21 @@
       font-size: 13px !important;
       min-width: 0;
     }
+    .chart-wrap {
+      padding: 18px 12px 14px;
+      overflow: hidden;
+    }
+    .chart-plot {
+      grid-template-columns: 44px minmax(0, 1fr);
+      gap: 6px;
+    }
+    .chart-y-axis {
+      font-size: 9px;
+    }
+    .chart-col { width: 48px; }
+    .chart-value-label {
+      font-size: 9px;
+    }
   }
 
   @media (max-width: 380px) {
@@ -792,8 +837,8 @@
 
 <!-- Action bar -->
 <div class="action-bar no-print">
-  <a href="index.html" class="btn" style="text-decoration:none">💳 개인 지출</a>
-  <a href="savings.html" class="btn" style="text-decoration:none">💎 저축 & 투자</a>
+  <a href="yearly.html" class="btn" style="text-decoration:none">📊 연도별 서머리</a>
+  <a href="index.html" class="btn" style="text-decoration:none">💰 재무 관리</a>
 </div>
 
 <!-- PDF-only header (hidden on screen) -->
@@ -864,13 +909,13 @@
 </div>
 
 <!-- History -->
-<div class="section-title no-print">📁 정산 히스토리</div>
+<div class="section-title no-print" id="history-title">📁 정산 히스토리</div>
 <div class="history-section no-print">
   <div class="history-list" id="history-list"></div>
 </div>
 
 <!-- Monthly chart -->
-<div class="section-title no-print">📊 월별 정산 현황</div>
+<div class="section-title no-print" id="chart-title">📊 월별 정산 현황</div>
 <div class="chart-wrap no-print" id="chart-wrap"></div>
 
 
@@ -1016,7 +1061,12 @@ function mk(suffix, y, m) {
   return `couple_${yr}_${String(mo+1).padStart(2,'0')}_${suffix}`;
 }
 
-function getAmounts(y, m)    { return JSON.parse(localStorage.getItem(mk('shared', y, m)) || '{}'); }
+function getAmounts(y, m) {
+  const amounts = JSON.parse(localStorage.getItem(mk('shared', y, m)) || '{}');
+  // 집세는 매월 기본값 322,000으로 표시하되, 사용자가 입력하면 그 값으로 덮어씁니다.
+  if (!Object.prototype.hasOwnProperty.call(amounts, 'rent')) amounts.rent = 322000;
+  return amounts;
+}
 function saveAmounts(o)      { localStorage.setItem(mk('shared'), JSON.stringify(o)); queueCloudSave(); }
 function getEnabled(y, m) {
   const stored = localStorage.getItem(mk('enabled', y, m));
@@ -1081,9 +1131,25 @@ function toggleShared(key) {
   render();
 }
 
+function parseMoneyInput(val) {
+  const raw = String(val ?? '').replace(/,/g, '').replace(/[^0-9]/g, '');
+  return raw ? parseInt(raw, 10) : NaN;
+}
+
+function formatSharedAmountInput(el, key) {
+  const n = parseMoneyInput(el.value);
+  if (isNaN(n) || n <= 0) {
+    el.value = '';
+    updateAmount(key, '');
+    return;
+  }
+  el.value = n.toLocaleString('ja-JP');
+  updateAmount(key, String(n));
+}
+
 function updateAmount(key, val) {
   const amounts = getAmounts();
-  const n = parseFloat(val);
+  const n = parseMoneyInput(val);
   if (!isNaN(n) && n > 0) amounts[key] = n;
   else delete amounts[key];
   saveAmounts(amounts);
@@ -1358,6 +1424,7 @@ function renderSharedGrid() {
     } else {
       // ── Regular: single amount input ──
       const val = amounts[def.key] || '';
+      const displayVal = val ? Number(val).toLocaleString('ja-JP') : '';
       div.className = 'shared-item' + (isOn ? '' : ' inactive');
       div.innerHTML = `
         <button class="toggle-btn ${isOn ? 'on' : 'off'}" onclick="toggleShared('${def.key}')"><span class="toggle-knob">${isOn ? '✓' : ''}</span></button>
@@ -1366,9 +1433,9 @@ function renderSharedGrid() {
           <span class="shared-name">${def.name}</span>
         </div>
         ${def.bimonthly ? '<span class="skip-badge">격월 · 홀수달</span>' : ''}
-        <input class="shared-input" type="number" placeholder="금액 입력" value="${val}"
+        <input class="shared-input" type="text" inputmode="numeric" placeholder="금액 입력" value="${displayVal}"
           ${isOn ? '' : 'disabled'}
-          oninput="updateAmount('${def.key}', this.value)">
+          oninput="formatSharedAmountInput(this, '${def.key}')">
         <div class="shared-each-label" id="each-${def.key}">${(isOn && val) ? '각자 ' + fmt(val / 2) : ''}</div>
       `;
     }
@@ -1398,10 +1465,12 @@ function renderHimItems() {
 
 // ── RENDER HISTORY ──
 function renderHistory() {
-  const history = getHistory();
+  const history = getHistory()
+    .filter(snap => snap.year === currentYear)
+    .sort((a, b) => b.month - a.month);
   const container = document.getElementById('history-list');
   if (!history.length) {
-    container.innerHTML = '<div class="history-empty">💾 정산을 저장하면 여기에 기록이 남아요</div>';
+    container.innerHTML = `<div class="history-empty">💾 ${currentYear}년에 저장된 정산 기록이 아직 없어요</div>`;
     return;
   }
   container.innerHTML = history.map(snap => `
@@ -1511,31 +1580,30 @@ function recalc() {
 function renderChart() {
   const container = document.getElementById('chart-wrap');
   if (!container) return;
-  const history = getHistory();
+  const history = getHistory().filter(h => h.year === currentYear);
 
-  // Build months from 2026-01 to current month
-  const startYear = 2026, startMonth = 0; // Jan 2026
-  const now = new Date();
-  const endYear = now.getFullYear(), endMonth = now.getMonth();
+  // Build months for the selected year only: January to December
+  const months = Array.from({ length: 12 }, (_, m) => ({ y: currentYear, m }));
 
-  const months = [];
-  let y = startYear, m = startMonth;
-  while (y < endYear || (y === endYear && m <= endMonth)) {
-    months.push({ y, m });
-    m++; if (m > 11) { m = 0; y++; }
-  }
-
-  if (!months.length) { container.innerHTML = ''; return; }
-
-  // Map history by key
+  // Map current-year history by key
   const histMap = {};
   history.forEach(h => { histMap[h.key] = h; });
 
-  // Find max for scaling
+  // Find max for scaling and round up by 100,000 JPY
   const maxVal = Math.max(...months.map(({ y, m }) => {
     const key = `${y}-${String(m+1).padStart(2,'0')}`;
     return histMap[key] ? histMap[key].himOwes : 0;
-  }), 1);
+  }), 0);
+  const axisStep = 100000;
+  const maxAxis = Math.max(axisStep, Math.ceil(maxVal / axisStep) * axisStep);
+  const axisLabels = [];
+  for (let v = maxAxis; v >= 0; v -= axisStep) axisLabels.push(v);
+
+  const compactJPY = (n) => {
+    if (!n) return '¥0';
+    if (n >= 10000) return `¥${(n / 10000).toFixed(n % 10000 === 0 ? 0 : 1)}만`;
+    return fmt(n);
+  };
 
   const bars = months.map(({ y, m }) => {
     const key = `${y}-${String(m+1).padStart(2,'0')}`;
@@ -1554,21 +1622,28 @@ function renderChart() {
         </div>`;
     }
 
-    const heightPct = Math.max(4, Math.round((snap.himOwes / maxVal) * 140));
+    const heightPx = Math.max(8, Math.round((snap.himOwes / maxAxis) * 140));
     const cls = snap.paid ? 'paid' : 'unpaid';
     const tipText = `${label} ${fmt(snap.himOwes)}${snap.paid ? ' ✅' : ' ⏳'}`;
 
     return `
       <div class="chart-col${isCurrent ? ' current' : ''}">
         <div class="chart-bar-area">
-          <div class="chart-bar ${cls}" style="height:${heightPct}px" data-tip="${tipText}"></div>
+          <div class="chart-bar ${cls}" style="height:${heightPx}px" data-tip="${tipText}">
+            <span class="chart-value-label">${compactJPY(snap.himOwes)}</span>
+          </div>
         </div>
         <span class="chart-month-label">${yearLabel ? yearLabel + ' ' : ''}${label}</span>
       </div>`;
   }).join('');
 
+  const yAxis = axisLabels.map(v => `<div>${v === 0 ? '¥0' : `¥${Math.round(v / 10000)}만`}</div>`).join('');
+
   container.innerHTML = `
-    <div class="chart-inner">${bars}</div>
+    <div class="chart-plot">
+      <div class="chart-y-axis">${yAxis}</div>
+      <div class="chart-inner">${bars}</div>
+    </div>
     <div class="chart-legend">
       <div class="chart-legend-item">
         <div class="chart-legend-dot" style="background:var(--him)"></div>
@@ -1601,13 +1676,20 @@ function renderChart() {
     });
   });
 
-  // Scroll to end (current month)
+  // Scroll to the selected month within the current year
   const inner = container.querySelector('.chart-inner');
-  if (inner) inner.scrollLeft = inner.scrollWidth;
+  if (inner) {
+    const currentCol = inner.querySelector('.chart-col.current');
+    if (currentCol) inner.scrollLeft = Math.max(0, currentCol.offsetLeft - 80);
+  }
 }
 
 function render() {
   document.getElementById('month-title').textContent = `${currentYear}년 ${currentMonth + 1}월`;
+  const historyTitle = document.getElementById('history-title');
+  const chartTitle = document.getElementById('chart-title');
+  if (historyTitle) historyTitle.childNodes[0].textContent = `📁 ${currentYear}년 정산 히스토리`;
+  if (chartTitle) chartTitle.childNodes[0].textContent = `📊 ${currentYear}년 월별 정산 현황`;
   renderSharedGrid();
   renderHimItems();
   renderHistory();
