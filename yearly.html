@@ -125,7 +125,7 @@ h1,.year-nav span,.sync-status,.btn,.section-title,.sum-label,.sum-amount,
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script>
-const firebaseConfig={apiKey:"AIzaSyCzUmvhRryWsK23XjGjaYxrAjphkhfdgBs",authDomain:"finance-dashboard-1d9b9.firebaseapp.com",projectId:"finance-dashboard-1d9b9",storageBucket:"finance-dashboard-1d9b9.firebasestorage.app",messagingSenderId:"225945272359",appId:"1:225945272359:web:dda18e82eba722e7f88e02",measurementId:"G-L6NWQJER72"};
+const firebaseConfig={apiKey:"AIzaSyABPojKMaEJfphyA_MfGaR_vynnHtbhc_k",authDomain:"finance-dashboard-1d9b9.firebaseapp.com",projectId:"finance-dashboard-1d9b9",storageBucket:"finance-dashboard-1d9b9.firebasestorage.app",messagingSenderId:"225945272359",appId:"1:225945272359:web:dda18e82eba722e7f88e02",measurementId:"G-L6NWQJER72"};
 firebase.initializeApp(firebaseConfig);const auth=firebase.auth();const db=firebase.firestore();let currentUser=null;let cloudTimer=null;let currentYear=new Date().getFullYear();const currentMonth=new Date().getMonth();
 function cloudDocRef(){if(!currentUser)return null;return db.collection('users').doc(currentUser.uid).collection('dashboards').doc('living-expense')}
 function collectLocalData(){const items={};for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key==='couple_history'||key.startsWith('couple_'))items[key]=localStorage.getItem(key)}return items}
