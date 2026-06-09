@@ -1,3 +1,9 @@
+
+
+
+
+
+
 <!doctype html>
 <html lang="ko">
 <head>
@@ -1094,6 +1100,127 @@ button,input{font-family:inherit}
   margin-top:22px!important;
 }
 
+
+.linked-note{
+  color:var(--text2);
+  font-size:12px;
+  margin:-4px 0 12px;
+}
+.linked-row input{
+  background:#fbf8ff!important;
+  color:var(--shared)!important;
+}
+.linked-row .x-btn{
+  cursor:default;
+  opacity:.9;
+}
+.refresh-btn{
+  margin:0 0 10px!important;
+  border-style:solid!important;
+  background:#f8f5ff!important;
+  color:var(--shared)!important;
+}
+
+
+.linked-actions{
+  display:grid;
+  grid-template-columns:42px 42px;
+  gap:8px;
+}
+.linked-actions .x-btn{
+  width:42px;
+}
+.linked-actions .refresh-mini{
+  background:#f8f5ff;
+  color:var(--shared);
+}
+.linked-actions .delete-mini{
+  background:#fff5fb;
+  color:var(--me);
+}
+.linked-row{
+  grid-template-columns:minmax(0,1fr) 130px 92px!important;
+}
+@media(max-width:700px){
+  .linked-row{grid-template-columns:1fr!important}
+  .linked-actions{grid-template-columns:1fr 1fr}
+  .linked-actions .x-btn{width:100%}
+}
+
+
+/* linked expense row action fix */
+.linked-row{
+  position:relative!important;
+  overflow:visible!important;
+  grid-template-columns:minmax(0,1fr) 130px 92px!important;
+}
+.linked-actions{
+  display:grid!important;
+  grid-template-columns:42px 42px!important;
+  gap:8px!important;
+  position:relative!important;
+  z-index:20!important;
+  pointer-events:auto!important;
+}
+.linked-actions button,
+.refresh-mini,
+.delete-mini{
+  pointer-events:auto!important;
+  cursor:pointer!important;
+  position:relative!important;
+  z-index:30!important;
+}
+.linked-actions .refresh-mini{
+  background:#f8f5ff!important;
+  color:var(--shared)!important;
+}
+.linked-actions .delete-mini{
+  background:#fff5fb!important;
+  color:var(--me)!important;
+}
+@media(max-width:700px){
+  .linked-row{grid-template-columns:1fr!important}
+  .linked-actions{grid-template-columns:1fr 1fr!important}
+  .linked-actions .x-btn{width:100%!important}
+}
+
+
+/* final linked expense action fix */
+.linked-row{
+  position:relative!important;
+  overflow:visible!important;
+  grid-template-columns:minmax(0,1fr) 130px 92px!important;
+}
+.linked-actions{
+  display:grid!important;
+  grid-template-columns:42px 42px!important;
+  gap:8px!important;
+  position:relative!important;
+  z-index:20!important;
+  pointer-events:auto!important;
+}
+.linked-actions button,
+.refresh-mini,
+.delete-mini{
+  pointer-events:auto!important;
+  cursor:pointer!important;
+  position:relative!important;
+  z-index:30!important;
+}
+.linked-actions .refresh-mini{
+  background:#f8f5ff!important;
+  color:var(--shared)!important;
+}
+.linked-actions .delete-mini{
+  background:#fff5fb!important;
+  color:var(--me)!important;
+}
+@media(max-width:700px){
+  .linked-row{grid-template-columns:1fr!important}
+  .linked-actions{grid-template-columns:1fr 1fr!important}
+  .linked-actions .x-btn{width:100%!important}
+}
+
 </style>
 </head>
 <body>
@@ -1199,6 +1326,7 @@ button,input{font-family:inherit}
 
       <div class="detail-card" style="grid-column:1 / -1">
         <div class="detail-title">고정/일반 지출 입력</div>
+        <div class="linked-note">생활비 정산과 구독료는 자동 연동 항목으로 표시됩니다.</div>
         <div class="input-list" id="expense-list"></div>
         <div class="input-list" style="margin-top:8px">
           <div class="input-row">
@@ -1207,7 +1335,6 @@ button,input{font-family:inherit}
             <button class="x-btn" onclick="addExpenseItem()">＋</button>
           </div>
         </div>
-        <button class="add-btn" onclick="addExpenseItem()">+ 지출 항목 추가</button>
       </div>
     </div>
   </section>
@@ -1492,8 +1619,125 @@ function getSubscriptionTotal(){
   return sum(getActiveSubscriptions());
 }
 
+
+const LIVING_SHARED_DEF = [
+  { key: 'rent', bimonthly: false },
+  { key: 'water', bimonthly: true },
+  { key: 'electric', bimonthly: false },
+  { key: 'internet', bimonthly: false },
+  { key: 'gas', bimonthly: false },
+  { key: 'essentials', bimonthly: false, listMode: true },
+];
+
+
+function monthLabel(){
+  return (currentMonth + 1) + '월';
+}
+
+function hiddenLinkedKey(){
+  return 'finance_hidden_linked_' + monthKey();
+}
+
+function getHiddenLinkedSources(){
+  try{
+    return JSON.parse(localStorage.getItem(hiddenLinkedKey())) || [];
+  }catch(e){
+    return [];
+  }
+}
+
+function setHiddenLinkedSources(list){
+  localStorage.setItem(hiddenLinkedKey(), JSON.stringify([...new Set(list)]));
+}
+
+function isLinkedHidden(source){
+  return getHiddenLinkedSources().includes(source);
+}
+
+function unhideLinkedSource(source){
+  const list = getHiddenLinkedSources().filter(s => s !== source);
+  setHiddenLinkedSources(list);
+}
+
+function hideLinkedSource(source){
+  const list = getHiddenLinkedSources();
+  if(!list.includes(source)) list.push(source);
+  setHiddenLinkedSources(list);
+}
+
+function livingKey(suffix, year=currentYear, month=currentMonth){
+  return `couple_${year}_${String(month + 1).padStart(2,'0')}_${suffix}`;
+}
+
+function readLivingJson(suffix, fallback){
+  try{
+    const raw = localStorage.getItem(livingKey(suffix));
+    return raw ? JSON.parse(raw) : fallback;
+  }catch(e){
+    return fallback;
+  }
+}
+
+function getLivingEnabled(){
+  const stored = readLivingJson('enabled', null);
+  if(stored) return stored;
+  const defaults = {};
+  LIVING_SHARED_DEF.forEach(def => {
+    defaults[def.key] = def.bimonthly ? (currentMonth % 2 === 0) : true;
+  });
+  return defaults;
+}
+
+function calculateLivingExpenseTotal(){
+  const amounts = readLivingJson('shared', {});
+  if(!Object.prototype.hasOwnProperty.call(amounts, 'rent')) amounts.rent = 322000;
+
+  const enabled = getLivingEnabled();
+  const essentials = readLivingJson('essentials', []);
+  const essentialsTotal = essentials.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+
+  let sharedTotal = 0;
+  LIVING_SHARED_DEF.forEach(def => {
+    if(!enabled[def.key]) return;
+    if(def.listMode) sharedTotal += essentialsTotal;
+    else sharedTotal += Number(amounts[def.key] || 0);
+  });
+
+  // living.html의 "공동 생활비 합계 → 각자 부담" 값과 동일하게 반영
+  // Ad hoc 청구 항목(him)은 포함하지 않음
+  return sharedTotal / 2;
+}
+
+function syncLivingExpenseFromLivingPage(){
+  const md = getMonthData();
+  const livingTotal = calculateLivingExpenseTotal();
+  const subscriptionTotal = getSubscriptionTotal();
+  const label = monthLabel();
+
+  md.expenses = (md.expenses || [])
+    .filter(item => item.source !== 'living')
+    .filter(item => item.source !== 'subscription')
+    .filter(item => !(item.name === '생활비 정산'))
+    .filter(item => !(item.name === '생활비 정산 Monthly Total'))
+    .filter(item => !(item.name === '구독료'))
+    .filter(item => !(item.name === '구독료 자동 반영'))
+    .filter(item => !/^\d+월 생활비$/.test(item.name || ''))
+    .filter(item => !/^\d+월 구독료$/.test(item.name || ''));
+
+  if(livingTotal > 0 && !isLinkedHidden('living')){
+    md.expenses = md.expenses.filter(item => !(item.name === '생활비' && Number(item.amount || 0) === 80000 && !item.source));
+    md.expenses.unshift({name: label + ' 생활비', amount: livingTotal, source:'living'});
+  }
+
+  if(subscriptionTotal > 0 && !isLinkedHidden('subscription')){
+    md.expenses.unshift({name: label + ' 구독료', amount: subscriptionTotal, source:'subscription'});
+  }
+
+  saveAppData();
+}
+
 function getNormalExpenseTotal(){
-  return sum(getMonthData().expenses);
+  return sum((getMonthData().expenses || []).filter(item => item.source !== 'subscription'));
 }
 
 function getTotalExpense(){
@@ -1542,11 +1786,22 @@ function itemRows(items, updateFn, deleteFn){
   return (items || []).map((item, index)=>{
     const name = escapeHtml(item.name);
     const amount = Number(item.amount || 0).toLocaleString('ja-JP');
+    const isLinked = item.source === 'living' || item.source === 'subscription';
+    const rowClass = isLinked ? 'input-row linked-row' : 'input-row';
+    const readonly = isLinked ? 'readonly title="자동 연동 항목입니다"' : '';
+
+    const actions = isLinked
+      ? `<div class="linked-actions">
+          <button type="button" class="x-btn refresh-mini" onclick="event.stopPropagation(); refreshLinkedExpense('${item.source}')" title="이 항목 새로고침">↻</button>
+          <button type="button" class="x-btn delete-mini" onclick="event.stopPropagation(); deleteLinkedExpense(${index})" title="이 항목 삭제">×</button>
+        </div>`
+      : `<button type="button" class="x-btn" onclick="${deleteFn}(${index})">×</button>`;
+
     return `
-      <div class="input-row">
-        <input value="${name}" onchange="${updateFn}(${index}, 'name', this.value)" placeholder="항목명">
-        <input class="amount" value="${amount}" onchange="${updateFn}(${index}, 'amount', this.value)" placeholder="금액">
-        <button class="x-btn" onclick="${deleteFn}(${index})">×</button>
+      <div class="${rowClass}">
+        <input value="${name}" ${readonly} onchange="${updateFn}(${index}, 'name', this.value)" placeholder="항목명">
+        <input class="amount" value="${amount}" ${readonly} onchange="${updateFn}(${index}, 'amount', this.value)" placeholder="금액">
+        ${actions}
       </div>
     `;
   }).join('');
@@ -1568,7 +1823,7 @@ function renderExpenses(){
 
 function updateExpenseItem(index, key, value){
   const items = getMonthData().expenses;
-  if(!items[index]) return;
+  if(!items[index] || items[index].source === 'living' || items[index].source === 'subscription') return;
   items[index][key] = key === 'amount' ? parseMoney(value) : value;
   saveAppData();
   render();
@@ -1588,7 +1843,9 @@ function addExpenseItem(){
 }
 
 function deleteExpenseItem(index){
-  getMonthData().expenses.splice(index, 1);
+  const items = getMonthData().expenses;
+  if(!items[index] || items[index].source === 'living' || items[index].source === 'subscription') return;
+  items.splice(index, 1);
   saveAppData();
   render();
 }
@@ -1891,6 +2148,59 @@ function saveBudget(){
 
 
 
+
+function refreshLinkedExpense(source){
+  const md = getMonthData();
+  const label = monthLabel();
+
+  unhideLinkedSource(source);
+
+  if(source === 'living'){
+    const livingTotal = calculateLivingExpenseTotal();
+    md.expenses = (md.expenses || [])
+      .filter(item => item.source !== 'living')
+      .filter(item => !(item.name === '생활비 정산'))
+      .filter(item => !(item.name === '생활비 정산 Monthly Total'))
+      .filter(item => !/^\d+월 생활비$/.test(item.name || ''));
+
+    if(livingTotal > 0){
+      md.expenses = md.expenses.filter(item => !(item.name === '생활비' && Number(item.amount || 0) === 80000 && !item.source));
+      md.expenses.unshift({name: label + ' 생활비', amount: livingTotal, source:'living'});
+    }
+  }
+
+  if(source === 'subscription'){
+    const subscriptionTotal = getSubscriptionTotal();
+    md.expenses = (md.expenses || [])
+      .filter(item => item.source !== 'subscription')
+      .filter(item => !(item.name === '구독료'))
+      .filter(item => !(item.name === '구독료 자동 반영'))
+      .filter(item => !/^\d+월 구독료$/.test(item.name || ''));
+
+    if(subscriptionTotal > 0){
+      md.expenses.unshift({name: label + ' 구독료', amount: subscriptionTotal, source:'subscription'});
+    }
+  }
+
+  saveAppData();
+  render();
+}
+
+function deleteLinkedExpense(index){
+  const items = getMonthData().expenses;
+  if(!items[index] || !(items[index].source === 'living' || items[index].source === 'subscription')) return;
+  hideLinkedSource(items[index].source);
+  items.splice(index, 1);
+  saveAppData();
+  render();
+}
+
+function refreshLinkedExpenses(){
+  setHiddenLinkedSources([]);
+  syncLivingExpenseFromLivingPage();
+  render();
+}
+
 function getYearSeries(type){
   let lastValue = 0;
   const arr = [];
@@ -1905,6 +2215,7 @@ function getYearSeries(type){
 }
 
 function render(){
+  syncLivingExpenseFromLivingPage();
   const md = getMonthData();
   const today = new Date();
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
