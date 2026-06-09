@@ -1,0 +1,2017 @@
+
+
+
+
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>재무관리 대시보드</title>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="재무관리">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+
+:root{
+
+  --me:#ff6b9d; --him:#5b8dee; --shared:#a78bfa;
+
+  --green:#16a34a; --red:#ff5b69; --purple:#7c4dce;
+
+  --mint:#67d3b0;
+
+  --bg:#fdf8ff; --surface:#ffffff; --border:#f0eaf5;
+
+  --text:#2d1f3d; --text2:#9b8aaa; --text3:#c9b8d8;
+
+  --shadow:0 2px 20px rgba(180,130,210,0.1);
+
+  --shadow-hover:0 8px 32px rgba(180,130,210,0.18);
+
+  --radius:20px;
+
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+
+  background:var(--bg);
+
+  background-image:radial-gradient(circle at 15% 10%,#ffedf5 0%,transparent 35%),radial-gradient(circle at 85% 85%,#edf0ff 0%,transparent 35%);
+
+  color:var(--text);
+
+  font-family:'Noto Sans KR',sans-serif;
+
+  min-height:100vh;
+
+  padding:32px 16px 72px;
+
+  font-weight:400;
+
+}
+
+button,input{font-family:inherit}
+
+.shell{max-width:820px;margin:0 auto}
+
+.top-links{
+
+  max-width:820px;
+
+  margin:0 auto 24px;
+
+  display:flex;
+
+  gap:10px;
+
+  justify-content:center;
+
+}
+
+.btn{
+
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+
+  padding:9px 18px;border-radius:99px;border:1.5px solid var(--border);
+
+  font-size:12px!important;font-weight:400;cursor:pointer;
+
+  background:var(--surface);color:var(--text2);font-family:inherit;text-decoration:none;
+
+  transition:.18s;box-shadow:var(--shadow);min-height:38px;
+
+}
+
+.btn:hover{border-color:var(--shared);color:var(--shared);transform:translateY(-1px)}
+
+.summary-card{
+
+  background:rgba(255,255,255,.96);
+
+  border:1.5px solid var(--border);
+
+  border-radius:24px;
+
+  box-shadow:var(--shadow);
+
+  padding:28px 24px 26px;
+
+  margin-bottom:24px;
+
+}
+
+.summary-head{
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:space-between;
+
+  gap:18px;
+
+  margin-bottom:24px;
+
+}
+
+.summary-left{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:16px;
+
+  min-width:0;
+
+}
+
+
+
+.quick-actions{
+
+  display:flex;
+
+  gap:8px;
+
+  align-items:center;
+
+  flex-wrap:wrap;
+
+}
+
+.quick-btn{
+
+  display:inline-flex;
+
+  align-items:center;
+
+  gap:7px;
+
+  min-height:38px;
+
+  padding:8px 13px;
+
+  border:1.5px solid var(--border);
+
+  border-radius:99px;
+
+  background:#fff;
+
+  color:var(--text2);
+
+  box-shadow:var(--shadow);
+
+  cursor:pointer;
+
+  font-size:12px;
+
+}
+
+.quick-btn:hover{border-color:var(--shared);color:var(--shared)}
+
+.month-nav{
+
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+
+  gap:16px!important;width:auto!important;min-width:0!important;max-width:none!important;
+
+  padding:8px 22px!important;background:var(--surface)!important;
+
+  border:1.5px solid var(--border)!important;border-radius:99px!important;
+
+  box-shadow:var(--shadow)!important;
+
+}
+
+.month-nav button{
+
+  background:none!important;border:none!important;color:var(--text2)!important;
+
+  font-size:16px!important;cursor:pointer!important;padding:2px 8px!important;
+
+  border-radius:50%!important;min-height:auto!important;height:auto!important;
+
+  line-height:1.2!important;box-shadow:none!important;
+
+}
+
+.month-nav button:hover{background:var(--border)!important;color:var(--text)!important}
+
+.month-nav span{
+
+  font-size:16px!important;font-weight:400!important;min-width:76px!important;
+
+  text-align:center!important;line-height:1.2!important;
+
+}
+
+
+
+.kpi-grid{
+
+  display:grid;
+
+  grid-template-columns:repeat(3,1fr);
+
+  gap:12px;
+
+  margin-bottom:14px;
+
+}
+
+.kpi-card{
+
+  min-height:172px;
+
+  background:#fff;
+
+  border:1.5px solid var(--border);
+
+  border-radius:18px;
+
+  box-shadow:0 1px 12px rgba(180,130,210,.06);
+
+  padding:20px 16px;
+
+  display:flex;
+
+  flex-direction:column;
+
+  align-items:center;
+
+  justify-content:center;
+
+  text-align:center;
+
+}
+
+.icon-circle{
+
+  width:48px;height:48px;border-radius:999px;
+
+  display:flex;align-items:center;justify-content:center;
+
+  margin-bottom:16px;color:#fff;font-size:22px;
+
+}
+
+.icon-green{background:linear-gradient(135deg,#85e0b8,#20b86f)}
+
+.icon-red{background:linear-gradient(135deg,#ff8a98,#ff5b69)}
+
+.icon-blue{background:linear-gradient(135deg,#7aaeff,#5b8dee)}
+
+.icon-purple{background:linear-gradient(135deg,#9d7cf3,#7047c6)}
+
+.kpi-label{font-size:13px;color:#1f1630;margin-bottom:10px}
+
+.kpi-value{font-size:27px;line-height:1.1;letter-spacing:-.05em}
+
+.kpi-value.green{color:var(--green)}
+
+.kpi-value.red{color:var(--red)}
+
+.kpi-value.blue{color:var(--him)}
+
+.kpi-value.purple{color:var(--purple)}
+
+.net-meta{margin-top:14px;width:100%;display:grid;gap:7px;font-size:12px}
+
+.net-line{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center}
+
+.net-line span:first-child{color:#41364e;text-align:left}
+
+.net-line .arrow,.net-line .amount{color:var(--green)}
+
+.budget-panel{
+
+  border:1.5px solid #dce8ff;
+
+  border-radius:18px;
+
+  padding:12px;
+
+  margin-bottom:20px;
+
+}
+
+.budget-grid{
+
+  display:grid;
+
+  grid-template-columns:repeat(3,1fr);
+
+  gap:10px;
+
+}
+
+.budget-card{
+
+  min-height:136px;background:#fff;border:1.5px solid var(--border);
+
+  border-radius:16px;padding:18px 14px;display:flex;flex-direction:column;
+
+  justify-content:center;align-items:center;text-align:center;
+
+}
+
+.budget-card:first-child{background:linear-gradient(135deg,#fffaf5,#fff)}
+
+.budget-icon{font-size:26px;margin-bottom:14px}
+
+.budget-label{font-size:13px;color:#1f1630;margin-bottom:10px}
+
+.budget-value{font-size:25px;letter-spacing:-.05em}
+
+.budget-sub{font-size:12px;color:#2868d9;margin-top:6px}
+
+.chart-card{
+
+  background:#fff;border:1.5px solid var(--border);border-radius:18px;
+
+  box-shadow:0 1px 12px rgba(180,130,210,.06);padding:20px 16px 18px;
+
+}
+
+.chart-title{font-size:19px;font-weight:400;letter-spacing:-.04em;margin-bottom:18px}
+
+.legend{display:flex;justify-content:center;gap:34px;margin-bottom:8px;font-size:13px;color:#1f1630}
+
+.legend span{display:inline-flex;align-items:center;gap:7px}
+
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+
+.dot.asset{background:#2f73ff}.dot.debt{background:#8e65dc}
+
+.chart-wrap{position:relative;height:308px}
+
+.line-chart{width:100%;height:100%;overflow:visible}
+
+.grid-line{stroke:#eee8f3;stroke-width:1}
+
+.axis-blue{fill:#2f73ff;font-size:11px}
+
+.axis-purple{fill:#7c4dce;font-size:11px}
+
+.month-label{fill:#7d728b;font-size:12px}
+
+.current-month{fill:#ff4b7b;font-weight:700}
+
+.asset-line{fill:none;stroke:#2f73ff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+
+.debt-line{fill:none;stroke:#8e65dc;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+
+.asset-dot{fill:#2f73ff}.debt-dot{fill:#8e65dc}
+
+.chart-summary{
+
+  display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:12px;
+
+  border:1.5px solid var(--border);border-radius:14px;overflow:hidden;
+
+}
+
+.chart-summary-card{padding:16px;text-align:center;background:#fbfdff}
+
+.chart-summary-card + .chart-summary-card{border-left:1.5px solid var(--border);background:#fff8ff}
+
+.chart-summary-label{font-size:12px;color:#1e63d8;margin-bottom:8px}
+
+.chart-summary-card:nth-child(2) .chart-summary-label{color:#7c4dce}
+
+.chart-summary-value{font-size:24px;color:#1e63d8;letter-spacing:-.04em}
+
+.chart-summary-card:nth-child(2) .chart-summary-value{color:#7c4dce}
+
+.chart-summary-sub{margin-top:8px;font-size:12px;color:#1f1630}
+
+.chart-summary-sub .green{color:var(--green)}
+
+.page{display:none;max-width:820px;margin:0 auto 24px}
+
+.page.active{display:block}
+
+.section-title{
+
+  max-width:820px;margin:0 auto 12px;font-size:12px;font-weight:400;
+
+  letter-spacing:.08em;text-transform:uppercase;color:var(--text2);
+
+  display:flex;align-items:center;gap:8px;
+
+}
+
+.section-title:after{content:'';flex:1;height:1px;background:var(--border)}
+
+.detail-grid{
+
+  display:grid;
+
+  grid-template-columns:1fr 1fr;
+
+  gap:12px;
+
+}
+
+.detail-card{
+
+  background:#fff;
+
+  border:1.5px solid var(--border);
+
+  border-radius:18px;
+
+  box-shadow:var(--shadow);
+
+  padding:18px;
+
+}
+
+.detail-title{
+
+  font-size:15px;
+
+  margin-bottom:14px;
+
+}
+
+.row{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  gap:12px;
+
+  padding:10px 0;
+
+  border-bottom:1px solid var(--border);
+
+  font-size:14px;
+
+}
+
+.row:last-child{border-bottom:none}
+
+.row span:first-child{color:var(--text2)}
+
+.input-list{display:grid;gap:8px}
+
+.input-row{
+
+  display:grid;
+
+  grid-template-columns:minmax(0,1fr) 130px 42px;
+
+  gap:8px;
+
+  align-items:center;
+
+}
+
+.input-row input{
+
+  min-height:42px;width:100%;
+
+  border:1.5px solid var(--border);
+
+  border-radius:10px;
+
+  background:var(--bg);
+
+  color:var(--text);
+
+  padding:8px 10px;
+
+  font-size:13px;
+
+}
+
+.input-row .amount{text-align:right}
+.input-row input[readonly]{color:var(--text2);background:#fff}
+
+.x-btn{
+
+  width:42px;height:42px;border:none;border-radius:10px;
+
+  background:#f8f5ff;color:var(--shared);cursor:pointer;font-size:15px;
+
+}
+
+.add-btn{
+
+  width:100%;min-height:42px;margin-top:8px;
+
+  border:1.5px dashed var(--border);
+
+  border-radius:12px;
+
+  background:#fff;
+
+  color:var(--text2);
+
+  cursor:pointer;
+
+  font-size:12px;
+
+}
+
+@media(max-width:700px){
+
+  body{padding:20px 12px 72px}
+
+  .top-links{gap:8px}
+
+  .top-links .btn{flex:1;padding:8px 10px}
+
+  .summary-card{padding:22px 14px}
+
+  .summary-head{flex-direction:column;align-items:stretch}
+
+  .summary-left{justify-content:space-between;gap:10px}
+
+  h1{font-size:22px}
+
+  .quick-actions{justify-content:center}
+
+  .quick-btn{flex:1;min-width:0;padding:8px 9px}
+
+  .month-nav{align-self:center!important}
+
+  .kpi-grid,.budget-grid,.chart-summary,.detail-grid{grid-template-columns:1fr}
+
+  .chart-summary-card + .chart-summary-card{border-left:none;border-top:1.5px solid var(--border)}
+
+  .chart-wrap{height:285px}
+
+  .input-row{grid-template-columns:1fr}
+
+  .x-btn{width:100%}
+
+}
+
+
+
+/* Detail page input layout */
+
+.detail-grid{
+
+  display:grid;
+
+  grid-template-columns:1fr 1fr;
+
+  gap:12px;
+
+}
+
+.detail-card{
+
+  background:#fff;
+
+  border:1.5px solid var(--border);
+
+  border-radius:18px;
+
+  box-shadow:var(--shadow);
+
+  padding:18px;
+
+}
+
+.detail-title{
+
+  font-size:15px;
+
+  margin-bottom:14px;
+
+}
+
+.input-list{display:grid;gap:8px}
+
+.input-row{
+
+  display:grid;
+
+  grid-template-columns:minmax(0,1fr) 130px 42px;
+
+  gap:8px;
+
+  align-items:center;
+
+}
+
+.input-row input{
+
+  min-height:42px;width:100%;
+
+  border:1.5px solid var(--border);
+
+  border-radius:10px;
+
+  background:var(--bg);
+
+  color:var(--text);
+
+  padding:8px 10px;
+
+  font-size:13px;
+
+}
+
+.input-row .amount{text-align:right}
+.input-row input[readonly]{color:var(--text2);background:#fff}
+
+.x-btn{
+
+  width:42px;height:42px;border:none;border-radius:10px;
+
+  background:#f8f5ff;color:var(--shared);cursor:pointer;font-size:15px;
+
+}
+
+.add-btn{
+
+  width:100%;min-height:42px;margin-top:8px;
+
+  border:1.5px dashed var(--border);
+
+  border-radius:12px;
+
+  background:#fff;color:var(--text2);
+
+  cursor:pointer;font-size:12px;
+
+}
+
+.progress-wrap{margin-top:12px}
+
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:6px}
+
+.progress-bg{height:12px;background:#f2ecf8;border-radius:999px;overflow:hidden}
+
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--him),var(--shared));border-radius:999px}
+
+@media(max-width:700px){
+
+  .detail-grid{grid-template-columns:1fr}
+
+  .input-row{grid-template-columns:1fr}
+
+  .x-btn{width:100%}
+
+}
+
+
+
+
+
+.inline-panel{display:none}
+
+.inline-panel.active{display:block}
+
+#summary-view.hidden{display:none}
+
+.inline-head{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:12px;
+
+  margin-bottom:18px;
+
+}
+
+.inline-head h2{
+
+  font-size:22px;
+
+  font-weight:400;
+
+  letter-spacing:-.04em;
+
+}
+
+.back-btn{
+
+  width:38px;
+
+  height:38px;
+
+  border:1.5px solid var(--border);
+
+  border-radius:999px;
+
+  background:#fff;
+
+  color:var(--text2);
+
+  box-shadow:var(--shadow);
+
+  cursor:pointer;
+
+  font-size:22px;
+
+  line-height:1;
+
+}
+
+.back-btn:hover{border-color:var(--shared);color:var(--shared)}
+
+
+
+
+
+.summary-view{display:block}
+
+.summary-view.hidden{display:none}
+
+.inline-panel{display:none}
+
+.inline-panel.active{display:block}
+
+.inline-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+
+.inline-head h2{font-size:22px;font-weight:400;letter-spacing:-.04em}
+
+.back-btn{width:38px;height:38px;border:1.5px solid var(--border);border-radius:999px;background:#fff;color:var(--text2);box-shadow:var(--shadow);cursor:pointer;font-size:22px;line-height:1}
+
+.back-btn:hover{border-color:var(--shared);color:var(--shared)}
+
+
+/* ── Final tab switching UX ── */
+.summary-view{display:block}
+.summary-view.hidden{display:none}
+.inline-panel{display:none}
+.inline-panel.active{display:block}
+.quick-btn.active{
+  color:var(--shared);
+  border-color:#ddd6fe;
+  background:#f8f5ff;
+}
+.inline-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:18px;
+}
+.inline-head h2{
+  font-size:22px;
+  font-weight:400;
+  letter-spacing:-.04em;
+}
+.inline-note{
+  font-size:12px;
+  color:var(--text2);
+}
+.progress-wrap{margin-top:12px}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:6px}
+.progress-bg{height:12px;background:#f2ecf8;border-radius:999px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--him),var(--shared));border-radius:999px}
+
+.subs-full{grid-column:1 / -1}
+.subs-table{display:grid;gap:8px}
+.subs-row{
+  display:grid;
+  grid-template-columns:1.4fr .7fr .8fr .9fr 1fr 42px;
+  gap:8px;
+  align-items:center;
+  min-height:42px;
+  padding:8px;
+  border:1.5px solid var(--border);
+  border-radius:12px;
+  background:var(--bg);
+  font-size:13px;
+}
+.subs-row.header{
+  background:#fff;
+  color:var(--text2);
+  font-size:11px;
+  min-height:34px;
+}
+.subs-row .amount{text-align:right}
+.subs-delete{
+  width:34px;
+  height:34px;
+  border:none;
+  border-radius:10px;
+  background:#f8f5ff;
+  color:var(--shared);
+  cursor:pointer;
+}
+.subs-add-row{
+  grid-template-columns:1fr 90px 120px 110px;
+}
+@media(max-width:700px){
+  .subs-full{grid-column:auto}
+  .subs-row{
+    grid-template-columns:1fr;
+    gap:4px;
+  }
+  .subs-row.header{display:none}
+  .subs-row .amount{text-align:left}
+  .subs-add-row{grid-template-columns:1fr}
+}
+
+
+/* simplified subscription layout */
+.subs-input-list{
+  display:grid;
+  gap:8px;
+}
+.subs-input-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 120px 42px;
+  gap:8px;
+  align-items:center;
+}
+.subs-input-row input{
+  min-height:42px;
+  width:100%;
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  background:var(--bg);
+  color:var(--text);
+  padding:8px 10px;
+  font-size:13px;
+}
+.subs-input-row .amount{text-align:right}
+.subs-add-box{
+  display:none;
+  margin-top:10px;
+}
+.subs-add-box.active{
+  display:grid;
+  gap:8px;
+}
+.subs-add-box input{
+  min-height:42px;
+  width:100%;
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  background:var(--bg);
+  color:var(--text);
+  padding:8px 10px;
+  font-size:13px;
+}
+.subs-add-grid{
+  display:grid;
+  grid-template-columns:1fr 86px 110px 110px;
+  gap:8px;
+}
+.subs-delete{
+  width:42px;
+  height:42px;
+  border:none;
+  border-radius:10px;
+  background:#f8f5ff;
+  color:var(--shared);
+  cursor:pointer;
+  font-size:15px;
+}
+@media(max-width:700px){
+  .subs-input-row,
+  .subs-add-grid{
+    grid-template-columns:1fr;
+  }
+  .subs-delete{width:100%}
+}
+
+
+/* emergency layout fix */
+.summary-view.hidden{display:none!important}
+.inline-panel{display:none!important}
+.inline-panel.active{display:block!important}
+.quick-btn{pointer-events:auto}
+.month-nav button{pointer-events:auto!important}
+
+/* subscription stacked layout */
+.subs-layout{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+}
+.subs-summary-card,
+.subs-input-card{
+  width:100%;
+}
+.subs-input-list{
+  display:grid;
+  gap:8px;
+}
+.subs-input-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 120px 120px 42px;
+  gap:8px;
+  align-items:center;
+}
+.subs-input-row input{
+  min-height:42px;
+  width:100%;
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  background:var(--bg);
+  color:var(--text);
+  padding:8px 10px;
+  font-size:13px;
+}
+.subs-input-row .amount{text-align:right}
+.subs-add-box{
+  display:none;
+  margin-top:10px;
+}
+.subs-add-box.active{
+  display:grid;
+  gap:8px;
+}
+.subs-add-box input{
+  min-height:42px;
+  width:100%;
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  background:var(--bg);
+  color:var(--text);
+  padding:8px 10px;
+  font-size:13px;
+}
+.subs-add-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 120px 120px 100px;
+  gap:8px;
+}
+.subs-delete{
+  width:42px;
+  height:42px;
+  border:none;
+  border-radius:10px;
+  background:#f8f5ff;
+  color:var(--shared);
+  cursor:pointer;
+  font-size:15px;
+}
+@media(max-width:700px){
+  .subs-input-row,
+  .subs-add-grid{
+    grid-template-columns:1fr;
+  }
+  .subs-delete{width:100%}
+}
+
+
+/* subscription active-month-only input list */
+.subs-input-row{
+  grid-template-columns:minmax(0,1fr) 120px 120px 42px!important;
+}
+@media(max-width:700px){
+  .subs-input-row{grid-template-columns:1fr!important}
+}
+
+
+/* unified header style from living dashboard */
+.dashboard-hero{
+  max-width:820px;
+  margin:0 auto 28px;
+  text-align:center;
+}
+.hero-icon{
+  font-size:36px;
+  line-height:1;
+  margin-bottom:8px;
+}
+.hero-title{
+  font-family:'Gowun Dodum', sans-serif;
+  font-size:26px;
+  font-weight:400;
+  letter-spacing:-0.3px;
+  color:var(--text);
+  margin-bottom:4px;
+}
+.hero-month-nav{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:16px!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+  padding:8px 20px!important;
+  margin:16px auto 0!important;
+  background:var(--surface)!important;
+  border:1.5px solid var(--border)!important;
+  border-radius:99px!important;
+  box-shadow:var(--shadow)!important;
+}
+.hero-month-nav button{
+  background:none!important;
+  border:none!important;
+  color:var(--text2)!important;
+  font-size:16px!important;
+  cursor:pointer!important;
+  padding:2px 8px!important;
+  border-radius:50%!important;
+  min-height:auto!important;
+  height:auto!important;
+  line-height:1.2!important;
+  box-shadow:none!important;
+  transition:all .15s!important;
+}
+.hero-month-nav button:hover{
+  background:var(--border)!important;
+  color:var(--text)!important;
+}
+.hero-month-nav span{
+  font-size:15px!important;
+  font-weight:700!important;
+  min-width:90px!important;
+  text-align:center!important;
+  line-height:1.2!important;
+}
+.hero-links{
+  max-width:820px;
+  margin:22px auto 0!important;
+  display:flex;
+  gap:10px;
+  justify-content:center;
+}
+.summary-head{
+  justify-content:center;
+  margin-bottom:24px;
+}
+.summary-left{
+  width:100%;
+  justify-content:center;
+}
+.quick-actions{
+  justify-content:center;
+}
+@media(max-width:700px){
+  .dashboard-hero{margin-bottom:24px}
+  .hero-icon{font-size:clamp(30px, 9vw, 36px)}
+  .hero-title{font-size:clamp(24px, 7vw, 30px)}
+  .hero-month-nav{
+    width:min(100%,330px)!important;
+    justify-content:space-between!important;
+    padding:8px 18px!important;
+  }
+  .hero-month-nav span{
+    font-size:15px!important;
+    min-width:90px!important;
+  }
+}
+
+
+/* final header consistency override */
+.dashboard-hero .hero-title{
+  font-family:'Gowun Dodum', sans-serif!important;
+  font-size:26px!important;
+  font-weight:400!important;
+  letter-spacing:-0.3px!important;
+  margin-bottom:4px!important;
+}
+.dashboard-hero .hero-month-nav{
+  padding:8px 20px!important;
+  margin-top:16px!important;
+  margin-bottom:0!important;
+  gap:16px!important;
+  min-width:0!important;
+}
+.dashboard-hero .hero-month-nav span{
+  font-size:15px!important;
+  font-weight:700!important;
+  min-width:90px!important;
+}
+.dashboard-hero .hero-month-nav button{
+  font-size:16px!important;
+  padding:2px 8px!important;
+}
+.dashboard-hero .hero-links{
+  margin-top:22px!important;
+}
+
+</style>
+</head>
+<body>
+
+
+<header class="dashboard-hero shell">
+  <div class="hero-icon">💰🌱</div>
+  <h1 class="hero-title">재무관리 대시보드</h1>
+
+  <div class="month-nav hero-month-nav">
+    <button onclick="changeMonth(-1)">◀</button>
+    <span id="month-title"></span>
+    <button onclick="changeMonth(1)">▶</button>
+  </div>
+
+  <div class="top-links hero-links">
+    <a href="living.html" class="btn">🏠 생활비 정산</a>
+    <a href="yearly.html" class="btn">📊 연도별 서머리</a>
+    
+  </div>
+</header>
+
+<main class="summary-card shell">
+  <div class="summary-head">
+    <div class="summary-left">
+      
+      <div class="quick-actions">
+        <button class="quick-btn active" data-tab="summary" onclick="openPage('summary')">📊 요약</button>
+        <button class="quick-btn" data-tab="expense" onclick="openPage('expense')">🛒 지출</button>
+        <button class="quick-btn" data-tab="debt" onclick="openPage('debt')">💳 부채</button>
+        <button class="quick-btn" data-tab="asset" onclick="openPage('asset')">🏛️ 자산</button>
+        <button class="quick-btn" data-tab="subs" onclick="openPage('subs')">🧾 구독</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary-view">
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="icon-circle icon-red">↑</div>
+        <div class="kpi-label">총 수입</div>
+        <div class="kpi-value red" id="income-total">¥0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="icon-circle icon-blue">↓</div>
+        <div class="kpi-label">총 지출</div>
+        <div class="kpi-value blue" id="expense-total">¥0</div>
+      </div>
+      <div class="kpi-card">
+        <div class="icon-circle icon-purple">💼</div>
+        <div class="kpi-label">순자산</div>
+        <div class="kpi-value purple" id="net-worth">¥0</div>
+        <div class="net-meta">
+          <div class="net-line"><span>전월 대비</span><span class="arrow">↑</span><span class="amount" id="net-change-month">+¥0</span></div>
+          <div class="net-line"><span>연초 대비</span><span class="arrow">↑</span><span class="amount" id="net-change-year">+¥0</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="budget-panel">
+      <div class="budget-grid">
+        <div class="budget-card"><div class="budget-icon">💳</div><div class="budget-label">한 달 예산</div><div class="budget-value" id="month-budget">¥0</div></div>
+        <div class="budget-card"><div class="budget-icon">◔</div><div class="budget-label">남은 예산</div><div class="budget-value" id="remaining-budget">¥0</div><div class="budget-sub" id="remaining-rate">(0%)</div></div>
+        <div class="budget-card"><div class="budget-icon">🗓️</div><div class="budget-label">하루 권장 예산</div><div class="budget-value" id="daily-budget">¥0</div><div class="budget-sub" id="daily-base">(30일 기준)</div></div>
+      </div>
+    </section>
+
+    <section class="chart-card">
+      <div class="chart-title" id="trend-title">2026년 자산 · 부채 추이</div>
+      <div class="legend">
+        <span><i class="dot asset"></i>자산 (유동성 자산)</span>
+        <span><i class="dot debt"></i>부채 (총 부채)</span>
+      </div>
+      <div class="chart-wrap"><svg class="line-chart" id="trend-chart" viewBox="0 0 680 300" preserveAspectRatio="none"></svg></div>
+      <div class="chart-summary">
+        <div class="chart-summary-card"><div class="chart-summary-label">현재 자산 (유동성 자산)</div><div class="chart-summary-value" id="current-asset">¥0</div><div class="chart-summary-sub">전월 대비 <span class="green">↑</span> <span class="green" id="asset-change">+¥0</span></div></div>
+        <div class="chart-summary-card"><div class="chart-summary-label">현재 부채 (총 부채)</div><div class="chart-summary-value" id="current-debt">¥0</div><div class="chart-summary-sub">전월 대비 <span class="green">↓</span> <span class="green" id="debt-change">-¥0</span></div></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="inline-panel" id="inline-expense">
+    <div class="inline-head"><h2>지출 입력</h2><span class="inline-note">일반 지출 + 구독비가 총 지출에 반영</span></div>
+    <div class="detail-grid">
+      <div class="detail-card">
+        <div class="detail-title">월 예산 설정</div>
+        <div class="input-list">
+          <div class="input-row budget-input-row">
+            <input value="한 달 예산" readonly>
+            <input class="amount" id="budget-input" value="300,000" placeholder="예: 300,000">
+            <button class="x-btn" onclick="saveBudget()">✓</button>
+          </div>
+        </div>
+        <button class="add-btn" onclick="saveBudget()">예산 저장</button>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-title">지출 요약</div>
+        <div class="row"><span>일반 지출</span><span id="expense-normal-total">¥0</span></div>
+        <div class="row"><span>구독비</span><span id="expense-subscription-total">¥0</span></div>
+        <div class="row"><span>이번 달 총 지출</span><span id="expense-grand-total">¥0</span></div>
+      </div>
+
+      <div class="detail-card" style="grid-column:1 / -1">
+        <div class="detail-title">고정/일반 지출 입력</div>
+        <div class="input-list" id="expense-list"></div>
+        <div class="input-list" style="margin-top:8px">
+          <div class="input-row">
+            <input id="expense-name-input" placeholder="항목명 예: 카드 청구">
+            <input class="amount" id="expense-amount-input" placeholder="금액">
+            <button class="x-btn" onclick="addExpenseItem()">＋</button>
+          </div>
+        </div>
+        <button class="add-btn" onclick="addExpenseItem()">+ 지출 항목 추가</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="inline-panel" id="inline-debt">
+    <div class="inline-head"><h2>부채 청산 현황</h2><span class="inline-note">리보 · 분할 · 상환 관리</span></div>
+    <div class="detail-grid">
+      <div class="detail-card">
+        <div class="detail-title">부채 요약</div>
+        <div class="row"><span>총 부채</span><span id="debt-total-row">¥0</span></div>
+        <div class="row"><span>리보 잔액</span><span id="debt-ribo-row">¥0</span></div>
+        <div class="row"><span>분할 잔액</span><span id="debt-install-row">¥0</span></div>
+        <div class="row"><span>전월 대비 감소</span><span id="debt-month-change" style="color:var(--green)">¥0</span></div>
+        <div class="progress-wrap">
+          <div class="progress-label"><span>부채 청산 진행률</span><span id="debt-progress-label">0%</span></div>
+          <div class="progress-bg"><div class="progress-fill" id="debt-progress-fill" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-title">리보 입력</div>
+        <div class="input-list" id="ribo-list"></div>
+        <div class="input-list" style="margin-top:8px">
+          <div class="input-row">
+            <input id="ribo-name-input" placeholder="항목명">
+            <input class="amount" id="ribo-amount-input" placeholder="잔액">
+            <button class="x-btn" onclick="addDebtItem('ribo')">＋</button>
+          </div>
+        </div>
+        <button class="add-btn" onclick="addDebtItem('ribo')">+ 리보 항목 추가</button>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-title">분할 입력</div>
+        <div class="input-list" id="installment-list"></div>
+        <div class="input-list" style="margin-top:8px">
+          <div class="input-row">
+            <input id="installment-name-input" placeholder="항목명">
+            <input class="amount" id="installment-amount-input" placeholder="잔액">
+            <button class="x-btn" onclick="addDebtItem('installment')">＋</button>
+          </div>
+        </div>
+        <button class="add-btn" onclick="addDebtItem('installment')">+ 분할 항목 추가</button>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-title">이번 달 상환 입력</div>
+        <div class="input-list" id="payment-list"></div>
+        <div class="input-list" style="margin-top:8px">
+          <div class="input-row">
+            <input id="payment-name-input" placeholder="항목명">
+            <input class="amount" id="payment-amount-input" placeholder="금액">
+            <button class="x-btn" onclick="addPaymentItem()">＋</button>
+          </div>
+        </div>
+        <button class="add-btn" onclick="addPaymentItem()">+ 상환 항목 추가</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="inline-panel" id="inline-asset">
+    <div class="inline-head"><h2>자산 현황</h2><span class="inline-note">수입은 여기에서 관리</span></div>
+    <div class="detail-grid">
+      <div class="detail-card">
+        <div class="detail-title">자산 요약</div>
+        <div class="row"><span>이번 달 입금 / 수입</span><span id="income-row-total">¥0</span></div>
+        <div class="row"><span>유동성 자산</span><span id="liquid-asset-row-total">¥0</span></div>
+        <div class="row"><span>저축 / 투자</span><span id="saving-invest-row-total">¥0</span></div>
+        <div class="row"><span>총 자산</span><span id="asset-row-total">¥0</span></div>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-title">이번 달 입금 / 수입</div>
+        <div class="input-list" id="income-list"></div>
+        <div class="input-list" style="margin-top:8px">
+          <div class="input-row">
+            <input id="income-name-input" placeholder="항목명">
+            <input class="amount" id="income-amount-input" placeholder="금액">
+            <button class="x-btn" onclick="addIncomeItem()">＋</button>
+          </div>
+        </div>
+        <button class="add-btn" onclick="addIncomeItem()">+ 수입 항목 추가</button>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-title">유동성 자산 입력</div>
+        <div class="input-list" id="liquid-asset-list"></div>
+        <div class="input-list" style="margin-top:8px">
+          <div class="input-row">
+            <input id="liquid-asset-name-input" placeholder="항목명">
+            <input class="amount" id="liquid-asset-amount-input" placeholder="금액">
+            <button class="x-btn" onclick="addAssetItem('liquid')">＋</button>
+          </div>
+        </div>
+        <button class="add-btn" onclick="addAssetItem('liquid')">+ 자산 항목 추가</button>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-title">저축 / 투자 입력</div>
+        <div class="input-list" id="saving-invest-list"></div>
+        <div class="input-list" style="margin-top:8px">
+          <div class="input-row">
+            <input id="saving-invest-name-input" placeholder="항목명">
+            <input class="amount" id="saving-invest-amount-input" placeholder="금액">
+            <button class="x-btn" onclick="addAssetItem('investment')">＋</button>
+          </div>
+        </div>
+        <button class="add-btn" onclick="addAssetItem('investment')">+ 저축/투자 항목 추가</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="inline-panel" id="inline-subs">
+    <div class="inline-head"><h2>구독 현황</h2><span class="inline-note">월간은 매달 반영 · 연간은 갱신월에만 반영</span></div>
+    <div class="subs-layout">
+      <div class="detail-card subs-summary-card">
+        <div class="detail-title">이번 달 구독 요약</div>
+        <div class="row"><span>이번 달 반영 합계</span><span id="subs-current-total">¥0</span></div>
+        <div class="row"><span>월간 구독 합계</span><span id="subs-monthly-total">¥0</span></div>
+        <div class="row"><span>이번 달 연간 갱신</span><span id="subs-annual-total">¥0</span></div>
+        <div class="row"><span>이번 달 반영 항목</span><span id="subs-current-count">0개</span></div>
+      </div>
+
+      <div class="detail-card subs-input-card">
+        <div class="detail-title">구독 입력</div>
+        <div class="subs-input-list" id="subs-input-list"></div>
+
+        <div class="subs-add-box">
+          <div class="subs-add-grid">
+            <input id="sub-name-input" placeholder="항목명">
+            <input id="sub-date-input" placeholder="갱신일">
+            <input class="amount" id="sub-amount-input" placeholder="금액">
+            <input id="sub-cycle-input" placeholder="월간/연간">
+          </div>
+          <input id="sub-memo-input" placeholder="메모">
+        </div>
+
+        <button class="add-btn" onclick="addSubscription()">+ 구독 항목 추가</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+
+<script>
+const STORAGE_KEY = 'financeDashboardMonthlyV1';
+
+let currentDate = new Date();
+let currentYear = currentDate.getFullYear();
+let currentMonth = currentDate.getMonth();
+
+const defaultSubscriptions = [
+  {name:'Flo', cycle:'연간', date:'9월 28일', amount:2500, memo:''},
+  {name:'소다', cycle:'연간', date:'3월 14일', amount:3500, memo:''},
+  {name:'아마존프라임', cycle:'연간', date:'12월 22일', amount:5900, memo:''},
+  {name:'라쿠텐프리미엄', cycle:'연간', date:'6월 3일', amount:11000, memo:''},
+  {name:'아멕스골드', cycle:'연간', date:'12월 7일', amount:34100, memo:''},
+  {name:'ChatGPT', cycle:'월간', date:'22일', amount:3000, memo:''},
+  {name:'iCloud', cycle:'월간', date:'3일', amount:1500, memo:''},
+  {name:'우버원', cycle:'월간', date:'10일', amount:498, memo:''},
+  {name:'넷플릭스', cycle:'월간', date:'24일', amount:1190, memo:''},
+  {name:'디즈니플러스', cycle:'월간', date:'28일', amount:1250, memo:''},
+  {name:'스포티파이', cycle:'월간', date:'29일', amount:1080, memo:''},
+  {name:'클로드', cycle:'월간', date:'29일', amount:3632, memo:''},
+  {name:'유넥스트', cycle:'월간', date:'30일', amount:1738, memo:'해지예정'},
+  {name:'도코모', cycle:'월간', date:'30일', amount:3765, memo:''}
+];
+
+const seededMonthKey = currentDate.getFullYear() + '-' + String(currentDate.getMonth() + 1).padStart(2, '0');
+
+function monthKey(year=currentYear, month=currentMonth){
+  return year + '-' + String(month + 1).padStart(2, '0');
+}
+
+function defaultMonthData(seed=false){
+  return {
+    monthBudget: 300000,
+    expenses: seed ? [
+      {name:'카드 청구', amount:420000},
+      {name:'생활비', amount:80000},
+      {name:'기타', amount:1400}
+    ] : [],
+    income: seed ? [
+      {name:'급여', amount:800000}
+    ] : [],
+    assets: seed ? [
+      {name:'MUFG', amount:736676, type:'liquid'},
+      {name:'Revolut', amount:37780, type:'liquid'},
+      {name:'현금', amount:18734, type:'liquid'}
+    ] : [],
+    debts: seed ? [
+      {name:'라쿠텐 쇼핑 리보', amount:1640000, type:'ribo'},
+      {name:'라쿠텐 캐싱 리보', amount:140000, type:'ribo'},
+      {name:'아멕스 리보', amount:96000, type:'ribo'},
+      {name:'라쿠텐 분할', amount:90000, type:'installment'},
+      {name:'아멕스 분할', amount:510000, type:'installment'}
+    ] : [],
+    payments: seed ? [
+      {name:'리보 원금 상환', amount:73000},
+      {name:'분할 당월 청구', amount:112000}
+    ] : []
+  };
+}
+
+function loadAppData(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if(saved && saved.months && saved.global) return saved;
+  }catch(e){}
+  return {
+    global:{
+      subscriptions: structuredClone(defaultSubscriptions),
+      initialDebt: 5000000
+    },
+    months:{
+      [seededMonthKey]: defaultMonthData(true)
+    }
+  };
+}
+
+let appData = loadAppData();
+
+function saveAppData(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+}
+
+function getMonthData(){
+  const key = monthKey();
+  if(!appData.months[key]){
+    const previousKey = monthKey(currentMonth === 0 ? currentYear - 1 : currentYear, currentMonth === 0 ? 11 : currentMonth - 1);
+    const previous = appData.months[previousKey];
+    const blank = defaultMonthData(false);
+    if(previous){
+      blank.monthBudget = previous.monthBudget || 300000;
+      blank.assets = structuredClone(previous.assets || []);
+      blank.debts = structuredClone(previous.debts || []);
+    }
+    appData.months[key] = blank;
+    saveAppData();
+  }
+  return appData.months[key];
+}
+
+function sum(items){
+  return (items || []).reduce((total, item) => total + Number(item.amount || 0), 0);
+}
+
+function fmt(n){
+  const sign = n < 0 ? '-' : '';
+  return sign + '¥' + Math.abs(Math.round(n || 0)).toLocaleString('ja-JP');
+}
+
+function man(n){
+  if(!n) return '¥0';
+  return '¥' + (Math.round(n / 1000) / 10).toLocaleString('ja-JP') + '만';
+}
+
+function parseMoney(value){
+  return Number(String(value || '').replace(/[^0-9.-]/g, '')) || 0;
+}
+
+function escapeHtml(value){
+  return String(value || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function getMonthFromDateText(text){
+  const m = String(text || '').match(/(\d+)\s*월/);
+  return m ? Number(m[1]) : null;
+}
+
+function isSubActiveThisMonth(sub){
+  if(sub.cycle === '월간') return true;
+  if(sub.cycle === '연간') return getMonthFromDateText(sub.date) === currentMonth + 1;
+  return false;
+}
+
+function getActiveSubscriptions(){
+  return appData.global.subscriptions.filter(isSubActiveThisMonth);
+}
+
+function getSubscriptionTotal(){
+  return sum(getActiveSubscriptions());
+}
+
+function getNormalExpenseTotal(){
+  return sum(getMonthData().expenses);
+}
+
+function getTotalExpense(){
+  return getNormalExpenseTotal() + getSubscriptionTotal();
+}
+
+function getIncomeTotal(){
+  return sum(getMonthData().income);
+}
+
+function getAssetTotal(type=null){
+  const assets = getMonthData().assets || [];
+  return sum(type ? assets.filter(a => a.type === type) : assets);
+}
+
+function getDebtTotal(type=null){
+  const debts = getMonthData().debts || [];
+  return sum(type ? debts.filter(d => d.type === type) : debts);
+}
+
+function getNetWorth(){
+  return getAssetTotal() - getDebtTotal();
+}
+
+function getPreviousMonthData(){
+  const y = currentMonth === 0 ? currentYear - 1 : currentYear;
+  const m = currentMonth === 0 ? 11 : currentMonth - 1;
+  return appData.months[monthKey(y, m)] || null;
+}
+
+function getPreviousNetWorth(){
+  const previous = getPreviousMonthData();
+  if(!previous) return null;
+  return sum(previous.assets) - sum(previous.debts);
+}
+
+function getYearStartNetWorth(){
+  for(let m=0; m<12; m++){
+    const data = appData.months[monthKey(currentYear, m)];
+    if(data) return sum(data.assets) - sum(data.debts);
+  }
+  return getNetWorth();
+}
+
+function itemRows(items, updateFn, deleteFn){
+  return (items || []).map((item, index)=>{
+    const name = escapeHtml(item.name);
+    const amount = Number(item.amount || 0).toLocaleString('ja-JP');
+    return `
+      <div class="input-row">
+        <input value="${name}" onchange="${updateFn}(${index}, 'name', this.value)" placeholder="항목명">
+        <input class="amount" value="${amount}" onchange="${updateFn}(${index}, 'amount', this.value)" placeholder="금액">
+        <button class="x-btn" onclick="${deleteFn}(${index})">×</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function expenseInputRows(){
+  return itemRows(getMonthData().expenses, 'updateExpenseItem', 'deleteExpenseItem');
+}
+
+function renderExpenses(){
+  const list = document.getElementById('expense-list');
+  if(!list) return;
+
+  list.innerHTML = expenseInputRows();
+  document.getElementById('expense-normal-total').textContent = fmt(getNormalExpenseTotal());
+  document.getElementById('expense-subscription-total').textContent = fmt(getSubscriptionTotal());
+  document.getElementById('expense-grand-total').textContent = fmt(getTotalExpense());
+}
+
+function updateExpenseItem(index, key, value){
+  const items = getMonthData().expenses;
+  if(!items[index]) return;
+  items[index][key] = key === 'amount' ? parseMoney(value) : value;
+  saveAppData();
+  render();
+}
+
+function addExpenseItem(){
+  const nameInput = document.getElementById('expense-name-input');
+  const amountInput = document.getElementById('expense-amount-input');
+  const name = nameInput.value.trim();
+  const amount = parseMoney(amountInput.value);
+  if(!name || !amount) return;
+  getMonthData().expenses.push({name, amount});
+  nameInput.value = '';
+  amountInput.value = '';
+  saveAppData();
+  render();
+}
+
+function deleteExpenseItem(index){
+  getMonthData().expenses.splice(index, 1);
+  saveAppData();
+  render();
+}
+
+function subscriptionInputRows(){
+  const visibleSubs = appData.global.subscriptions
+    .map((sub, index) => ({...sub, originalIndex:index}))
+    .filter(isSubActiveThisMonth);
+
+  return visibleSubs.map((sub)=>{
+    const index = sub.originalIndex;
+    const name = escapeHtml(sub.name);
+    const date = escapeHtml(sub.date);
+    const amount = Number(sub.amount || 0).toLocaleString('ja-JP');
+
+    return `
+      <div class="subs-input-row">
+        <input value="${name}" onchange="updateSubscription(${index}, 'name', this.value)" placeholder="항목명">
+        <input value="${date}" onchange="updateSubscription(${index}, 'date', this.value)" placeholder="갱신일">
+        <input class="amount" value="${amount}" onchange="updateSubscription(${index}, 'amount', this.value)" placeholder="금액">
+        <button class="subs-delete" onclick="deleteSubscription(${index})">×</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderSubscriptions(){
+  const active = getActiveSubscriptions();
+  const monthly = appData.global.subscriptions.filter(s => s.cycle === '월간');
+  const annualThisMonth = appData.global.subscriptions.filter(s => s.cycle === '연간' && isSubActiveThisMonth(s));
+
+  const currentTotalEl = document.getElementById('subs-current-total');
+  if(!currentTotalEl) return;
+
+  currentTotalEl.textContent = fmt(sum(active));
+  document.getElementById('subs-monthly-total').textContent = fmt(sum(monthly));
+  document.getElementById('subs-annual-total').textContent = fmt(sum(annualThisMonth));
+  document.getElementById('subs-current-count').textContent = active.length + '개';
+  document.getElementById('subs-input-list').innerHTML = subscriptionInputRows();
+}
+
+function updateSubscription(index, key, value){
+  const item = appData.global.subscriptions[index];
+  if(!item) return;
+  item[key] = key === 'amount' ? parseMoney(value) : value;
+  saveAppData();
+  render();
+}
+
+function addSubscription(){
+  const addBox = document.querySelector('.subs-add-box');
+  const nameInput = document.getElementById('sub-name-input');
+  const amountInput = document.getElementById('sub-amount-input');
+
+  if(addBox && !addBox.classList.contains('active')){
+    addBox.classList.add('active');
+    if(nameInput) nameInput.focus();
+    return;
+  }
+
+  const name = nameInput.value.trim();
+  const cycle = document.getElementById('sub-cycle-input').value.trim() || '월간';
+  const date = document.getElementById('sub-date-input').value.trim();
+  const amount = parseMoney(amountInput.value);
+  const memo = document.getElementById('sub-memo-input').value.trim();
+
+  if(!name || !amount) return;
+
+  appData.global.subscriptions.push({name, cycle, date, amount, memo});
+
+  nameInput.value = '';
+  document.getElementById('sub-cycle-input').value = '';
+  document.getElementById('sub-date-input').value = '';
+  amountInput.value = '';
+  document.getElementById('sub-memo-input').value = '';
+
+  if(addBox) addBox.classList.remove('active');
+  saveAppData();
+  render();
+}
+
+function deleteSubscription(index){
+  appData.global.subscriptions.splice(index, 1);
+  saveAppData();
+  render();
+}
+
+function renderIncome(){
+  const md = getMonthData();
+  const incomeList = document.getElementById('income-list');
+  if(incomeList) incomeList.innerHTML = itemRows(md.income, 'updateIncomeItem', 'deleteIncomeItem');
+  document.getElementById('income-row-total').textContent = fmt(getIncomeTotal());
+}
+
+function updateIncomeItem(index, key, value){
+  const items = getMonthData().income;
+  if(!items[index]) return;
+  items[index][key] = key === 'amount' ? parseMoney(value) : value;
+  saveAppData();
+  render();
+}
+
+function addIncomeItem(){
+  const nameInput = document.getElementById('income-name-input');
+  const amountInput = document.getElementById('income-amount-input');
+  const name = nameInput.value.trim();
+  const amount = parseMoney(amountInput.value);
+  if(!name || !amount) return;
+  getMonthData().income.push({name, amount});
+  nameInput.value = '';
+  amountInput.value = '';
+  saveAppData();
+  render();
+}
+
+function deleteIncomeItem(index){
+  getMonthData().income.splice(index, 1);
+  saveAppData();
+  render();
+}
+
+function filteredRows(items, type, updateFn, deleteFn){
+  return (items || [])
+    .map((item, index) => ({...item, originalIndex:index}))
+    .filter(item => item.type === type)
+    .map(item=>{
+      const index = item.originalIndex;
+      const name = escapeHtml(item.name);
+      const amount = Number(item.amount || 0).toLocaleString('ja-JP');
+      return `
+        <div class="input-row">
+          <input value="${name}" onchange="${updateFn}(${index}, 'name', this.value)" placeholder="항목명">
+          <input class="amount" value="${amount}" onchange="${updateFn}(${index}, 'amount', this.value)" placeholder="금액">
+          <button class="x-btn" onclick="${deleteFn}(${index})">×</button>
+        </div>
+      `;
+    }).join('');
+}
+
+function renderAssets(){
+  const md = getMonthData();
+  const liquidList = document.getElementById('liquid-asset-list');
+  const investList = document.getElementById('saving-invest-list');
+  if(liquidList) liquidList.innerHTML = filteredRows(md.assets, 'liquid', 'updateAssetItem', 'deleteAssetItem');
+  if(investList) investList.innerHTML = filteredRows(md.assets, 'investment', 'updateAssetItem', 'deleteAssetItem');
+
+  document.getElementById('liquid-asset-row-total').textContent = fmt(getAssetTotal('liquid'));
+  document.getElementById('saving-invest-row-total').textContent = fmt(getAssetTotal('investment'));
+  document.getElementById('asset-row-total').textContent = fmt(getAssetTotal());
+}
+
+function updateAssetItem(index, key, value){
+  const items = getMonthData().assets;
+  if(!items[index]) return;
+  items[index][key] = key === 'amount' ? parseMoney(value) : value;
+  saveAppData();
+  render();
+}
+
+function addAssetItem(type){
+  const id = type === 'liquid' ? 'liquid-asset' : 'saving-invest';
+  const nameInput = document.getElementById(id + '-name-input');
+  const amountInput = document.getElementById(id + '-amount-input');
+  const name = nameInput.value.trim();
+  const amount = parseMoney(amountInput.value);
+  if(!name || !amount) return;
+  getMonthData().assets.push({name, amount, type});
+  nameInput.value = '';
+  amountInput.value = '';
+  saveAppData();
+  render();
+}
+
+function deleteAssetItem(index){
+  getMonthData().assets.splice(index, 1);
+  saveAppData();
+  render();
+}
+
+function renderDebts(){
+  const md = getMonthData();
+  const riboList = document.getElementById('ribo-list');
+  const installmentList = document.getElementById('installment-list');
+  const paymentList = document.getElementById('payment-list');
+
+  if(riboList) riboList.innerHTML = filteredRows(md.debts, 'ribo', 'updateDebtItem', 'deleteDebtItem');
+  if(installmentList) installmentList.innerHTML = filteredRows(md.debts, 'installment', 'updateDebtItem', 'deleteDebtItem');
+  if(paymentList) paymentList.innerHTML = itemRows(md.payments, 'updatePaymentItem', 'deletePaymentItem');
+
+  const totalDebt = getDebtTotal();
+  const previous = getPreviousMonthData();
+  const previousDebt = previous ? sum(previous.debts) : null;
+  const monthChange = previousDebt === null ? 0 : previousDebt - totalDebt;
+  const initialDebt = Number(appData.global.initialDebt || totalDebt || 1);
+  const progress = Math.max(0, Math.min(100, Math.round((1 - totalDebt / initialDebt) * 100)));
+
+  document.getElementById('debt-total-row').textContent = fmt(totalDebt);
+  document.getElementById('debt-ribo-row').textContent = fmt(getDebtTotal('ribo'));
+  document.getElementById('debt-install-row').textContent = fmt(getDebtTotal('installment'));
+  document.getElementById('debt-month-change').textContent = fmt(monthChange);
+  document.getElementById('debt-progress-label').textContent = progress + '%';
+  document.getElementById('debt-progress-fill').style.width = progress + '%';
+}
+
+function updateDebtItem(index, key, value){
+  const items = getMonthData().debts;
+  if(!items[index]) return;
+  items[index][key] = key === 'amount' ? parseMoney(value) : value;
+  saveAppData();
+  render();
+}
+
+function addDebtItem(type){
+  const id = type === 'ribo' ? 'ribo' : 'installment';
+  const nameInput = document.getElementById(id + '-name-input');
+  const amountInput = document.getElementById(id + '-amount-input');
+  const name = nameInput.value.trim();
+  const amount = parseMoney(amountInput.value);
+  if(!name || !amount) return;
+  getMonthData().debts.push({name, amount, type});
+  nameInput.value = '';
+  amountInput.value = '';
+  saveAppData();
+  render();
+}
+
+function deleteDebtItem(index){
+  getMonthData().debts.splice(index, 1);
+  saveAppData();
+  render();
+}
+
+function updatePaymentItem(index, key, value){
+  const items = getMonthData().payments;
+  if(!items[index]) return;
+  items[index][key] = key === 'amount' ? parseMoney(value) : value;
+  saveAppData();
+  render();
+}
+
+function addPaymentItem(){
+  const nameInput = document.getElementById('payment-name-input');
+  const amountInput = document.getElementById('payment-amount-input');
+  const name = nameInput.value.trim();
+  const amount = parseMoney(amountInput.value);
+  if(!name || !amount) return;
+  getMonthData().payments.push({name, amount});
+  nameInput.value = '';
+  amountInput.value = '';
+  saveAppData();
+  render();
+}
+
+function deletePaymentItem(index){
+  getMonthData().payments.splice(index, 1);
+  saveAppData();
+  render();
+}
+
+function updateMonthTitle(){
+  document.getElementById('month-title').textContent = currentYear + '년 ' + (currentMonth + 1) + '월';
+  document.getElementById('trend-title').textContent = currentYear + '년 자산 · 부채 추이';
+}
+
+function changeMonth(diff){
+  currentMonth += diff;
+  if(currentMonth < 0){currentMonth=11;currentYear--}
+  if(currentMonth > 11){currentMonth=0;currentYear++}
+  updateMonthTitle();
+  getMonthData();
+  render();
+}
+
+function openPage(id){
+  document.querySelectorAll('.quick-btn').forEach(b=>b.classList.remove('active'));
+  const activeBtn = document.querySelector('[data-tab="' + id + '"]');
+  if(activeBtn) activeBtn.classList.add('active');
+
+  const summary = document.querySelector('.summary-view');
+  document.querySelectorAll('.inline-panel').forEach(p=>p.classList.remove('active'));
+
+  if(id === 'summary'){
+    if(summary) summary.classList.remove('hidden');
+    return;
+  }
+
+  if(summary) summary.classList.add('hidden');
+  const panel = document.getElementById('inline-' + id);
+  if(panel) panel.classList.add('active');
+}
+
+function saveBudget(){
+  const input = document.getElementById('budget-input');
+  if(!input) return;
+  getMonthData().monthBudget = parseMoney(input.value);
+  input.value = getMonthData().monthBudget.toLocaleString('ja-JP');
+  saveAppData();
+  render();
+}
+
+
+
+function getYearSeries(type){
+  let lastValue = 0;
+  const arr = [];
+  for(let m=0; m<12; m++){
+    const data = appData.months[monthKey(currentYear, m)];
+    if(data){
+      lastValue = type === 'asset' ? sum(data.assets) : sum(data.debts);
+    }
+    arr.push(lastValue);
+  }
+  return arr;
+}
+
+function render(){
+  const md = getMonthData();
+  const today = new Date();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const isCurrentMonth = today.getFullYear() === currentYear && today.getMonth() === currentMonth;
+  const remainingDays = isCurrentMonth ? Math.max(1, daysInMonth - today.getDate() + 1) : daysInMonth;
+
+  const income = getIncomeTotal();
+  const totalExpense = getTotalExpense();
+  const netWorth = getNetWorth();
+  const previousNetWorth = getPreviousNetWorth();
+  const netChangeMonth = previousNetWorth === null ? 0 : netWorth - previousNetWorth;
+  const netChangeYear = netWorth - getYearStartNetWorth();
+  const remainingBudget = md.monthBudget - totalExpense;
+  const dailyBudget = remainingBudget / remainingDays;
+  const rate = md.monthBudget > 0 ? Math.round(remainingBudget / md.monthBudget * 1000) / 10 : 0;
+
+  document.getElementById('income-total').textContent = fmt(income);
+  document.getElementById('expense-total').textContent = fmt(totalExpense);
+  document.getElementById('net-worth').textContent = fmt(netWorth);
+  document.getElementById('net-change-month').textContent = (netChangeMonth >= 0 ? '+' : '') + fmt(netChangeMonth);
+  document.getElementById('net-change-year').textContent = (netChangeYear >= 0 ? '+' : '') + fmt(netChangeYear);
+
+  document.getElementById('month-budget').textContent = fmt(md.monthBudget);
+  const budgetInput = document.getElementById('budget-input');
+  if(budgetInput && document.activeElement !== budgetInput) budgetInput.value = md.monthBudget.toLocaleString('ja-JP');
+
+  document.getElementById('remaining-budget').textContent = fmt(remainingBudget);
+  document.getElementById('remaining-rate').textContent = '(' + rate + '%)';
+  document.getElementById('daily-budget').textContent = fmt(dailyBudget);
+  document.getElementById('daily-base').textContent = '(' + remainingDays + '일 기준)';
+
+  document.getElementById('current-asset').textContent = fmt(getAssetTotal());
+  document.getElementById('current-debt').textContent = fmt(getDebtTotal());
+
+  const previous = getPreviousMonthData();
+  const assetChange = previous ? getAssetTotal() - sum(previous.assets) : 0;
+  const debtChange = previous ? getDebtTotal() - sum(previous.debts) : 0;
+  document.getElementById('asset-change').textContent = (assetChange >= 0 ? '+' : '') + fmt(assetChange);
+  document.getElementById('debt-change').textContent = fmt(debtChange);
+
+  renderChart();
+  renderSubscriptions();
+  renderExpenses();
+  renderIncome();
+  renderAssets();
+  renderDebts();
+}
+
+function scalePoints(values, axisMax, left, top, width, height){
+  const denom = Math.max(1, values.length - 1);
+  return values.map((v,i)=>{
+    const x = left + (width / denom) * i;
+    const y = top + height - ((v || 0) / axisMax) * height;
+    return {x,y,v,i};
+  });
+}
+
+function renderChart(){
+  const svg = document.getElementById('trend-chart');
+  const left = 68, top = 32, width = 535, height = 205;
+  const assetValues = getYearSeries('asset');
+  const debtValues = getYearSeries('debt');
+  const assetMax = Math.max(1000000, Math.ceil(Math.max(...assetValues, 1) / 500000) * 500000);
+  const debtMax = Math.max(1000000, Math.ceil(Math.max(...debtValues, 1) / 500000) * 500000);
+  const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+
+  const aPts = scalePoints(assetValues, assetMax, left, top, width, height);
+  const dPts = scalePoints(debtValues, debtMax, left, top, width, height);
+  const line = pts => pts.map((p,i)=>(i?'L':'M')+p.x+' '+p.y).join(' ');
+
+  const ticksA = [assetMax, assetMax*.75, assetMax*.5, assetMax*.25, 0];
+  const ticksD = [debtMax, debtMax*.75, debtMax*.5, debtMax*.25, 0];
+
+  let html = '';
+  ticksA.forEach((t,idx)=>{
+    const y = top + height - (t/assetMax)*height;
+    html += '<line class="grid-line" x1="'+left+'" y1="'+y+'" x2="'+(left+width)+'" y2="'+y+'"></line>';
+    html += '<text class="axis-blue" x="6" y="'+(y+4)+'">'+man(t)+'</text>';
+    html += '<text class="axis-purple" x="'+(left+width+10)+'" y="'+(y+4)+'">'+man(ticksD[idx])+'</text>';
+  });
+
+  html += '<path class="asset-line" d="'+line(aPts)+'"></path>';
+  html += '<path class="debt-line" d="'+line(dPts)+'"></path>';
+  html += aPts.map(p=>'<circle class="asset-dot" cx="'+p.x+'" cy="'+p.y+'" r="4.5"></circle>').join('');
+  html += dPts.map(p=>'<circle class="debt-dot" cx="'+p.x+'" cy="'+p.y+'" r="4.5"></circle>').join('');
+  html += aPts.map((p,i)=>'<text class="month-label '+(i===currentMonth?'current-month':'')+'" x="'+(p.x-10)+'" y="276">'+months[i]+'</text>').join('');
+
+  svg.innerHTML = html;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  getMonthData();
+  updateMonthTitle();
+  render();
+});
+</script>
+
+</body>
+</html>
