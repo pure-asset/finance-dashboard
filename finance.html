@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="ko">
 <head>
@@ -1444,11 +1443,7 @@ button,input{font-family:inherit}
         <div class="row"><span>총 부채</span><span id="debt-total-row">¥0</span></div>
         <div class="row"><span>리보 잔액</span><span id="debt-ribo-row">¥0</span></div>
         <div class="row"><span>분할 잔액</span><span id="debt-install-row">¥0</span></div>
-        <div class="row"><span>전월 대비 감소</span><span id="debt-month-change" style="color:var(--green)">¥0</span></div>
-        <div class="progress-wrap">
-          <div class="progress-label"><span>부채 청산 진행률</span><span id="debt-progress-label">0%</span></div>
-          <div class="progress-bg"><div class="progress-fill" id="debt-progress-fill" style="width:0%"></div></div>
-        </div>
+        <div class="row"><span>전월 대비 증감</span><span id="debt-month-change">➖ ¥0</span></div>
       </div>
 
       <div class="detail-card">
@@ -1666,8 +1661,7 @@ function loadAppData(){
   }catch(e){}
   return {
     global:{
-      subscriptions: structuredClone(defaultSubscriptions),
-      initialDebt: 5000000
+      subscriptions: structuredClone(defaultSubscriptions)
     },
     months:{
       [seededMonthKey]: defaultMonthData(true)
@@ -2310,17 +2304,13 @@ function renderDebts(){
 
   const totalDebt = getDebtTotal();
   const previous = getPreviousMonthData();
-  const previousDebt = previous ? sum(previous.debts) : null;
-  const monthChange = previousDebt === null ? 0 : previousDebt - totalDebt;
-  const initialDebt = Number(appData.global.initialDebt || totalDebt || 1);
-  const progress = Math.max(0, Math.min(100, Math.round((1 - totalDebt / initialDebt) * 100)));
+  const previousDebt = previous ? sum(previous.debts || []) : null;
+  const monthChange = previousDebt === null ? 0 : totalDebt - previousDebt;
 
   document.getElementById('debt-total-row').textContent = fmt(totalDebt);
   document.getElementById('debt-ribo-row').textContent = fmt(getDebtTotal('ribo'));
   document.getElementById('debt-install-row').textContent = fmt(getDebtTotal('installment'));
-  document.getElementById('debt-month-change').textContent = fmt(monthChange);
-  document.getElementById('debt-progress-label').textContent = progress + '%';
-  document.getElementById('debt-progress-fill').style.width = progress + '%';
+  setChangeElement('debt-month-change', monthChange);
 }
 
 function updateDebtItem(index, key, value){
