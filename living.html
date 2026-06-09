@@ -814,6 +814,54 @@
     }
   }
 
+  /* ── Month navigator size override: match yearly summary bar ── */
+  .month-nav {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 16px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    padding: 8px 22px !important;
+    margin-top: 16px !important;
+    background: var(--surface) !important;
+    border: 1.5px solid var(--border) !important;
+    border-radius: 99px !important;
+    box-shadow: var(--shadow) !important;
+  }
+
+  .month-nav button {
+    background: none !important;
+    border: none !important;
+    color: var(--text2) !important;
+    font-size: 16px !important;
+    cursor: pointer !important;
+    padding: 2px 8px !important;
+    border-radius: 50% !important;
+    min-height: auto !important;
+    height: auto !important;
+    line-height: 1.2 !important;
+    box-shadow: none !important;
+  }
+
+  .month-nav span {
+    font-size: 16px !important;
+    font-weight: 900 !important;
+    min-width: 76px !important;
+    text-align: center !important;
+    line-height: 1.2 !important;
+  }
+
+  @media (max-width: 600px) {
+    .month-nav {
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: none !important;
+      justify-content: center !important;
+      padding: 8px 22px !important;
+    }
+  }
 
 
 /* Remove bold styling across living dashboard */
@@ -828,56 +876,90 @@ h1,.month-nav span,.btn,.section-title,.sum-label,.sum-amount,.shared-name,
 }
 
 
-/* ── Unified period navigator: living + yearly ── */
-.year-nav,
-.month-nav {
-  display: inline-flex !important;
+/* ── Unified input rows: Essentials + Ad hoc ── */
+.essentials-add-row{
+  grid-template-columns: 150px minmax(0, 1fr) 120px 74px !important;
   align-items: center !important;
-  justify-content: center !important;
-  gap: 16px !important;
-  width: auto !important;
-  min-width: 0 !important;
-  max-width: none !important;
-  padding: 8px 22px !important;
-  margin-top: 16px !important;
-  background: var(--surface) !important;
-  border: 1.5px solid var(--border) !important;
-  border-radius: 99px !important;
-  box-shadow: var(--shadow) !important;
 }
 
-.year-nav button,
-.month-nav button {
-  background: none !important;
-  border: none !important;
-  color: var(--text2) !important;
-  font-size: 16px !important;
-  cursor: pointer !important;
-  padding: 2px 8px !important;
-  border-radius: 50% !important;
-  min-height: auto !important;
-  height: auto !important;
+.essentials-input-sm,
+.him-inline-input{
+  min-height: 44px !important;
+  height: 44px !important;
+  font-size: 11px !important;
   line-height: 1.2 !important;
-  box-shadow: none !important;
+  padding: 6px 10px !important;
+  border-radius: 8px !important;
 }
 
-.year-nav span,
-.month-nav span {
-  font-size: 16px !important;
-  font-weight: 400 !important;
-  min-width: 76px !important;
-  text-align: center !important;
+.essentials-input-sm::placeholder,
+.him-inline-input::placeholder{
+  font-size: 11px !important;
+  letter-spacing: -0.04em;
+}
+
+.essentials-add-btn,
+.him-add-btn{
+  min-width: 74px !important;
+  width: 74px !important;
+  min-height: 44px !important;
+  height: 44px !important;
+  padding: 0 12px !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+}
+
+.essentials-add-btn{
+  background: linear-gradient(135deg, var(--him), #7aaeff) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(91,141,238,0.3) !important;
+}
+
+.essentials-add-btn:hover{
+  opacity: 0.88 !important;
+  background: linear-gradient(135deg, var(--him), #7aaeff) !important;
+  color: #fff !important;
+}
+
+.him-add-row{
+  grid-template-columns: minmax(0, 1fr) 120px 74px !important;
+  gap: 8px !important;
+  align-items: center !important;
+  padding: 16px 18px !important;
+}
+
+.him-add-row .fg{
+  display: block !important;
+}
+
+.him-add-row .fg label{
+  display: none !important;
+}
+
+.him-add-row input{
+  min-height: 44px !important;
+  height: 44px !important;
+  font-size: 11px !important;
   line-height: 1.2 !important;
+  padding: 6px 10px !important;
+  border-radius: 8px !important;
 }
 
-@media (max-width: 700px) {
-  .year-nav,
-  .month-nav {
-    width: auto !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    justify-content: center !important;
-    padding: 8px 22px !important;
+.him-add-row input::placeholder{
+  font-size: 11px !important;
+  letter-spacing: -0.04em;
+}
+
+@media (max-width: 600px){
+  .essentials-add-row,
+  .him-add-row{
+    grid-template-columns: 1fr !important;
+  }
+  .essentials-add-btn,
+  .him-add-btn{
+    width: 100% !important;
+    min-width: 100% !important;
   }
 }
 
@@ -952,12 +1034,10 @@ h1,.month-nav span,.btn,.section-title,.sum-label,.sum-amount,.shared-name,
 <div class="him-section">
   <div class="him-add-row no-print">
     <div class="fg">
-      <label>항목</label>
-      <input type="text" id="him-desc" placeholder="예: 지난번 저녁 밥값">
+      <input class="him-inline-input" type="text" id="him-desc" placeholder="항목 (예: 지난번 저녁 밥값)">
     </div>
     <div class="fg">
-      <label>금액 (¥)</label>
-      <input type="number" id="him-amount" placeholder="0" min="0">
+      <input class="him-inline-input" type="number" id="him-amount" placeholder="금액" min="0">
     </div>
     <button class="him-add-btn" onclick="addHimItem()">+ 추가</button>
   </div>
@@ -1480,7 +1560,7 @@ function renderSharedGrid() {
           <span class="shared-name">${def.name}</span>
         </div>
         <div class="essentials-add-row no-print">
-          <input class="essentials-input-sm" type="text" id="ess-place" placeholder="장소 (예:Amazon)" ${isOn ? '' : 'disabled'}>
+          <input class="essentials-input-sm" type="text" id="ess-place" placeholder="장소 (예: Amazon)" ${isOn ? '' : 'disabled'}>
           <input class="essentials-input-sm" type="text" id="ess-desc" placeholder="내용 (예: 샴푸, 세제)" ${isOn ? '' : 'disabled'}>
           <input class="essentials-input-sm" type="number" id="ess-amount" placeholder="금액" min="0" ${isOn ? '' : 'disabled'}
             onkeydown="if(event.key==='Enter') addEssentialItem()">
