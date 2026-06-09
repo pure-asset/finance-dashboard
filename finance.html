@@ -1,5 +1,7 @@
 
 
+
+
 <!doctype html>
 <html lang="ko">
 <head>
@@ -2139,6 +2141,22 @@ body.auth-ready #logout-btn{
   visibility:visible!important;
 }
 
+
+/* v49 cloud recursion fix */
+[hidden], .force-hidden{
+  display:none!important;
+  visibility:hidden!important;
+}
+body.auth-ready #sync-btn,
+body.auth-ready #logout-btn{
+  display:inline-flex!important;
+  visibility:visible!important;
+}
+body.auth-ready #login-btn{
+  display:none!important;
+  visibility:hidden!important;
+}
+
 </style>
 
 
@@ -2440,9 +2458,12 @@ if (typeof firebase !== 'undefined' && !firebase.apps.length) {
 
 const auth = firebase.auth();
 const db = firebase.firestore();
+
 let currentUser = null;
 let cloudTimer = null;
 let isApplyingCloud = false;
+let isCloudSaving = false;
+let lastCloudDataString = '';
 
 function cloudDocRef(){
   if(!currentUser) return null;
@@ -2453,7 +2474,7 @@ function updateSyncUI(status, userText){
   const statusEl = document.getElementById('cloud-status-text');
   const userEl = document.getElementById('cloud-user-email');
   if(statusEl) statusEl.textContent = status;
-  if(userEl) userEl.textContent = userText;
+  if(userEl) userEl.textContent = userText || '';
 }
 
 function updateAuthButtons(user){
@@ -2477,49 +2498,73 @@ function updateAuthButtons(user){
   }
 }
 
+function getSerializedAppData(){
+  return JSON.stringify(appData);
+}
+
 async function saveCloudNow(){
   const ref = cloudDocRef();
-  if(!ref || isApplyingCloud) return;
+  if(!ref || isApplyingCloud || isCloudSaving) return;
+
+  const serialized = getSerializedAppData();
+  if(serialized === lastCloudDataString){
+    updateSyncUI('클라우드 동기화 완료', currentUser.email || '로그인됨');
+    return;
+  }
+
+  isCloudSaving = true;
   try{
+    localStorage.setItem(STORAGE_KEY, serialized);
     await ref.set({
-      data: localStorage.getItem(STORAGE_KEY) || JSON.stringify(appData),
+      data: serialized,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge:true });
+    lastCloudDataString = serialized;
     updateSyncUI('클라우드 동기화 완료', currentUser.email || '로그인됨');
   }catch(err){
     console.error(err);
     updateSyncUI('동기화 실패', err.message);
+  }finally{
+    isCloudSaving = false;
   }
 }
 
 function queueCloudSave(){
-  if(!currentUser || isApplyingCloud) return;
+  if(!currentUser || isApplyingCloud || isCloudSaving) return;
   clearTimeout(cloudTimer);
-  cloudTimer = setTimeout(saveCloudNow, 700);
+  cloudTimer = setTimeout(() => saveCloudNow(), 900);
 }
 
 async function loadCloudData(){
   const ref = cloudDocRef();
   if(!ref) return;
+
+  isApplyingCloud = true;
   try{
     updateSyncUI('클라우드 불러오는 중...', currentUser.email || '로그인됨');
     const snap = await ref.get();
-    if(snap.exists && snap.data()?.data){
-      isApplyingCloud = true;
-      localStorage.setItem(STORAGE_KEY, snap.data().data);
-      appData = loadAppData();
+
+    if(snap.exists && snap.data() && snap.data().data){
+      const cloudString = snap.data().data;
+      lastCloudDataString = cloudString;
+
+      localStorage.setItem(STORAGE_KEY, cloudString);
+      appData = JSON.parse(cloudString);
       window.appData = appData;
-      isApplyingCloud = false;
+
       render();
-      updateSyncUI('클라우드 불러오기 완료', currentUser.email || '로그인됨');
+      updateSyncUI('클라우드 동기화 완료', currentUser.email || '로그인됨');
     }else{
+      isApplyingCloud = false;
       await saveCloudNow();
       updateSyncUI('첫 클라우드 저장 완료', currentUser.email || '로그인됨');
+      return;
     }
   }catch(err){
     console.error(err);
-    isApplyingCloud = false;
     updateSyncUI('클라우드 불러오기 실패', err.message);
+  }finally{
+    isApplyingCloud = false;
   }
 }
 
@@ -2546,10 +2591,6 @@ function syncNow(){
 window.signInWithGoogle = signInWithGoogle;
 window.signOutUser = signOutUser;
 window.syncNow = syncNow;
-
-window.signOutGoogle = window.signOutUser;
-window.saveCloudNow = window.syncNow;
-
 window.saveCloudNow = saveCloudNow;
 window.queueCloudSave = queueCloudSave;
 
@@ -2676,7 +2717,7 @@ let cloudSaveTimer = null;
 function saveAppData(){
   window.appData = appData;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-  if(typeof queueCloudSave === 'function') queueCloudSave();
+  if(!isApplyingCloud && typeof queueCloudSave === 'function') queueCloudSave();
 }
 
 
@@ -2763,6 +2804,8 @@ if(localStorage.getItem(DEBT_VERSION_KEY) !== '1'){
 
 function getMonthData(){
   const key = monthKey();
+  let changed = false;
+
   if(!appData.months[key]){
     const previousKey = monthKey(currentMonth === 0 ? currentYear - 1 : currentYear, currentMonth === 0 ? 11 : currentMonth - 1);
     const previous = appData.months[previousKey];
@@ -2773,11 +2816,18 @@ function getMonthData(){
       blank.debts = structuredClone(previous.debts || []);
     }
     appData.months[key] = blank;
-    saveAppData();
+    changed = true;
   }
+
+  const before = JSON.stringify(appData.months[key]);
   ensureMonthlyAssetIncomeDefaults(appData.months[key]);
   ensureMonthlyDebtDefaults(appData.months[key]);
-  saveAppData();
+  const after = JSON.stringify(appData.months[key]);
+
+  if(changed || before !== after){
+    saveAppData();
+  }
+
   return appData.months[key];
 }
 
@@ -2943,6 +2993,8 @@ function calculateLivingExpenseTotal(){
 
 function syncLivingExpenseFromLivingPage(){
   const md = getMonthData();
+  const before = JSON.stringify(md.expenses || []);
+
   const livingTotal = calculateLivingExpenseTotal();
   const subscriptionTotal = getSubscriptionTotal();
   const label = monthLabel();
@@ -2966,7 +3018,10 @@ function syncLivingExpenseFromLivingPage(){
     md.expenses.unshift({name: label + ' 구독료', amount: subscriptionTotal, source:'subscription'});
   }
 
-  saveAppData();
+  const after = JSON.stringify(md.expenses || []);
+  if(before !== after){
+    saveAppData();
+  }
 }
 
 function getLivingExpenseTotal(){
@@ -3703,13 +3758,20 @@ function renderChart(){
 }
 
 
+let lastLoadedUid = null;
+
 auth.onAuthStateChanged(async (user) => {
   currentUser = user;
   updateAuthButtons(user);
+
   if(user){
     updateSyncUI('클라우드 연결됨', user.email || '로그인됨');
-    await loadCloudData();
+    if(lastLoadedUid !== user.uid){
+      lastLoadedUid = user.uid;
+      await loadCloudData();
+    }
   }else{
+    lastLoadedUid = null;
     updateAuthButtons(null);
     updateSyncUI('로컬 저장 모드', 'Google 로그인하면 기기 간 동기화됩니다.');
   }
