@@ -2,6 +2,7 @@
 
 
 
+
 <!doctype html>
 <html lang="ko">
 <head>
@@ -1819,17 +1820,7 @@ header h1{
 .sync-actions .btn.danger{
   color:var(--me)!important;
 }
-.dashboard-hero,
-.hero-icon,
-.hero-title,
-.hero-month-nav,
-.hero-links,
-.cloud-panel,
-.cloud-row,
-.cloud-status,
-.cloud-actions{
-  all:unset;
-}
+
 @media(max-width:700px){
   .sync-bar{
     flex-direction:column!important;
@@ -2439,6 +2430,208 @@ body.auth-ready #login-btn{
   }
 }
 
+
+/* v55 stable runtime + mobile layout fix */
+#month-title{
+  display:inline-block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  min-width:120px!important;
+  color:var(--text)!important;
+}
+
+.quick-actions,
+.quick-btn,
+.month-nav button{
+  pointer-events:auto!important;
+  position:relative!important;
+  z-index:20!important;
+}
+
+@media(max-width:700px){
+  body{
+    padding:20px 10px 72px!important;
+    overflow-x:hidden!important;
+  }
+
+  .shell,
+  .sync-bar,
+  header,
+  .summary-card{
+    width:100%!important;
+    max-width:100%!important;
+  }
+
+  .action-bar{
+    width:auto!important;
+    max-width:820px!important;
+    margin:0 auto 22px!important;
+    display:flex!important;
+    gap:10px!important;
+    justify-content:center!important;
+  }
+
+  .action-bar .btn{
+    flex:0 0 auto!important;
+    width:auto!important;
+    min-width:auto!important;
+    padding:8px 14px!important;
+    min-height:36px!important;
+    font-size:12px!important;
+    white-space:nowrap!important;
+  }
+
+  .summary-card{
+    padding:18px 12px 22px!important;
+    border-radius:22px!important;
+  }
+
+  .summary-head{
+    margin-bottom:18px!important;
+  }
+
+  .quick-actions{
+    display:grid!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    gap:6px!important;
+    width:100%!important;
+  }
+
+  .quick-btn{
+    width:100%!important;
+    min-width:0!important;
+    min-height:40px!important;
+    height:auto!important;
+    padding:7px 3px!important;
+    border-radius:16px!important;
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:3px!important;
+    font-size:12px!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+    word-break:keep-all!important;
+  }
+
+  .kpi-grid,
+  .budget-grid,
+  .chart-summary,
+  .detail-grid{
+    grid-template-columns:1fr!important;
+  }
+
+  .chart-card{
+    padding:18px 10px 14px!important;
+    overflow:visible!important;
+  }
+
+  .chart-wrap{
+    height:260px!important;
+    min-height:260px!important;
+    overflow:visible!important;
+  }
+
+  .line-chart{
+    display:block!important;
+    width:100%!important;
+    height:260px!important;
+    min-height:260px!important;
+    overflow:visible!important;
+  }
+
+  .legend{
+    gap:14px!important;
+    flex-wrap:wrap!important;
+    font-size:12px!important;
+  }
+
+  .input-row{
+    grid-template-columns:minmax(0,1fr) minmax(92px,108px) 40px!important;
+    gap:7px!important;
+    align-items:center!important;
+  }
+
+  .input-row input{
+    min-height:40px!important;
+    height:40px!important;
+    padding:7px 9px!important;
+    font-size:13px!important;
+    min-width:0!important;
+  }
+
+  .x-btn,
+  .subs-delete{
+    width:40px!important;
+    min-width:40px!important;
+    height:40px!important;
+    min-height:40px!important;
+  }
+
+  .linked-row{
+    grid-template-columns:minmax(0,1fr) minmax(96px,112px) 86px!important;
+  }
+
+  .linked-actions{
+    grid-template-columns:40px 40px!important;
+    gap:6px!important;
+  }
+
+  #inline-subs .subs-input-row,
+  #inline-subs .subs-add-inline .subs-input-row{
+    display:grid!important;
+    grid-template-columns:minmax(72px,1fr) 50px 64px 76px 34px!important;
+    gap:5px!important;
+    align-items:center!important;
+  }
+
+  #inline-subs .subs-input-row input,
+  #inline-subs .subs-input-row select{
+    min-height:38px!important;
+    height:38px!important;
+    padding:6px 6px!important;
+    font-size:11px!important;
+    min-width:0!important;
+  }
+
+  #inline-subs .subs-input-row input:first-child{
+    font-size:12px!important;
+  }
+
+  #inline-subs .subs-delete{
+    width:34px!important;
+    min-width:34px!important;
+    height:38px!important;
+    min-height:38px!important;
+  }
+}
+
+@media(max-width:390px){
+  .quick-btn{
+    min-height:38px!important;
+    font-size:11px!important;
+    gap:2px!important;
+    padding:6px 2px!important;
+  }
+
+  .input-row{
+    grid-template-columns:minmax(0,1fr) 92px 36px!important;
+  }
+
+  .x-btn,
+  .subs-delete{
+    width:36px!important;
+    min-width:36px!important;
+  }
+
+  #inline-subs .subs-input-row,
+  #inline-subs .subs-add-inline .subs-input-row{
+    grid-template-columns:minmax(64px,1fr) 45px 58px 68px 32px!important;
+    gap:4px!important;
+  }
+}
+
 </style>
 
 
@@ -2712,12 +2905,7 @@ document.addEventListener('DOMContentLoaded', function(){
 </main>
 
 
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js">
-document.addEventListener('DOMContentLoaded', () => {
-  updateAuthButtons(null);
-});
-
-</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 
@@ -2734,12 +2922,14 @@ const firebaseConfig = {
   measurementId: "G-L6NWQJER72"
 };
 
-if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+const firebaseReady = (typeof firebase !== 'undefined' && firebase.auth && firebase.firestore);
+
+if (firebaseReady && !firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 
-const auth = firebase.auth();
-const db = firebase.firestore();
+const auth = firebaseReady ? firebase.auth() : null;
+const db = firebaseReady ? firebase.firestore() : null;
 
 let currentUser = null;
 let cloudTimer = null;
@@ -2748,7 +2938,7 @@ let isCloudSaving = false;
 let lastCloudDataString = '';
 
 function cloudDocRef(){
-  if(!currentUser) return null;
+  if(!db || !currentUser) return null;
   return db.collection('users').doc(currentUser.uid).collection('dashboards').doc('finance-dashboard');
 }
 
@@ -2851,6 +3041,10 @@ async function loadCloudData(){
 }
 
 function signInWithGoogle(){
+  if(!auth || typeof firebase === 'undefined'){
+    alert('Firebase 연결을 불러오지 못했습니다. 인터넷 연결 후 다시 시도해 주세요.');
+    return;
+  }
   const provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider).catch(err => {
     console.error(err);
@@ -2859,7 +3053,7 @@ function signInWithGoogle(){
 }
 
 function signOutUser(){
-  auth.signOut();
+  if(auth) auth.signOut();
 }
 
 function syncNow(){
@@ -3777,8 +3971,10 @@ function deletePaymentItem(index){
 }
 
 function updateMonthTitle(){
-  document.getElementById('month-title').textContent = currentYear + '년 ' + (currentMonth + 1) + '월';
-  document.getElementById('trend-title').textContent = currentYear + '년 자산 · 부채 추이';
+  const monthEl = document.getElementById('month-title');
+  const trendEl = document.getElementById('trend-title');
+  if(monthEl) monthEl.textContent = currentYear + '년 ' + (currentMonth + 1) + '월';
+  if(trendEl) trendEl.textContent = currentYear + '년 자산 · 부채 추이';
 }
 
 function changeMonth(diff){
@@ -4042,27 +4238,39 @@ function renderChart(){
 
 let lastLoadedUid = null;
 
-auth.onAuthStateChanged(async (user) => {
-  currentUser = user;
-  updateAuthButtons(user);
+if(auth){
+  auth.onAuthStateChanged(async (user) => {
+    currentUser = user;
+    updateAuthButtons(user);
 
-  if(user){
-    updateSyncUI('클라우드 연결됨', user.email || '로그인됨');
-    if(lastLoadedUid !== user.uid){
-      lastLoadedUid = user.uid;
-      await loadCloudData();
+    if(user){
+      updateSyncUI('클라우드 연결됨', user.email || '로그인됨');
+      if(lastLoadedUid !== user.uid){
+        lastLoadedUid = user.uid;
+        await loadCloudData();
+      }
+    }else{
+      lastLoadedUid = null;
+      updateAuthButtons(null);
+      updateSyncUI('로컬 저장 모드', 'Google 로그인하면 기기 간 동기화됩니다.');
     }
-  }else{
-    lastLoadedUid = null;
+  });
+}else{
+  document.addEventListener('DOMContentLoaded', () => {
     updateAuthButtons(null);
     updateSyncUI('로컬 저장 모드', 'Google 로그인하면 기기 간 동기화됩니다.');
-  }
-});
+  });
+}
 
 document.addEventListener('DOMContentLoaded', () => {
-  getMonthData();
-  updateMonthTitle();
-  render();
+  try{
+    getMonthData();
+    updateMonthTitle();
+    render();
+  }catch(err){
+    console.error(err);
+    updateMonthTitle();
+  }
 });
 </script>
 
