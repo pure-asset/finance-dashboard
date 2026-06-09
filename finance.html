@@ -1,14 +1,4 @@
 
-
-
-
-
-
-
-
-
-
-
 <!doctype html>
 <html lang="ko">
 <head>
@@ -1309,6 +1299,26 @@ button,input{font-family:inherit}
   font-weight:700;
 }
 
+
+/* keep all tab panels aligned consistently */
+.inline-panel,
+.summary-view,
+.subs-layout,
+.detail-grid{
+  width:100%!important;
+  max-width:100%!important;
+}
+#inline-subs,
+#inline-subs .subs-layout,
+#inline-subs .detail-card{
+  margin-left:0!important;
+  margin-right:0!important;
+}
+.subs-input-card,
+.subs-summary-card{
+  box-sizing:border-box!important;
+}
+
 </style>
 </head>
 <body>
@@ -1451,7 +1461,6 @@ button,input{font-family:inherit}
             <button class="x-btn" onclick="addDebtItem('ribo')">＋</button>
           </div>
         </div>
-        <button class="add-btn" onclick="addDebtItem('ribo')">+ 리보 항목 추가</button>
       </div>
 
       <div class="detail-card">
@@ -1464,7 +1473,6 @@ button,input{font-family:inherit}
             <button class="x-btn" onclick="addDebtItem('installment')">＋</button>
           </div>
         </div>
-        <button class="add-btn" onclick="addDebtItem('installment')">+ 분할 항목 추가</button>
       </div>
 
       <div class="detail-card">
@@ -1477,7 +1485,6 @@ button,input{font-family:inherit}
             <button class="x-btn" onclick="addPaymentItem()">＋</button>
           </div>
         </div>
-        <button class="add-btn" onclick="addPaymentItem()">+ 상환 항목 추가</button>
       </div>
     </div>
   </section>
@@ -1620,16 +1627,35 @@ function defaultMonthData(seed=false){
       {name:'현금', amount:0, type:'liquid'}
     ],
     debts: seed ? [
-      {name:'라쿠텐 쇼핑 리보', amount:1640000, type:'ribo'},
-      {name:'라쿠텐 캐싱 리보', amount:140000, type:'ribo'},
-      {name:'아멕스 리보', amount:96000, type:'ribo'},
-      {name:'라쿠텐 분할', amount:90000, type:'installment'},
-      {name:'아멕스 분할', amount:510000, type:'installment'}
-    ] : [],
+      {name:'Rakuten-쇼핑', amount:1641035, type:'ribo'},
+      {name:'Rakuten-캐싱', amount:140000, type:'ribo'},
+      {name:'Amex', amount:96646, type:'ribo'},
+      {name:'Saison', amount:135955, type:'ribo'},
+      {name:'Rakuten', amount:95780, type:'installment'},
+      {name:'Amex', amount:567007, type:'installment'}
+    ] : [
+      {name:'Rakuten-쇼핑', amount:1641035, type:'ribo'},
+      {name:'Rakuten-캐싱', amount:140000, type:'ribo'},
+      {name:'Amex', amount:96646, type:'ribo'},
+      {name:'Saison', amount:135955, type:'ribo'},
+      {name:'Rakuten', amount:95780, type:'installment'},
+      {name:'Amex', amount:567007, type:'installment'}
+    ],
     payments: seed ? [
-      {name:'리보 원금 상환', amount:73000},
-      {name:'분할 당월 청구', amount:112000}
-    ] : []
+      {name:'Rakuten-쇼핑리보', amount:0},
+      {name:'Rakuten-캐싱리보', amount:0},
+      {name:'Rakuten-할부', amount:0},
+      {name:'Amex-리보', amount:0},
+      {name:'Amex-할부', amount:0},
+      {name:'Saison-할부', amount:0}
+    ] : [
+      {name:'Rakuten-쇼핑리보', amount:0},
+      {name:'Rakuten-캐싱리보', amount:0},
+      {name:'Rakuten-할부', amount:0},
+      {name:'Amex-리보', amount:0},
+      {name:'Amex-할부', amount:0},
+      {name:'Saison-할부', amount:0}
+    ]
   };
 }
 
@@ -1687,6 +1713,44 @@ function ensureMonthlyAssetIncomeDefaults(md){
   });
 }
 
+
+function ensureMonthlyDebtDefaults(md){
+  if(!Array.isArray(md.debts)) md.debts = [];
+  if(!Array.isArray(md.payments)) md.payments = [];
+
+  const debtDefaults = [
+    {name:'Rakuten-쇼핑', amount:1641035, type:'ribo'},
+    {name:'Rakuten-캐싱', amount:140000, type:'ribo'},
+    {name:'Amex', amount:96646, type:'ribo'},
+    {name:'Saison', amount:135955, type:'ribo'},
+    {name:'Rakuten', amount:95780, type:'installment'},
+    {name:'Amex', amount:567007, type:'installment'}
+  ];
+
+  const paymentDefaults = [
+    'Rakuten-쇼핑리보',
+    'Rakuten-캐싱리보',
+    'Rakuten-할부',
+    'Amex-리보',
+    'Amex-할부',
+    'Saison-할부'
+  ];
+
+  debtDefaults.forEach(def => {
+    const exists = md.debts.some(item => item.name === def.name && item.type === def.type);
+    if(!exists){
+      md.debts.push({...def});
+    }
+  });
+
+  paymentDefaults.forEach(name => {
+    const exists = md.payments.some(item => item.name === name);
+    if(!exists){
+      md.payments.push({name, amount:0});
+    }
+  });
+}
+
 function getMonthData(){
   const key = monthKey();
   if(!appData.months[key]){
@@ -1702,6 +1766,7 @@ function getMonthData(){
     saveAppData();
   }
   ensureMonthlyAssetIncomeDefaults(appData.months[key]);
+  ensureMonthlyDebtDefaults(appData.months[key]);
   saveAppData();
   return appData.months[key];
 }
@@ -2024,7 +2089,15 @@ function updateExpenseItem(index, key, value){
   if(!items[index] || items[index].source === 'living' || items[index].source === 'subscription') return;
   items[index][key] = key === 'amount' ? parseMoney(value) : value;
   saveAppData();
-  render();
+  
+const DEBT_VERSION_KEY = 'finance_debt_defaults_v2_current';
+if(localStorage.getItem(DEBT_VERSION_KEY) !== '1'){
+  Object.values(appData.months || {}).forEach(md => ensureMonthlyDebtDefaults(md));
+  localStorage.setItem(DEBT_VERSION_KEY, '1');
+  saveAppData();
+}
+
+render();
 }
 
 function addExpenseItem(){
