@@ -2118,7 +2118,42 @@ header h1{font-family:'Gowun Dodum',sans-serif!important;font-size:26px!importan
   .action-bar .btn{flex:1!important;padding:8px 10px!important}
 }
 
+
+
+/* v48 auth visibility hard fix */
+body:not(.auth-ready) #sync-btn,
+body:not(.auth-ready) #logout-btn,
+#sync-btn.force-hidden,
+#logout-btn.force-hidden,
+button[hidden]{
+  display:none!important;
+  visibility:hidden!important;
+}
+body.auth-ready #login-btn{
+  display:none!important;
+  visibility:hidden!important;
+}
+body.auth-ready #sync-btn,
+body.auth-ready #logout-btn{
+  display:inline-flex!important;
+  visibility:visible!important;
+}
+
 </style>
+
+
+<script>/* v48 초기 인증 버튼 숨김 */
+document.addEventListener('DOMContentLoaded', function(){
+  document.body.classList.remove('auth-ready');
+  ['sync-btn','logout-btn'].forEach(function(id){
+    const el = document.getElementById(id);
+    if(el){
+      el.hidden = true;
+      el.classList.add('force-hidden');
+    }
+  });
+});
+</script>
 
 </head>
 <body>
@@ -2131,8 +2166,8 @@ header h1{font-family:'Gowun Dodum',sans-serif!important;font-size:26px!importan
   </div>
   <div class="sync-actions">
     <button class="btn blue" id="login-btn" onclick="signInWithGoogle()">Google 로그인</button>
-    <button class="btn" id="sync-btn" onclick="syncNow()" style="display:none">☁️ 지금 동기화</button>
-    <button class="btn danger" id="logout-btn" onclick="signOutUser()" style="display:none">로그아웃</button>
+    <button class="btn force-hidden" id="sync-btn" onclick="syncNow()" hidden>☁️ 지금 동기화</button>
+    <button class="btn danger force-hidden" id="logout-btn" onclick="signOutUser()" hidden>로그아웃</button>
   </div>
 </div>
 
@@ -2377,7 +2412,12 @@ header h1{font-family:'Gowun Dodum',sans-serif!important;font-size:26px!importan
 </main>
 
 
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js">
+document.addEventListener('DOMContentLoaded', () => {
+  updateAuthButtons(null);
+});
+
+</script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 
@@ -2420,9 +2460,21 @@ function updateAuthButtons(user){
   const loginBtn = document.getElementById('login-btn');
   const syncBtn = document.getElementById('sync-btn');
   const logoutBtn = document.getElementById('logout-btn');
-  if(loginBtn) loginBtn.style.display = user ? 'none' : 'inline-flex';
-  if(syncBtn) syncBtn.style.display = user ? 'inline-flex' : 'none';
-  if(logoutBtn) logoutBtn.style.display = user ? 'inline-flex' : 'none';
+
+  document.body.classList.toggle('auth-ready', !!user);
+
+  if(loginBtn){
+    loginBtn.hidden = !!user;
+    loginBtn.classList.toggle('force-hidden', !!user);
+  }
+  if(syncBtn){
+    syncBtn.hidden = !user;
+    syncBtn.classList.toggle('force-hidden', !user);
+  }
+  if(logoutBtn){
+    logoutBtn.hidden = !user;
+    logoutBtn.classList.toggle('force-hidden', !user);
+  }
 }
 
 async function saveCloudNow(){
@@ -3658,6 +3710,7 @@ auth.onAuthStateChanged(async (user) => {
     updateSyncUI('클라우드 연결됨', user.email || '로그인됨');
     await loadCloudData();
   }else{
+    updateAuthButtons(null);
     updateSyncUI('로컬 저장 모드', 'Google 로그인하면 기기 간 동기화됩니다.');
   }
 });
