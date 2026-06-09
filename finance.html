@@ -1,13 +1,4 @@
 
-
-
-
-
-
-
-
-
-
 <!doctype html>
 <html lang="ko">
 <head>
@@ -2640,6 +2631,16 @@ body.auth-ready #login-btn{
 
 
 /* v60 undo button */
+
+.save-btn{
+  color:var(--green)!important;
+}
+.save-btn:disabled{
+  opacity:.45!important;
+  cursor:not-allowed!important;
+  transform:none!important;
+}
+
 .undo-btn{
   color:var(--shared)!important;
 }
@@ -2695,6 +2696,7 @@ document.addEventListener('DOMContentLoaded', function(){
   <a href="living.html" class="btn" style="text-decoration:none">🏠 생활비 정산</a>
   <a href="yearly.html" class="btn" style="text-decoration:none">📊 연도별 서머리</a>
   <button class="btn undo-btn" id="undo-btn" onclick="undoLastChange()" disabled>↶ 되돌리기</button>
+  <button class="btn save-btn" id="manual-save-btn" onclick="manualSaveNow()">✓ 저장</button>
 </div>
 
 <main class="summary-card shell">
@@ -2784,9 +2786,9 @@ document.addEventListener('DOMContentLoaded', function(){
         <div class="input-list" id="expense-list"></div>
         <div class="input-list" style="margin-top:8px">
           <div class="input-row">
-            <input id="expense-name-input" placeholder="항목명 예: 카드 청구">
-            <input class="amount" id="expense-amount-input" placeholder="금액">
-            <button class="x-btn" onclick="addExpenseItem()">＋</button>
+            <input id="expense-name-input" placeholder="항목명 예: 카드 청구" onkeydown="handleExpenseAddKey(event)">
+            <input class="amount" id="expense-amount-input" placeholder="금액" onkeydown="handleExpenseAddKey(event)">
+            <button type="button" class="x-btn" onclick="addExpenseItem()">＋</button>
           </div>
         </div>
       </div>
@@ -3085,6 +3087,19 @@ function syncNow(){
 
 window.signInWithGoogle = signInWithGoogle;
 window.signOutUser = signOutUser;
+
+function manualSaveNow(){
+  saveAppData();
+  if(currentUser && typeof saveCloudNow === 'function'){
+    saveCloudNow();
+    updateSyncUI('클라우드 저장 완료', currentUser.email || '로그인됨');
+  }else{
+    updateSyncUI('로컬 저장 완료', 'Google 로그인하면 기기 간 동기화됩니다.');
+  }
+}
+
+window.manualSaveNow = manualSaveNow;
+
 window.syncNow = syncNow;
 window.saveCloudNow = saveCloudNow;
 window.queueCloudSave = queueCloudSave;
@@ -3486,6 +3501,13 @@ function hideLinkedSource(source){
   setHiddenLinkedSources(list);
 }
 
+
+const FORCE_DEBT_PAYMENT_LINK_KEY = 'finance_force_debt_payment_link_v2';
+if(localStorage.getItem(FORCE_DEBT_PAYMENT_LINK_KEY) !== '1'){
+  unhideLinkedSource('debtPayment');
+  localStorage.setItem(FORCE_DEBT_PAYMENT_LINK_KEY, '1');
+}
+
 function livingKey(suffix, year=currentYear, month=currentMonth){
   return `couple_${year}_${String(month + 1).padStart(2,'0')}_${suffix}`;
 }
@@ -3561,6 +3583,7 @@ function syncLivingExpenseFromLivingPage(){
     md.expenses.unshift({name: label + ' 구독료', amount: subscriptionTotal, source:'subscription'});
   }
 
+  // 부채 탭의 "이번 달 상환" 총액을 지출 탭의 고정비로 자동 연결
   if(debtPaymentTotal > 0 && !isLinkedHidden('debtPayment')){
     md.expenses.unshift({name: label + ' 부채 상환', amount: debtPaymentTotal, source:'debtPayment'});
   }
@@ -3775,13 +3798,19 @@ render();
 }
 
 function addExpenseItem(){
-  pushUndoState();
   const nameInput = document.getElementById('expense-name-input');
   const amountInput = document.getElementById('expense-amount-input');
-  const name = nameInput.value.trim();
+  if(!nameInput || !amountInput) return;
+
+  const name = String(nameInput.value || '').trim();
   const amount = parseMoney(amountInput.value);
   if(!name || !amount) return;
-  getMonthData().expenses.push({name, amount});
+
+  pushUndoState();
+  const md = getMonthData();
+  if(!Array.isArray(md.expenses)) md.expenses = [];
+  md.expenses.push({name, amount});
+
   nameInput.value = '';
   amountInput.value = '';
   saveAppData();
@@ -3796,6 +3825,18 @@ function deleteExpenseItem(index){
   saveAppData();
   render();
 }
+
+
+function handleExpenseAddKey(event){
+  if(event && event.key === 'Enter'){
+    event.preventDefault();
+    addExpenseItem();
+  }
+}
+window.handleExpenseAddKey = handleExpenseAddKey;
+window.addExpenseItem = addExpenseItem;
+window.updateExpenseItem = updateExpenseItem;
+window.deleteExpenseItem = deleteExpenseItem;
 
 function subscriptionInputRows(){
   const visibleSubs = sortSubscriptionsByDate(
@@ -4089,6 +4130,14 @@ function deletePaymentItem(index){
   saveAppData();
   render();
 }
+
+
+window.updatePaymentItem = updatePaymentItem;
+window.addPaymentItem = addPaymentItem;
+window.deletePaymentItem = deletePaymentItem;
+window.refreshLinkedExpense = refreshLinkedExpense;
+window.deleteLinkedExpense = deleteLinkedExpense;
+window.refreshLinkedExpenses = refreshLinkedExpenses;
 
 function updateMonthTitle(){
   const monthEl = document.getElementById('month-title');
