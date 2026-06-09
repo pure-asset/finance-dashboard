@@ -1,9 +1,3 @@
-
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -997,7 +991,7 @@ h1,.month-nav span,.btn,.section-title,.sum-label,.sum-amount,.shared-name,
 <!-- Action bar -->
 <div class="action-bar no-print">
   <a href="yearly.html" class="btn" style="text-decoration:none">📊 연도별 서머리</a>
-  <a href="index.html" class="btn" style="text-decoration:none">💰 재무 관리</a>
+  <a href="finance.html" class="btn" style="text-decoration:none">💰 재무 관리</a>
 </div>
 
 <!-- PDF-only header (hidden on screen) -->
@@ -1120,7 +1114,7 @@ function collectLocalData() {
   const items = {};
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key === 'couple_history' || key.startsWith('couple_')) {
+    if (key === 'couple_history' || key.startsWith('couple_') || key === FINANCE_STORAGE_KEY) {
       items[key] = localStorage.getItem(key);
     }
   }
@@ -1130,7 +1124,7 @@ function collectLocalData() {
 function applyCloudData(items) {
   isApplyingCloud = true;
   Object.entries(items || {}).forEach(([key, value]) => {
-    if (key === 'couple_history' || key.startsWith('couple_')) {
+    if (key === 'couple_history' || key.startsWith('couple_') || key === FINANCE_STORAGE_KEY) {
       localStorage.setItem(key, value);
     }
   });
@@ -1218,13 +1212,88 @@ function mk(suffix, y, m) {
   return `couple_${yr}_${String(mo+1).padStart(2,'0')}_${suffix}`;
 }
 
+
+const FINANCE_STORAGE_KEY = 'financeDashboardMonthlyV1';
+
+function financeMonthKey(y=currentYear, m=currentMonth){
+  return y + '-' + String(m + 1).padStart(2, '0');
+}
+
+function getFinanceData(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(FINANCE_STORAGE_KEY));
+    if(saved && saved.months && saved.global) return saved;
+  }catch(e){}
+  return {
+    global:{ subscriptions: [], initialDebt: 5000000 },
+    months:{}
+  };
+}
+
+function saveFinanceData(data){
+  localStorage.setItem(FINANCE_STORAGE_KEY, JSON.stringify(data));
+}
+
+function getFinanceMonthData(data, y=currentYear, m=currentMonth){
+  const key = financeMonthKey(y, m);
+  if(!data.months[key]){
+    data.months[key] = {
+      monthBudget: 300000,
+      expenses: [],
+      income: [],
+      assets: [],
+      debts: [],
+      payments: []
+    };
+  }
+  return data.months[key];
+}
+
+function upsertFinanceExpense(name, amount, source='living'){
+  const data = getFinanceData();
+  const md = getFinanceMonthData(data);
+  md.expenses = (md.expenses || []).filter(item => item.source !== source);
+  if(amount > 0){
+    md.expenses.push({ name, amount, source });
+  }
+  saveFinanceData(data);
+  queueCloudSave();
+}
+
+function removeFinanceExpenseSource(source='living'){
+  const data = getFinanceData();
+  const md = getFinanceMonthData(data);
+  md.expenses = (md.expenses || []).filter(item => item.source !== source);
+  saveFinanceData(data);
+  queueCloudSave();
+}
+
+function syncLivingExpenseToFinance(){
+  const amounts = getAmounts();
+  const enabled = getEnabled();
+  const essItems = getEssentials();
+  const himItems = getHimItems();
+  const essTotal = essItems.reduce((s, i) => s + Number(i.amount || 0), 0);
+  const himExtra = himItems.reduce((s, i) => s + Number(i.amount || 0), 0);
+
+  let sharedTotal = 0;
+  SHARED_DEF.forEach(def => {
+    if (!enabled[def.key]) return;
+    if (def.listMode) sharedTotal += essTotal;
+    else if (amounts[def.key]) sharedTotal += Number(amounts[def.key] || 0);
+  });
+
+  const livingTotal = sharedTotal + himExtra;
+  upsertFinanceExpense('생활비 정산', livingTotal, 'living');
+}
+
 function getAmounts(y, m) {
   const amounts = JSON.parse(localStorage.getItem(mk('shared', y, m)) || '{}');
   // 집세는 매월 기본값 322,000으로 표시하되, 사용자가 입력하면 그 값으로 덮어씁니다.
   if (!Object.prototype.hasOwnProperty.call(amounts, 'rent')) amounts.rent = 322000;
   return amounts;
 }
-function saveAmounts(o)      { localStorage.setItem(mk('shared'), JSON.stringify(o)); queueCloudSave(); }
+function saveAmounts(o)      { localStorage.setItem(mk('shared'), JSON.stringify(o)); syncLivingExpenseToFinance(); queueCloudSave(); }
 function getEnabled(y, m) {
   const stored = localStorage.getItem(mk('enabled', y, m));
   if (stored) return JSON.parse(stored);
@@ -1234,13 +1303,13 @@ function getEnabled(y, m) {
   SHARED_DEF.forEach(def => { d[def.key] = def.bimonthly ? (mo % 2 === 0) : true; });
   return d;
 }
-function saveEnabled(o)      { localStorage.setItem(mk('enabled'), JSON.stringify(o)); queueCloudSave(); }
+function saveEnabled(o)      { localStorage.setItem(mk('enabled'), JSON.stringify(o)); syncLivingExpenseToFinance(); queueCloudSave(); }
 function getHimItems(y, m)   { return JSON.parse(localStorage.getItem(mk('him', y, m)) || '[]'); }
-function saveHimItems(a)     { localStorage.setItem(mk('him'), JSON.stringify(a)); queueCloudSave(); }
+function saveHimItems(a)     { localStorage.setItem(mk('him'), JSON.stringify(a)); syncLivingExpenseToFinance(); queueCloudSave(); }
 
 // Essentials sub-items
 function getEssentials(y, m)  { return JSON.parse(localStorage.getItem(mk('essentials', y, m)) || '[]'); }
-function saveEssentials(a)    { localStorage.setItem(mk('essentials'), JSON.stringify(a)); queueCloudSave(); }
+function saveEssentials(a)    { localStorage.setItem(mk('essentials'), JSON.stringify(a)); syncLivingExpenseToFinance(); queueCloudSave(); }
 
 function addEssentialItem() {
   const place = document.getElementById('ess-place').value.trim();
@@ -1351,6 +1420,8 @@ function saveSnapshot() {
   const himOwes = sharedEach + himExtra;
 
   if (himOwes === 0) { showToast('금액을 먼저 입력해주세요!'); return; }
+
+  syncLivingExpenseToFinance();
 
   const history = getHistory();
   const key = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}`;
@@ -1852,6 +1923,8 @@ function render() {
   renderHistory();
   renderChart();
   recalc();
+
+  syncLivingExpenseToFinance();
 }
 
 // ── TOAST ──
