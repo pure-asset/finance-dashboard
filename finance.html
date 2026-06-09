@@ -1,3 +1,14 @@
+
+
+
+
+
+
+
+
+
+
+
 <!doctype html>
 <html lang="ko">
 <head>
@@ -1380,10 +1391,10 @@ button,input{font-family:inherit}
   </div>
 
   <section class="inline-panel" id="inline-expense">
-    <div class="inline-head"><h2>지출 입력</h2><span class="inline-note">생활비·구독비는 고정비, 나머지는 일반 지출로 반영</span></div>
+    <div class="inline-head"><h2>이번 달 지출</h2></div>
     <div class="detail-grid">
       <div class="detail-card">
-        <div class="detail-title">월 예산 설정</div>
+        <div class="detail-title">이번 달 예산</div>
         <div class="input-list">
           <div class="input-row budget-input-row">
             <input value="한 달 예산" readonly>
@@ -1391,7 +1402,6 @@ button,input{font-family:inherit}
             <button class="x-btn" onclick="saveBudget()">✓</button>
           </div>
         </div>
-        <button class="add-btn" onclick="saveBudget()">예산 저장</button>
       </div>
 
       <div class="detail-card">
@@ -1403,8 +1413,7 @@ button,input{font-family:inherit}
       </div>
 
       <div class="detail-card" style="grid-column:1 / -1">
-        <div class="detail-title">고정/일반 지출 입력</div>
-        <div class="linked-note">생활비 정산과 구독료는 자동 연동 항목으로 표시됩니다.</div>
+        <div class="detail-title">고정/일반 지출</div>
         <div class="input-list" id="expense-list"></div>
         <div class="input-list" style="margin-top:8px">
           <div class="input-row">
@@ -1418,7 +1427,7 @@ button,input{font-family:inherit}
   </section>
 
   <section class="inline-panel" id="inline-debt">
-    <div class="inline-head"><h2>부채 청산 현황</h2><span class="inline-note">리보 · 분할 · 상환 관리</span></div>
+    <div class="inline-head"><h2>이번 달 부채 현황</h2><span class="inline-note">리볼빙 · 분할 · 상환 관리</span></div>
     <div class="detail-grid">
       <div class="detail-card">
         <div class="detail-title">부채 요약</div>
@@ -1433,7 +1442,7 @@ button,input{font-family:inherit}
       </div>
 
       <div class="detail-card">
-        <div class="detail-title">리보 입력</div>
+        <div class="detail-title">리볼빙</div>
         <div class="input-list" id="ribo-list"></div>
         <div class="input-list" style="margin-top:8px">
           <div class="input-row">
@@ -1446,7 +1455,7 @@ button,input{font-family:inherit}
       </div>
 
       <div class="detail-card">
-        <div class="detail-title">분할 입력</div>
+        <div class="detail-title">분할</div>
         <div class="input-list" id="installment-list"></div>
         <div class="input-list" style="margin-top:8px">
           <div class="input-row">
@@ -1459,7 +1468,7 @@ button,input{font-family:inherit}
       </div>
 
       <div class="detail-card">
-        <div class="detail-title">이번 달 상환 입력</div>
+        <div class="detail-title">이번 달 상환</div>
         <div class="input-list" id="payment-list"></div>
         <div class="input-list" style="margin-top:8px">
           <div class="input-row">
@@ -1511,7 +1520,7 @@ button,input{font-family:inherit}
       </div>
 
       <div class="detail-card">
-        <div class="detail-title">저축 / 투자 입력</div>
+        <div class="detail-title">저축 / 투자</div>
         <div class="input-list" id="saving-invest-list"></div>
         <div class="input-list" style="margin-top:8px">
           <div class="input-row">
@@ -1526,7 +1535,7 @@ button,input{font-family:inherit}
   </section>
 
   <section class="inline-panel" id="inline-subs">
-    <div class="inline-head"><h2>구독 현황</h2><span class="inline-note">월간은 매달 표시 · 연간은 해당 월에만 표시</span></div>
+    <div class="inline-head"><h2>구독 현황</h2></div>
     <div class="subs-layout">
       <div class="detail-card subs-summary-card">
         <div class="detail-title">이번 달 구독 요약</div>
@@ -1537,7 +1546,7 @@ button,input{font-family:inherit}
       </div>
 
       <div class="detail-card subs-input-card">
-        <div class="detail-title">구독 입력</div>
+        <div class="detail-title">이번 달 구독 목록</div>
         <div class="subs-input-list" id="subs-input-list"></div>
 
         <div class="subs-input-list" style="margin-top:8px">
