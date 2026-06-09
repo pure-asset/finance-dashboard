@@ -1,5 +1,7 @@
 
 
+
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -38,6 +40,60 @@ h1,.year-nav span,.sync-status,.btn,.section-title,.sum-label,.sum-amount,
 .chart-y-axis,.chart-value-label,.chart-month-label,.chart-legend-item,
 .month-title,.status,.month-amount,.mini-btn{
   font-weight:400 !important;
+}
+
+
+/* ── Unified period navigator: living + yearly ── */
+.year-nav,
+.month-nav {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 16px !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  padding: 8px 22px !important;
+  margin-top: 16px !important;
+  background: var(--surface) !important;
+  border: 1.5px solid var(--border) !important;
+  border-radius: 99px !important;
+  box-shadow: var(--shadow) !important;
+}
+
+.year-nav button,
+.month-nav button {
+  background: none !important;
+  border: none !important;
+  color: var(--text2) !important;
+  font-size: 16px !important;
+  cursor: pointer !important;
+  padding: 2px 8px !important;
+  border-radius: 50% !important;
+  min-height: auto !important;
+  height: auto !important;
+  line-height: 1.2 !important;
+  box-shadow: none !important;
+}
+
+.year-nav span,
+.month-nav span {
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  min-width: 76px !important;
+  text-align: center !important;
+  line-height: 1.2 !important;
+}
+
+@media (max-width: 700px) {
+  .year-nav,
+  .month-nav {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    justify-content: center !important;
+    padding: 8px 22px !important;
+  }
 }
 
 </style>
