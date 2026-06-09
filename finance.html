@@ -1423,7 +1423,7 @@ button,input{font-family:inherit}
       </div>
 
       <div class="detail-card">
-        <div class="detail-title">유동성 자산 입력</div>
+        <div class="detail-title">유동성 자산</div>
         <div class="input-list" id="liquid-asset-list"></div>
         <div class="input-list" style="margin-top:8px">
           <div class="input-row">
@@ -1436,7 +1436,7 @@ button,input{font-family:inherit}
       </div>
 
       <div class="detail-card">
-        <div class="detail-title">저축 / 투자 입력</div>
+        <div class="detail-title">저축 / 투자</div>
         <div class="input-list" id="saving-invest-list"></div>
         <div class="input-list" style="margin-top:8px">
           <div class="input-row">
@@ -1521,13 +1521,19 @@ function defaultMonthData(seed=false){
       {name:'기타', amount:1400}
     ] : [],
     income: seed ? [
-      {name:'급여', amount:800000}
-    ] : [],
+      {name:'급여', amount:0}
+    ] : [
+      {name:'급여', amount:0}
+    ],
     assets: seed ? [
-      {name:'MUFG', amount:736676, type:'liquid'},
-      {name:'Revolut', amount:37780, type:'liquid'},
-      {name:'현금', amount:18734, type:'liquid'}
-    ] : [],
+      {name:'계좌 (MUFG)', amount:0, type:'liquid'},
+      {name:'Revolut', amount:0, type:'liquid'},
+      {name:'현금', amount:0, type:'liquid'}
+    ] : [
+      {name:'계좌 (MUFG)', amount:0, type:'liquid'},
+      {name:'Revolut', amount:0, type:'liquid'},
+      {name:'현금', amount:0, type:'liquid'}
+    ],
     debts: seed ? [
       {name:'라쿠텐 쇼핑 리보', amount:1640000, type:'ribo'},
       {name:'라쿠텐 캐싱 리보', amount:140000, type:'ribo'},
@@ -1564,6 +1570,30 @@ function saveAppData(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
 }
 
+
+function ensureMonthlyAssetIncomeDefaults(md){
+  if(!Array.isArray(md.income)) md.income = [];
+  if(!Array.isArray(md.assets)) md.assets = [];
+
+  const hasSalary = md.income.some(item => item.name === '급여');
+  if(!hasSalary){
+    md.income.unshift({name:'급여', amount:0});
+  }
+
+  const liquidDefaults = ['계좌 (MUFG)', 'Revolut', '현금'];
+  liquidDefaults.slice().reverse().forEach(name => {
+    const exists = md.assets.some(item => item.type === 'liquid' && item.name === name);
+    if(!exists){
+      md.assets.unshift({name, amount:0, type:'liquid'});
+    }
+  });
+
+  // 예전 기본명 MUFG가 남아있으면 새 명칭으로 정리
+  md.assets.forEach(item => {
+    if(item.type === 'liquid' && item.name === 'MUFG') item.name = '계좌 (MUFG)';
+  });
+}
+
 function getMonthData(){
   const key = monthKey();
   if(!appData.months[key]){
@@ -1578,6 +1608,8 @@ function getMonthData(){
     appData.months[key] = blank;
     saveAppData();
   }
+  ensureMonthlyAssetIncomeDefaults(appData.months[key]);
+  saveAppData();
   return appData.months[key];
 }
 
@@ -1799,7 +1831,7 @@ function getYearStartNetWorth(){
 function itemRows(items, updateFn, deleteFn){
   return (items || []).map((item, index)=>{
     const name = escapeHtml(item.name);
-    const amount = Number(item.amount || 0).toLocaleString('ja-JP');
+    const amount = Number(item.amount || 0) === 0 ? '' : Number(item.amount || 0).toLocaleString('ja-JP');
     const isLinked = item.source === 'living' || item.source === 'subscription';
     const rowClass = isLinked ? 'input-row linked-row' : 'input-row';
     const readonly = isLinked ? 'readonly title="자동 연동 항목입니다"' : '';
@@ -1992,7 +2024,7 @@ function filteredRows(items, type, updateFn, deleteFn){
     .map(item=>{
       const index = item.originalIndex;
       const name = escapeHtml(item.name);
-      const amount = Number(item.amount || 0).toLocaleString('ja-JP');
+      const amount = Number(item.amount || 0) === 0 ? '' : Number(item.amount || 0).toLocaleString('ja-JP');
       return `
         <div class="input-row">
           <input value="${name}" onchange="${updateFn}(${index}, 'name', this.value)" placeholder="항목명">
