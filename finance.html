@@ -1436,7 +1436,7 @@ button,input{font-family:inherit}
       </div>
 
       <div class="detail-card">
-        <div class="detail-title">저축 / 투자</div>
+        <div class="detail-title">저축 / 투자 입력</div>
         <div class="input-list" id="saving-invest-list"></div>
         <div class="input-list" style="margin-top:8px">
           <div class="input-row">
@@ -1566,6 +1566,14 @@ function loadAppData(){
 
 let appData = loadAppData();
 
+const SUBS_VERSION_KEY = 'finance_subscriptions_version_v2_current_list';
+if(localStorage.getItem(SUBS_VERSION_KEY) !== '1'){
+  appData.global.subscriptions = structuredClone(defaultSubscriptions);
+  localStorage.setItem(SUBS_VERSION_KEY, '1');
+  saveAppData();
+}
+
+
 function saveAppData(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
 }
@@ -1633,6 +1641,36 @@ function parseMoney(value){
 
 function escapeHtml(value){
   return String(value || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+
+function getSubscriptionSortValue(sub){
+  const text = String(sub.date || '');
+  const monthMatch = text.match(/(\d+)\s*월/);
+  const dayMatch = text.match(/(\d+)\s*일/);
+  const month = monthMatch ? Number(monthMatch[1]) : 0;
+  const day = dayMatch ? Number(dayMatch[1]) : 0;
+
+  if(sub.cycle === '연간'){
+    return month * 100 + day;
+  }
+
+  // 월간 구독은 매월 반복이므로 일자 기준으로 정렬
+  return day;
+}
+
+function sortSubscriptionsByDate(list){
+  return [...(list || [])].sort((a, b) => {
+    const av = getSubscriptionSortValue(a);
+    const bv = getSubscriptionSortValue(b);
+    if(av !== bv) return av - bv;
+    return String(a.name || '').localeCompare(String(b.name || ''), 'ko');
+  });
+}
+
+function normalizeDefaultSubscriptions(){
+  appData.global.subscriptions = structuredClone(defaultSubscriptions);
+  saveAppData();
 }
 
 function getMonthFromDateText(text){
@@ -1901,9 +1939,9 @@ function deleteExpenseItem(index){
 }
 
 function subscriptionInputRows(){
-  const visibleSubs = appData.global.subscriptions
-    .map((sub, index) => ({...sub, originalIndex:index}))
-    .filter(isSubActiveThisMonth);
+  const visibleSubs = sortSubscriptionsByDate(
+    appData.global.subscriptions.map((sub, index) => ({...sub, originalIndex:index}))
+  );
 
   return visibleSubs.map((sub)=>{
     const index = sub.originalIndex;
