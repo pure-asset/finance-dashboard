@@ -666,10 +666,6 @@ button,input{font-family:inherit}
 
 }
 
-
-
-
-
 .inline-panel{display:none}
 
 .inline-panel.active{display:block}
@@ -724,10 +720,6 @@ button,input{font-family:inherit}
 
 .back-btn:hover{border-color:var(--shared);color:var(--shared)}
 
-
-
-
-
 .summary-view{display:block}
 
 .summary-view.hidden{display:none}
@@ -743,7 +735,6 @@ button,input{font-family:inherit}
 .back-btn{width:38px;height:38px;border:1.5px solid var(--border);border-radius:999px;background:#fff;color:var(--text2);box-shadow:var(--shadow);cursor:pointer;font-size:22px;line-height:1}
 
 .back-btn:hover{border-color:var(--shared);color:var(--shared)}
-
 
 /* ── Final tab switching UX ── */
 .summary-view{display:block}
@@ -820,7 +811,6 @@ button,input{font-family:inherit}
   .subs-add-row{grid-template-columns:1fr}
 }
 
-
 /* simplified subscription layout */
 .subs-input-list{
   display:grid;
@@ -883,7 +873,6 @@ button,input{font-family:inherit}
   }
   .subs-delete{width:100%}
 }
-
 
 /* emergency layout fix */
 .summary-view.hidden{display:none!important}
@@ -964,7 +953,6 @@ button,input{font-family:inherit}
   .subs-delete{width:100%}
 }
 
-
 /* subscription active-month-only input list */
 .subs-input-row{
   grid-template-columns:minmax(0,1fr) 120px 120px 42px!important;
@@ -972,7 +960,6 @@ button,input{font-family:inherit}
 @media(max-width:700px){
   .subs-input-row{grid-template-columns:1fr!important}
 }
-
 
 /* unified header style from living dashboard */
 .dashboard-hero{
@@ -1066,7 +1053,6 @@ button,input{font-family:inherit}
   }
 }
 
-
 /* final header consistency override */
 .dashboard-hero .hero-title{
   font-family:'Gowun Dodum', sans-serif!important;
@@ -1095,7 +1081,6 @@ button,input{font-family:inherit}
   margin-top:22px!important;
 }
 
-
 .linked-note{
   color:var(--text2);
   font-size:12px;
@@ -1115,7 +1100,6 @@ button,input{font-family:inherit}
   background:#f8f5ff!important;
   color:var(--shared)!important;
 }
-
 
 .linked-actions{
   display:grid;
@@ -1141,7 +1125,6 @@ button,input{font-family:inherit}
   .linked-actions{grid-template-columns:1fr 1fr}
   .linked-actions .x-btn{width:100%}
 }
-
 
 /* linked expense row action fix */
 .linked-row{
@@ -1179,44 +1162,6 @@ button,input{font-family:inherit}
   .linked-actions .x-btn{width:100%!important}
 }
 
-
-/* final linked expense action fix */
-.linked-row{
-  position:relative!important;
-  overflow:visible!important;
-  grid-template-columns:minmax(0,1fr) 130px 92px!important;
-}
-.linked-actions{
-  display:grid!important;
-  grid-template-columns:42px 42px!important;
-  gap:8px!important;
-  position:relative!important;
-  z-index:20!important;
-  pointer-events:auto!important;
-}
-.linked-actions button,
-.refresh-mini,
-.delete-mini{
-  pointer-events:auto!important;
-  cursor:pointer!important;
-  position:relative!important;
-  z-index:30!important;
-}
-.linked-actions .refresh-mini{
-  background:#f8f5ff!important;
-  color:var(--shared)!important;
-}
-.linked-actions .delete-mini{
-  background:#fff5fb!important;
-  color:var(--me)!important;
-}
-@media(max-width:700px){
-  .linked-row{grid-template-columns:1fr!important}
-  .linked-actions{grid-template-columns:1fr 1fr!important}
-  .linked-actions .x-btn{width:100%!important}
-}
-
-
 /* subscription visible-current-month layout fix */
 .subs-input-row{
   grid-template-columns:minmax(0,1fr) 90px 120px 120px 42px!important;
@@ -1230,7 +1175,6 @@ button,input{font-family:inherit}
     grid-template-columns:1fr!important;
   }
 }
-
 
 /* simple inline subscription add row */
 .subs-input-row select{
@@ -1250,7 +1194,6 @@ button,input{font-family:inherit}
 .subs-add-inline .subs-delete{
   font-size:18px;
 }
-
 
 /* net worth change direction colors */
 .net-line{
@@ -1276,7 +1219,6 @@ button,input{font-family:inherit}
   color:var(--text2)!important;
 }
 
-
 /* chart visibility + change colors */
 .chart-wrap{
   min-height:308px!important;
@@ -1299,7 +1241,6 @@ button,input{font-family:inherit}
   font-weight:700;
 }
 
-
 /* keep all tab panels aligned consistently */
 .inline-panel,
 .summary-view,
@@ -1318,7 +1259,6 @@ button,input{font-family:inherit}
 .subs-summary-card{
   box-sizing:border-box!important;
 }
-
 
 /* cloud sync / auth panel */
 .cloud-panel{
@@ -1386,7 +1326,6 @@ button,input{font-family:inherit}
   .cloud-status,.cloud-actions{width:100%;justify-content:center}
   .cloud-actions button{flex:1}
 }
-
 
 /* finance cloud bar aligned with living.html sync-bar */
 .cloud-panel,
@@ -1504,564 +1443,7 @@ button,input{font-family:inherit}
   }
 }
 
-
-
-
-
-/* v42: restore living.html-style top sync bar and centered header */
-.sync-bar{
-  width:min(820px, calc(100% - 0px))!important;
-  max-width:820px!important;
-  margin:0 auto 40px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:space-between!important;
-  gap:14px!important;
-  background:rgba(255,255,255,0.92)!important;
-  border:1.5px solid var(--border)!important;
-  border-radius:24px!important;
-  padding:14px 16px!important;
-  box-shadow:var(--shadow)!important;
-  font-size:12px!important;
-  color:var(--text2)!important;
-}
-.sync-left{
-  display:flex!important;
-  align-items:center!important;
-  gap:12px!important;
-  min-width:0!important;
-  flex:1 1 auto!important;
-}
-.sync-status{
-  font-weight:400!important;
-  color:var(--shared)!important;
-  white-space:nowrap!important;
-  min-width:0!important;
-}
-.sync-user{
-  font-size:11px!important;
-  color:var(--text2)!important;
-  white-space:nowrap!important;
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
-  min-width:0!important;
-}
-.sync-user::before{
-  content:'|'!important;
-  color:var(--border)!important;
-  margin-right:12px!important;
-  font-weight:400!important;
-}
-.sync-actions{
-  display:flex!important;
-  gap:8px!important;
-  align-items:center!important;
-  justify-content:center!important;
-  flex-wrap:nowrap!important;
-  flex:0 0 auto!important;
-}
-.sync-actions .btn{
-  box-shadow:none!important;
-  padding:5px 11px!important;
-  min-height:32px!important;
-  font-size:12px!important;
-  line-height:1!important;
-  white-space:nowrap!important;
-}
-header.dashboard-hero,
-.dashboard-hero{
-  max-width:820px!important;
-  margin:0 auto 28px!important;
-  text-align:center!important;
-  display:block!important;
-  background:transparent!important;
-  border:none!important;
-  box-shadow:none!important;
-  padding:0!important;
-}
-.dashboard-hero .hero-icon{
-  font-size:36px!important;
-  line-height:1!important;
-  margin-bottom:8px!important;
-}
-.dashboard-hero .hero-title{
-  font-family:'Gowun Dodum', sans-serif!important;
-  font-size:26px!important;
-  font-weight:400!important;
-  letter-spacing:-0.3px!important;
-  color:var(--text)!important;
-  margin:0 0 4px!important;
-  text-align:center!important;
-}
-.dashboard-hero .hero-month-nav{
-  display:inline-flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  gap:16px!important;
-  width:auto!important;
-  min-width:0!important;
-  max-width:none!important;
-  padding:8px 22px!important;
-  margin:16px auto 0!important;
-  background:var(--surface)!important;
-  border:1.5px solid var(--border)!important;
-  border-radius:99px!important;
-  box-shadow:var(--shadow)!important;
-}
-.dashboard-hero .hero-month-nav button{
-  background:none!important;
-  border:none!important;
-  color:var(--text2)!important;
-  font-size:16px!important;
-  cursor:pointer!important;
-  padding:2px 8px!important;
-  border-radius:50%!important;
-  min-height:auto!important;
-  height:auto!important;
-  line-height:1.2!important;
-  box-shadow:none!important;
-}
-.dashboard-hero .hero-month-nav span{
-  display:inline-block!important;
-  font-size:16px!important;
-  font-weight:400!important;
-  min-width:90px!important;
-  text-align:center!important;
-  line-height:1.2!important;
-  color:var(--text)!important;
-}
-.dashboard-hero .hero-links{
-  max-width:820px!important;
-  margin:22px auto 0!important;
-  display:flex!important;
-  gap:10px!important;
-  justify-content:center!important;
-}
-@media(max-width:700px){
-  .sync-bar{
-    flex-direction:column!important;
-    align-items:center!important;
-    justify-content:center!important;
-    gap:10px!important;
-    margin:0 auto 34px!important;
-    padding:13px 12px!important;
-    border-radius:22px!important;
-  }
-  .sync-left{
-    width:100%!important;
-    justify-content:center!important;
-    gap:8px!important;
-    line-height:1.25!important;
-  }
-  .sync-status{
-    font-size:12px!important;
-    max-width:52%!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
-  }
-  .sync-user{
-    font-size:11px!important;
-    max-width:42%!important;
-  }
-  .sync-user::before{margin-right:8px!important}
-  .sync-actions{
-    width:100%!important;
-    justify-content:center!important;
-    gap:8px!important;
-  }
-  .sync-actions .btn{
-    min-height:32px!important;
-    padding:5px 11px!important;
-    font-size:12px!important;
-  }
-}
-
-
-/* v43: match living.html header, month navigator, sync bar */
-header{
-  max-width:820px!important;
-  margin:0 auto 28px!important;
-  text-align:center!important;
-  display:block!important;
-  background:transparent!important;
-  border:none!important;
-  box-shadow:none!important;
-  padding:0!important;
-}
-.header-emoji{
-  font-size:36px!important;
-  margin-bottom:8px!important;
-  line-height:1!important;
-}
-header h1{
-  font-family:'Gowun Dodum', sans-serif!important;
-  font-size:26px!important;
-  font-weight:400!important;
-  letter-spacing:-0.3px!important;
-  margin:0 0 4px!important;
-  color:var(--text)!important;
-}
-.month-nav{
-  display:inline-flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  gap:16px!important;
-  width:auto!important;
-  min-width:0!important;
-  max-width:none!important;
-  background:var(--surface)!important;
-  border:1.5px solid var(--border)!important;
-  border-radius:99px!important;
-  padding:8px 22px!important;
-  margin-top:16px!important;
-  box-shadow:var(--shadow)!important;
-}
-.month-nav button{
-  background:none!important;
-  border:none!important;
-  color:var(--text2)!important;
-  font-size:16px!important;
-  cursor:pointer!important;
-  padding:2px 8px!important;
-  border-radius:50%!important;
-  min-height:auto!important;
-  height:auto!important;
-  line-height:1.2!important;
-  box-shadow:none!important;
-}
-.month-nav button:hover{
-  background:var(--border)!important;
-  color:var(--text)!important;
-}
-.month-nav span{
-  display:inline-block!important;
-  font-size:16px!important;
-  font-weight:400!important;
-  min-width:90px!important;
-  text-align:center!important;
-  line-height:1.2!important;
-  color:var(--text)!important;
-}
-.action-bar{
-  max-width:820px!important;
-  margin:0 auto 22px!important;
-  display:flex!important;
-  gap:10px!important;
-  justify-content:center!important;
-}
-.sync-bar{
-  width:min(820px, calc(100% - 0px))!important;
-  max-width:820px!important;
-  margin:0 auto 40px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:space-between!important;
-  gap:14px!important;
-  background:rgba(255,255,255,0.92)!important;
-  border:1.5px solid var(--border)!important;
-  border-radius:24px!important;
-  padding:14px 16px!important;
-  box-shadow:var(--shadow)!important;
-  font-size:12px!important;
-  color:var(--text2)!important;
-}
-.sync-left{
-  display:flex!important;
-  align-items:center!important;
-  gap:12px!important;
-  min-width:0!important;
-  flex:1 1 auto!important;
-}
-.sync-status{
-  font-weight:400!important;
-  color:var(--shared)!important;
-  white-space:nowrap!important;
-  min-width:0!important;
-}
-.sync-user{
-  font-size:11px!important;
-  color:var(--text2)!important;
-  white-space:nowrap!important;
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
-  min-width:0!important;
-}
-.sync-user::before{
-  content:'|'!important;
-  color:var(--border)!important;
-  margin-right:12px!important;
-  font-weight:400!important;
-}
-.sync-actions{
-  display:flex!important;
-  gap:8px!important;
-  align-items:center!important;
-  justify-content:center!important;
-  flex-wrap:nowrap!important;
-  flex:0 0 auto!important;
-}
-.sync-actions .btn{
-  box-shadow:none!important;
-  padding:5px 11px!important;
-  min-height:32px!important;
-  font-size:12px!important;
-  line-height:1!important;
-  white-space:nowrap!important;
-}
-.sync-actions .btn.blue{
-  background:linear-gradient(135deg,var(--him),#7aaeff)!important;
-  color:#fff!important;
-  border-color:transparent!important;
-}
-.sync-actions .btn.danger{
-  color:var(--me)!important;
-}
-
-@media(max-width:700px){
-  .sync-bar{
-    flex-direction:column!important;
-    align-items:center!important;
-    justify-content:center!important;
-    gap:10px!important;
-    margin:0 auto 34px!important;
-    padding:13px 12px!important;
-    border-radius:22px!important;
-  }
-  .sync-left{
-    width:100%!important;
-    justify-content:center!important;
-    gap:8px!important;
-    line-height:1.25!important;
-  }
-  .sync-status{
-    font-size:12px!important;
-    max-width:52%!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
-  }
-  .sync-user{
-    font-size:11px!important;
-    max-width:42%!important;
-  }
-  .sync-user::before{margin-right:8px!important}
-  .sync-actions{
-    width:100%!important;
-    justify-content:center!important;
-    gap:8px!important;
-  }
-  .sync-actions .btn{
-    min-height:32px!important;
-    padding:5px 11px!important;
-    font-size:12px!important;
-  }
-  .action-bar{
-    gap:8px!important;
-  }
-  .action-bar .btn{
-    flex:1!important;
-    padding:8px 10px!important;
-  }
-}
-
-
-/* v44 repair: living-style header, clean sync bar, clickable tabs */
-header{
-  max-width:820px!important;
-  margin:0 auto 28px!important;
-  text-align:center!important;
-  display:block!important;
-  background:transparent!important;
-  border:none!important;
-  box-shadow:none!important;
-  padding:0!important;
-}
-.header-emoji{
-  font-size:36px!important;
-  margin-bottom:8px!important;
-  line-height:1!important;
-}
-header h1{
-  font-family:'Gowun Dodum', sans-serif!important;
-  font-size:26px!important;
-  font-weight:400!important;
-  letter-spacing:-0.3px!important;
-  margin:0 0 4px!important;
-  color:var(--text)!important;
-}
-.month-nav{
-  display:inline-flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  gap:16px!important;
-  width:auto!important;
-  min-width:0!important;
-  max-width:none!important;
-  background:var(--surface)!important;
-  border:1.5px solid var(--border)!important;
-  border-radius:99px!important;
-  padding:8px 22px!important;
-  margin-top:16px!important;
-  box-shadow:var(--shadow)!important;
-}
-.month-nav button{
-  background:none!important;
-  border:none!important;
-  color:var(--text2)!important;
-  font-size:16px!important;
-  cursor:pointer!important;
-  padding:2px 8px!important;
-  border-radius:50%!important;
-  min-height:auto!important;
-  height:auto!important;
-  line-height:1.2!important;
-  box-shadow:none!important;
-}
-.month-nav span{
-  display:inline-block!important;
-  font-size:16px!important;
-  font-weight:400!important;
-  min-width:90px!important;
-  text-align:center!important;
-  line-height:1.2!important;
-  color:var(--text)!important;
-}
-.action-bar{
-  max-width:820px!important;
-  margin:0 auto 22px!important;
-  display:flex!important;
-  gap:10px!important;
-  justify-content:center!important;
-}
-.sync-bar{
-  width:min(820px, calc(100% - 0px))!important;
-  max-width:820px!important;
-  margin:0 auto 40px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:space-between!important;
-  gap:14px!important;
-  background:rgba(255,255,255,0.92)!important;
-  border:1.5px solid var(--border)!important;
-  border-radius:24px!important;
-  padding:14px 16px!important;
-  box-shadow:var(--shadow)!important;
-  font-size:12px!important;
-  color:var(--text2)!important;
-}
-.sync-left{
-  display:flex!important;
-  align-items:center!important;
-  gap:12px!important;
-  min-width:0!important;
-  flex:1 1 auto!important;
-}
-.sync-status{
-  font-weight:400!important;
-  color:var(--shared)!important;
-  white-space:nowrap!important;
-  min-width:0!important;
-}
-.sync-user{
-  font-size:11px!important;
-  color:var(--text2)!important;
-  white-space:nowrap!important;
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
-  min-width:0!important;
-}
-.sync-user::before{
-  content:'|'!important;
-  color:var(--border)!important;
-  margin-right:12px!important;
-  font-weight:400!important;
-}
-.sync-actions{
-  display:flex!important;
-  gap:8px!important;
-  align-items:center!important;
-  justify-content:center!important;
-  flex-wrap:nowrap!important;
-  flex:0 0 auto!important;
-}
-.sync-actions .btn{
-  box-shadow:none!important;
-  padding:5px 11px!important;
-  min-height:32px!important;
-  font-size:12px!important;
-  line-height:1!important;
-  white-space:nowrap!important;
-}
-.sync-actions .btn.blue{
-  background:linear-gradient(135deg,var(--him),#7aaeff)!important;
-  color:#fff!important;
-  border-color:transparent!important;
-}
-.sync-actions .btn.danger{
-  color:var(--me)!important;
-}
-.quick-actions,
-.quick-btn,
-.month-nav button,
-.x-btn,
-.subs-delete,
-button{
-  pointer-events:auto!important;
-}
-.summary-card,
-.summary-head,
-.summary-view,
-.inline-panel{
-  position:relative!important;
-  z-index:1!important;
-}
-@media(max-width:700px){
-  .sync-bar{
-    flex-direction:column!important;
-    align-items:center!important;
-    justify-content:center!important;
-    gap:10px!important;
-    margin:0 auto 34px!important;
-    padding:13px 12px!important;
-    border-radius:22px!important;
-  }
-  .sync-left{
-    width:100%!important;
-    justify-content:center!important;
-    gap:8px!important;
-    line-height:1.25!important;
-  }
-  .sync-status{
-    font-size:12px!important;
-    max-width:52%!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
-  }
-  .sync-user{
-    font-size:11px!important;
-    max-width:42%!important;
-  }
-  .sync-user::before{margin-right:8px!important}
-  .sync-actions{
-    width:100%!important;
-    justify-content:center!important;
-    gap:8px!important;
-  }
-  .sync-actions .btn{
-    min-height:32px!important;
-    padding:5px 11px!important;
-    font-size:12px!important;
-  }
-  .action-bar{
-    gap:8px!important;
-  }
-  .action-bar .btn{
-    flex:1!important;
-    padding:8px 10px!important;
-  }
-}
-
-
-/* v45 cloud sync and clickable layout repair */
+/* v42~v45 sync-bar styles */
 .sync-bar{
   width:min(820px, calc(100% - 0px))!important;
   max-width:820px!important;
@@ -2107,8 +1489,6 @@ header h1{font-family:'Gowun Dodum',sans-serif!important;font-size:26px!importan
   .action-bar .btn{flex:1!important;padding:8px 10px!important}
 }
 
-
-
 /* v48 auth visibility hard fix */
 body:not(.auth-ready) #sync-btn,
 body:not(.auth-ready) #logout-btn,
@@ -2128,7 +1508,6 @@ body.auth-ready #logout-btn{
   visibility:visible!important;
 }
 
-
 /* v49 cloud recursion fix */
 [hidden], .force-hidden{
   display:none!important;
@@ -2143,7 +1522,6 @@ body.auth-ready #login-btn{
   display:none!important;
   visibility:hidden!important;
 }
-
 
 /* v50 mobile responsive polish */
 @media(max-width:700px){
@@ -2426,7 +1804,6 @@ body.auth-ready #login-btn{
   }
 }
 
-
 /* v55 stable runtime + mobile layout fix */
 #month-title{
   display:inline-block!important;
@@ -2628,10 +2005,7 @@ body.auth-ready #login-btn{
   }
 }
 
-
-
 /* v60 undo button */
-
 .save-btn{
   color:var(--green)!important;
 }
@@ -3502,9 +2876,14 @@ function hideLinkedSource(source){
 }
 
 
-const FORCE_DEBT_PAYMENT_LINK_KEY = 'finance_force_debt_payment_link_v2';
+// ★ 수정 1: v3로 버전 업 → 기존 모든 달의 hidden linked 상태 일괄 초기화
+// 효과: 이전에 삭제(숨김)했던 구독료/생활비/부채상환 항목이 복원됨
+const FORCE_DEBT_PAYMENT_LINK_KEY = 'finance_force_debt_payment_link_v3';
 if(localStorage.getItem(FORCE_DEBT_PAYMENT_LINK_KEY) !== '1'){
-  unhideLinkedSource('debtPayment');
+  // localStorage에서 finance_hidden_linked_ 접두사를 가진 모든 키 삭제
+  Object.keys(localStorage).forEach(function(k){
+    if(k.startsWith('finance_hidden_linked_')) localStorage.removeItem(k);
+  });
   localStorage.setItem(FORCE_DEBT_PAYMENT_LINK_KEY, '1');
 }
 
@@ -3792,9 +3171,7 @@ function updateExpenseItem(index, key, value){
   if(!items[index] || items[index].source === 'living' || items[index].source === 'subscription' || items[index].source === 'debtPayment') return;
   items[index][key] = key === 'amount' ? parseMoney(value) : value;
   saveAppData();
-  
-
-render();
+  render();
 }
 
 function addExpenseItem(){
@@ -4107,6 +3484,8 @@ function updatePaymentItem(index, key, value){
   if(!items[index]) return;
   items[index][key] = key === 'amount' ? parseMoney(value) : value;
   saveAppData();
+  // ★ 수정 3: 부채 상환 금액 변경 시 지출 탭의 debtPayment 항목 즉시 갱신
+  syncLivingExpenseFromLivingPage();
   render();
 }
 
@@ -4121,6 +3500,8 @@ function addPaymentItem(){
   nameInput.value = '';
   amountInput.value = '';
   saveAppData();
+  // ★ 부채 상환 추가 시 지출 탭 즉시 갱신
+  syncLivingExpenseFromLivingPage();
   render();
 }
 
@@ -4128,6 +3509,8 @@ function deletePaymentItem(index){
   pushUndoState();
   getMonthData().payments.splice(index, 1);
   saveAppData();
+  // ★ 부채 상환 삭제 시 지출 탭 즉시 갱신
+  syncLivingExpenseFromLivingPage();
   render();
 }
 
@@ -4146,10 +3529,14 @@ function updateMonthTitle(){
   if(trendEl) trendEl.textContent = currentYear + '년 자산 · 부채 추이';
 }
 
+// ★ 수정 2: 월 이동 시 해당 달의 hidden linked 상태 초기화
+// 효과: 다른 달로 이동해도 구독료/생활비/부채상환 항목이 항상 자동으로 표시됨
 function changeMonth(diff){
   currentMonth += diff;
   if(currentMonth < 0){currentMonth=11;currentYear--}
   if(currentMonth > 11){currentMonth=0;currentYear++}
+  // 월 이동 시 해당 달의 hidden 상태 초기화 → linked 항목 항상 복원
+  setHiddenLinkedSources([]);
   updateMonthTitle();
   getMonthData();
   render();
@@ -4330,7 +3717,18 @@ function renderTrendChart(){
 function render(){
   updateUndoButton();
   setDisplayedMonthTitle();
-if(window.appData && window.appData !== appData) appData = window.appData;
+  if(window.appData && window.appData !== appData) appData = window.appData;
+
+  // ★ 수정 3: render() 진입 시 현재 달에 linked 항목이 없으면 hidden 상태 자동 해제
+  // 효과: 로그인 후 클라우드 데이터 로드 시에도 항목이 정상 복원됨
+  const _md = getMonthData();
+  const _hasLinked = (_md.expenses || []).some(function(e){
+    return e.source === 'living' || e.source === 'subscription' || e.source === 'debtPayment';
+  });
+  if(!_hasLinked){
+    setHiddenLinkedSources([]);
+  }
+
   syncLivingExpenseFromLivingPage();
   const md = getMonthData();
   const today = new Date();
