@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>연간 서머리</title>
+<title>연도별 서머리</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Gowun+Dodum&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -251,7 +251,7 @@
 </div>
 <header>
   <div class="header-emoji">📊💗</div>
-  <h1>연간 서머리</h1>
+  <h1>연도별 서머리</h1>
   <div class="year-nav"><button onclick="changeYear(-1)">◀</button><span id="year-title"></span><button onclick="changeYear(1)">▶</button></div>
 </header>
 <div class="action-bar no-print"><a href="living.html" class="btn">🏠 생활비 정산</a><a href="finance.html" class="btn">💰 재무 관리</a></div>
@@ -342,12 +342,12 @@ function renderChart(months){
 // ── 파이차트 ──
 // 카테고리 정의: 색상 + 이름
 const PIE_CATEGORIES = [
-  { key: 'rent',       name: '집세',              emoji: '🏠', color: '#5b8dee' },
+  { key: 'rent',       name: '집세',              emoji: '🏠', color: '#2d1f3d' },
   { key: 'electric',   name: '전기세',             emoji: '💡', color: '#ff9f43' },
   { key: 'internet',   name: '인터넷',              emoji: '📶', color: '#a78bfa' },
   { key: 'gas',        name: '가스',               emoji: '🔥', color: '#ff6b9d' },
   { key: 'water',      name: '수도세',              emoji: '🚿', color: '#26de81' },
-  { key: 'essentials', name: '생필품/식재료',        emoji: '🛒', color: '#fd9644' },
+  { key: 'essentials', name: '생필품/식재료',        emoji: '🛒', color: '#20bf6b' },
   { key: 'adhoc',      name: 'Ad hoc',             emoji: '💙', color: '#45aaf2' },
 ];
 
@@ -398,13 +398,14 @@ function renderPieChart(months) {
     return;
   }
 
-  // 평균 계산 + 0인 항목 제외
+  // 평균 계산 + 0인 항목 제외 + 비중 높은 순 정렬
   const avgData = PIE_CATEGORIES
     .map(cat => ({
       ...cat,
       avg: totals[cat.key] / validMonths
     }))
-    .filter(d => d.avg > 0);
+    .filter(d => d.avg > 0)
+    .sort((a, b) => b.avg - a.avg);
 
   if (!avgData.length) {
     container.innerHTML = '<div class="pie-empty">금액이 입력된 항목이 없어요.</div>';
