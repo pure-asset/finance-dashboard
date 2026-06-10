@@ -260,6 +260,9 @@
 <div class="toast" id="toast"></div>
 
 
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script>
 const firebaseConfig={apiKey:"AIzaSyABPojKMaEJfphyA_MfGaR_vynnHtbhc_k",authDomain:"finance-dashboard-1d9b9.firebaseapp.com",projectId:"finance-dashboard-1d9b9",storageBucket:"finance-dashboard-1d9b9.firebasestorage.app",messagingSenderId:"225945272359",appId:"1:225945272359:web:dda18e82eba722e7f88e02",measurementId:"G-L6NWQJER72"};
 firebase.initializeApp(firebaseConfig);const auth=firebase.auth();const db=firebase.firestore();let currentUser=null;let cloudTimer=null;let currentYear=new Date().getFullYear();const currentMonth=new Date().getMonth();
