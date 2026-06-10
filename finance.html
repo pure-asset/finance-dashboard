@@ -2,6 +2,8 @@
 
 
 
+
+
 <!doctype html>
 <html lang="ko">
 <head>
@@ -2740,7 +2742,15 @@ async function loadCloudData(){
       appData = JSON.parse(cloudString);
       window.appData = appData;
 
+      const subscriptionDefaultsChanged = ensureDefaultSubscriptionsMerged();
+      if(subscriptionDefaultsChanged){
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+      }
+
       render();
+      if(subscriptionDefaultsChanged){
+        setTimeout(() => saveCloudNow(), 0);
+      }
       updateSyncUI('클라우드 동기화 완료', currentUser.email || '로그인됨');
     }else{
       isApplyingCloud = false;
@@ -2921,22 +2931,53 @@ if(!appData.global) appData.global = { subscriptions: structuredClone(defaultSub
 if(!appData.global.chartSnapshots) appData.global.chartSnapshots = {};
 window.appData = appData;
 
-const SUBS_VERSION_KEY = 'finance_subscriptions_version_v5_add_notion';
-if(
-  localStorage.getItem(SUBS_VERSION_KEY) !== '1' ||
-  !appData.global.subscriptions ||
-  appData.global.subscriptions.length === 0
-){
-  if(!appData.global.subscriptions || appData.global.subscriptions.length === 0){
-    appData.global.subscriptions = structuredClone(defaultSubscriptions);
-  }else{
-    const hasNotion = appData.global.subscriptions.some(s => String(s.name || '').toLowerCase() === 'notion' || String(s.name || '').includes('노션'));
-    if(!hasNotion){
-      appData.global.subscriptions.push({name:'Notion', cycle:'연간', date:'11월 24일', amount:37800, memo:''});
-    }
+function normalizeSubscriptionName(name){
+  return String(name || '').trim().toLowerCase().replace(/\s+/g, '');
+}
+
+function ensureDefaultSubscriptionsMerged(){
+  if(!appData.global) appData.global = {};
+  if(!Array.isArray(appData.global.subscriptions)){
+    appData.global.subscriptions = [];
   }
-  localStorage.setItem(SUBS_VERSION_KEY, '1');
-  saveAppData();
+
+  let changed = false;
+
+  // 기본 구독 중 기존 데이터에 없는 항목은 자동 복구합니다.
+  defaultSubscriptions.forEach(def => {
+    const key = normalizeSubscriptionName(def.name);
+    const exists = appData.global.subscriptions.some(sub => normalizeSubscriptionName(sub.name) === key);
+    if(!exists){
+      appData.global.subscriptions.push(structuredClone(def));
+      changed = true;
+    }
+  });
+
+  // Notion은 이전 저장/클라우드 데이터에 없거나 잘못 저장되어 있어도
+  // 11월 연간 갱신 항목으로 반드시 맞춥니다.
+  const notion = appData.global.subscriptions.find(sub => {
+    const raw = String(sub.name || '').trim();
+    const key = normalizeSubscriptionName(raw);
+    return key === 'notion' || raw.includes('노션');
+  });
+
+  if(notion){
+    if(notion.name !== 'Notion'){ notion.name = 'Notion'; changed = true; }
+    if(notion.cycle !== '연간'){ notion.cycle = '연간'; changed = true; }
+    if(notion.date !== '11월 24일'){ notion.date = '11월 24일'; changed = true; }
+    if(Number(notion.amount || 0) !== 37800){ notion.amount = 37800; changed = true; }
+    if(notion.memo == null){ notion.memo = ''; changed = true; }
+  }else{
+    appData.global.subscriptions.push({name:'Notion', cycle:'연간', date:'11월 24일', amount:37800, memo:''});
+    changed = true;
+  }
+
+  appData.global.subscriptions = sortSubscriptionsByDate(appData.global.subscriptions);
+  return changed;
+}
+
+if(ensureDefaultSubscriptionsMerged()){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
 }
 
 
