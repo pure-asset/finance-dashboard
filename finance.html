@@ -1,5 +1,7 @@
 
 
+
+
 <!doctype html>
 <html lang="ko">
 <head>
@@ -2781,8 +2783,34 @@ function syncNow(){
 window.signInWithGoogle = signInWithGoogle;
 window.signOutUser = signOutUser;
 
+function ensureChartSnapshots(){
+  if(!appData.global) appData.global = {};
+  if(!appData.global.chartSnapshots) appData.global.chartSnapshots = {};
+  return appData.global.chartSnapshots;
+}
+
+function buildChartSnapshot(data=getMonthData()){
+  const asset = getAssetTotal(null, data);
+  const debt = sum(getAdjustedDebtItems(data));
+  return {
+    asset,
+    debt,
+    net: asset - debt,
+    savedAt: Date.now()
+  };
+}
+
+function captureCurrentMonthSnapshot(){
+  const snapshots = ensureChartSnapshots();
+  snapshots[monthKey()] = buildChartSnapshot(getMonthData());
+}
+
 function manualSaveNow(){
+  // 그래프는 사용자가 명시적으로 저장한 월별 스냅샷만 사용합니다.
+  captureCurrentMonthSnapshot();
   saveAppData();
+  renderChart();
+  updateChartSummary();
   if(currentUser && typeof saveCloudNow === 'function'){
     saveCloudNow();
     updateSyncUI('클라우드 저장 완료', currentUser.email || '로그인됨');
@@ -2889,6 +2917,8 @@ function loadAppData(){
 }
 
 let appData = loadAppData();
+if(!appData.global) appData.global = { subscriptions: structuredClone(defaultSubscriptions) };
+if(!appData.global.chartSnapshots) appData.global.chartSnapshots = {};
 window.appData = appData;
 
 const SUBS_VERSION_KEY = 'finance_subscriptions_version_v5_add_notion';
@@ -3964,26 +3994,23 @@ function refreshLinkedExpenses(){
 }
 
 function getYearSeries(type){
-  // 그래프는 localStorage에 실제 저장된 데이터만 참조
-  // 월 이동으로 생성된 임시 메모리 데이터는 제외
-  let savedData = null;
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    savedData = raw ? JSON.parse(raw) : null;
-  } catch(e) {}
-  const savedMonths = savedData ? savedData.months : {};
-
+  // 그래프는 입력 중인 화면값이 아니라, 사용자가 ✓ 저장을 누른 월별 스냅샷만 참조합니다.
+  const snapshots = (appData.global && appData.global.chartSnapshots) ? appData.global.chartSnapshots : {};
   const arr = [];
+
   for(let m=0; m<12; m++){
-    const data = savedMonths[monthKey(currentYear, m)];
-    if(data){
-      if(type === 'asset') arr.push(getAssetTotal(null, data));
-      else if(type === 'debt') arr.push(sum(getAdjustedDebtItems(data)));
-      else if(type === 'net') arr.push(getAssetTotal(null, data) - sum(getAdjustedDebtItems(data)));
-      else arr.push(null);
-    } else {
+    const snap = snapshots[monthKey(currentYear, m)];
+    if(!snap){
       arr.push(null);
+      continue;
     }
+
+    const value = type === 'asset' ? snap.asset
+                : type === 'debt'  ? snap.debt
+                : type === 'net'   ? snap.net
+                : null;
+
+    arr.push(value === null || value === undefined || Number.isNaN(Number(value)) ? null : Number(value));
   }
   return arr;
 }
