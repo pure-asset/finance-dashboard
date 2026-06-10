@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연도별 서머리</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --me:#ff6b9d; --him:#5b8dee; --shared:#a78bfa;
+    --bg:#fdf8ff; --surface:#ffffff; --border:#f0eaf5;
+    --text:#2d1f3d; --text2:#9b8aaa; --text3:#c9b8d8;
+    --shadow:0 2px 20px rgba(180,130,210,0.1);
+    --shadow-hover:0 8px 32px rgba(180,130,210,0.18);
+    --radius:20px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg);
+    background-image:radial-gradient(circle at 15% 10%,#ffedf5 0%,transparent 35%),radial-gradient(circle at 85% 85%,#edf0ff 0%,transparent 35%);
+    color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh;padding:32px 16px 72px;
+  }
+  .sync-bar{width:min(820px,100%);max-width:820px;margin:0 auto 36px;display:flex;align-items:center;justify-content:space-between;gap:14px;background:rgba(255,255,255,.92);border:1.5px solid var(--border);border-radius:24px;padding:14px 16px;box-shadow:var(--shadow);font-size:12px;color:var(--text2)}
+  .sync-left{display:flex;align-items:center;gap:12px;min-width:0;flex:1}.sync-status{font-weight:900;color:var(--shared);white-space:nowrap}.sync-user{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.sync-user:before{content:'|';color:var(--border);margin-right:12px;font-weight:700}.sync-actions{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:nowrap}.sync-actions .btn{box-shadow:none;padding:5px 11px;min-height:32px;font-size:12px!important;line-height:1;white-space:nowrap}
+  header{max-width:820px;margin:0 auto 28px;text-align:center}.header-emoji{font-size:36px;margin-bottom:8px}h1{font-family:'Gowun Dodum',sans-serif;font-size:28px;letter-spacing:-.3px;margin-bottom:4px}.year-nav{display:inline-flex;align-items:center;gap:16px;background:var(--surface);border:1.5px solid var(--border);border-radius:99px;padding:8px 20px;margin-top:16px;box-shadow:var(--shadow)}.year-nav button{background:none;border:none;color:var(--text2);font-size:16px;cursor:pointer;padding:2px 8px;border-radius:50%;transition:all .15s}.year-nav button:hover{background:var(--border);color:var(--text)}.year-nav span{font-size:15px;font-weight:700;min-width:90px;text-align:center}
+  .action-bar{max-width:820px;margin:0 auto 24px;display:flex;gap:10px;justify-content:center}.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:99px;border:1.5px solid var(--border);font-size:12px!important;font-weight:800;cursor:pointer;background:var(--surface);color:var(--text2);font-family:inherit;text-decoration:none;transition:.18s;box-shadow:var(--shadow);min-height:38px}.btn:hover{border-color:var(--shared);color:var(--shared);transform:translateY(-1px)}.btn.blue{background:linear-gradient(135deg,var(--him),#7aaeff);color:#fff;border-color:transparent}.btn.danger{color:var(--me)}
+  .section-title{max-width:820px;margin:0 auto 12px;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);display:flex;align-items:center;gap:8px}.section-title:after{content:'';flex:1;height:1px;background:var(--border)}
+  .summary-grid{max-width:820px;margin:0 auto 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.sum-card{background:var(--surface);border-radius:var(--radius);padding:20px 14px;border:1.5px solid var(--border);box-shadow:var(--shadow);text-align:center}.sum-label{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:6px}.sum-amount{font-size:24px;font-weight:900;letter-spacing:-.6px;color:var(--him)}.sum-sub{font-size:11px;color:var(--text2);margin-top:4px}.sum-card.pink .sum-amount{color:var(--me)}.sum-card.purple .sum-amount{color:var(--shared)}
+  .chart-wrap{max-width:820px;margin:0 auto 24px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:26px 24px 18px;box-shadow:var(--shadow)}.chart-plot{display:grid;grid-template-columns:54px minmax(0,1fr);gap:12px;align-items:stretch}.chart-y-axis{height:210px;padding-bottom:34px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;color:var(--text3);font-size:10px;font-weight:800}.chart-inner{display:flex;align-items:flex-end;gap:6px;height:210px;padding-bottom:34px;position:relative;border-bottom:1.5px solid var(--border);overflow-x:hidden}.chart-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative}.chart-bar-area{width:100%;display:flex;align-items:flex-end;justify-content:center;flex:1}.chart-bar{width:min(34px,70%);border-radius:8px 8px 0 0;position:relative;transition:height .45s cubic-bezier(.34,1.1,.64,1)}.chart-bar.paid{background:linear-gradient(180deg,#7aaeff,var(--him))}.chart-bar.unpaid{background:linear-gradient(180deg,#c4b5fd,var(--shared));opacity:.88}.chart-bar.empty{background:var(--border);opacity:.55;min-height:4px;border-radius:4px}.chart-value-label{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);font-size:10px;font-weight:900;color:var(--him);white-space:nowrap}.chart-bar.unpaid .chart-value-label{color:var(--shared)}.chart-month-label{position:absolute;bottom:-24px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--text3);white-space:nowrap;font-weight:800}.chart-col.current .chart-month-label{color:var(--me)}.chart-legend{display:flex;gap:16px;margin-top:16px;flex-wrap:wrap}.chart-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);font-weight:700}.chart-legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+  .monthly-grid{max-width:820px;margin:0 auto 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.month-card{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);display:grid;gap:6px}.month-card.has-data{border-color:#d0dcff}.month-card.paid{border-color:#bbf7d0;background:#fbfffc}.month-top{display:flex;justify-content:space-between;align-items:center;gap:8px}.month-title{font-size:14px;font-weight:900}.status{font-size:10px;font-weight:800;padding:3px 8px;border-radius:99px;white-space:nowrap}.status.paid{background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0}.status.unpaid{background:#f3f0ff;color:var(--shared);border:1px solid #ddd6fe}.status.empty{background:var(--bg);color:var(--text3);border:1px solid var(--border)}.month-amount{font-size:20px;font-weight:900;color:var(--him)}.month-detail{font-size:11px;color:var(--text2);line-height:1.45}.month-actions{display:flex;gap:6px;margin-top:4px}.mini-btn{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:5px 9px;font-size:11px!important;color:var(--text2);font-weight:800;text-decoration:none;cursor:pointer}.mini-btn:hover{border-color:var(--him);color:var(--him)}
+  .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#2d1f3d;color:#fff;padding:12px 24px;border-radius:99px;font-size:13px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.2);transition:.3s;z-index:1000;white-space:nowrap}.toast.show{transform:translateX(-50%) translateY(0)}
+
+  /* ── 파이차트 ── */
+  .pie-wrap{
+    max-width:820px;
+    margin:0 auto 24px;
+    background:var(--surface);
+    border:1.5px solid var(--border);
+    border-radius:var(--radius);
+    padding:26px 24px 22px;
+    box-shadow:var(--shadow);
+  }
+  .pie-layout{
+    display:grid;
+    grid-template-columns:220px 1fr;
+    gap:32px;
+    align-items:center;
+    margin-top:8px;
+  }
+  .pie-svg-wrap{
+    position:relative;
+    width:200px;
+    height:200px;
+    flex-shrink:0;
+  }
+  .pie-center-label{
+    position:absolute;
+    top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    text-align:center;
+    pointer-events:none;
+  }
+  .pie-center-total{
+    font-size:18px;
+    font-weight:700;
+    color:var(--text);
+    letter-spacing:-.04em;
+    line-height:1.2;
+  }
+  .pie-center-sub{
+    font-size:10px;
+    color:var(--text2);
+    margin-top:2px;
+  }
+  .pie-legend{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px 20px;
+    align-content:center;
+  }
+  .pie-legend-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 12px;
+    background:var(--bg);
+    border-radius:10px;
+    border:1.5px solid var(--border);
+    transition:all .15s;
+  }
+  .pie-legend-item:hover{
+    border-color:var(--shared);
+    transform:translateY(-1px);
+    box-shadow:var(--shadow);
+  }
+  .pie-legend-dot{
+    width:12px;height:12px;border-radius:50%;flex-shrink:0;
+  }
+  .pie-legend-info{
+    flex:1;min-width:0;
+  }
+  .pie-legend-name{
+    font-size:12px;
+    color:var(--text);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .pie-legend-val{
+    font-size:11px;
+    color:var(--text2);
+    margin-top:2px;
+  }
+  .pie-legend-pct{
+    font-size:13px;
+    font-weight:700;
+    color:var(--text);
+    white-space:nowrap;
+  }
+  .pie-empty{
+    text-align:center;
+    padding:32px;
+    color:var(--text3);
+    font-size:13px;
+  }
+  .pie-months-note{
+    font-size:11px;
+    color:var(--text2);
+    margin-top:14px;
+    text-align:center;
+  }
+
+  @media(max-width:700px){
+    body{padding:clamp(14px,4vw,22px) clamp(12px,4vw,16px) 72px}
+    .sync-bar{flex-direction:column;gap:10px;margin-bottom:30px}
+    .sync-left{width:100%;justify-content:center;gap:8px}
+    .sync-status{font-size:12px!important;max-width:52%;overflow:hidden;text-overflow:ellipsis}
+    .sync-user{font-size:11px!important;max-width:42%}
+    .sync-user:before{margin-right:8px}
+    .sync-actions{width:100%;justify-content:center}
+    .summary-grid{grid-template-columns:1fr 1fr}
+    .sum-card{padding:16px 12px}
+    .sum-amount{font-size:22px}
+    .chart-wrap{padding:20px 16px 16px}
+    .chart-plot{grid-template-columns:44px minmax(0,1fr);gap:8px}
+    .chart-y-axis{font-size:9px;height:190px}
+    .chart-inner{height:190px;overflow-x:auto;gap:8px}
+    .chart-col{flex:0 0 52px;min-width:52px}
+    .chart-bar{width:34px}
+    .chart-value-label{font-size:9px}
+    .monthly-grid{grid-template-columns:1fr}
+    .action-bar{gap:8px}
+    .action-bar .btn{flex:1;padding:8px 10px}
+    /* 파이차트 모바일 */
+    .pie-layout{
+      grid-template-columns:1fr;
+      gap:20px;
+      justify-items:center;
+    }
+    .pie-legend{
+      grid-template-columns:1fr;
+      width:100%;
+    }
+  }
+
+  /* Remove nearly all bold styling */
+  h1,.year-nav span,.sync-status,.btn,.section-title,.sum-label,.sum-amount,
+  .chart-y-axis,.chart-value-label,.chart-month-label,.chart-legend-item,
+  .month-title,.status,.month-amount,.mini-btn{
+    font-weight:400 !important;
+  }
+
+  /* ── Unified period navigator ── */
+  .year-nav,
+  .month-nav {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 16px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    padding: 8px 22px !important;
+    margin-top: 16px !important;
+    background: var(--surface) !important;
+    border: 1.5px solid var(--border) !important;
+    border-radius: 99px !important;
+    box-shadow: var(--shadow) !important;
+  }
+  .year-nav button,
+  .month-nav button {
+    background: none !important;
+    border: none !important;
+    color: var(--text2) !important;
+    font-size: 16px !important;
+    cursor: pointer !important;
+    padding: 2px 8px !important;
+    border-radius: 50% !important;
+    min-height: auto !important;
+    height: auto !important;
+    line-height: 1.2 !important;
+    box-shadow: none !important;
+  }
+  .year-nav span,
+  .month-nav span {
+    font-size: 16px !important;
+    font-weight: 400 !important;
+    min-width: 76px !important;
+    text-align: center !important;
+    line-height: 1.2 !important;
+  }
+  @media (max-width: 700px) {
+    .year-nav, .month-nav {
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: none !important;
+      justify-content: center !important;
+      padding: 8px 22px !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="sync-bar no-print">
+  <div class="sync-left"><div class="sync-status" id="sync-status">로컬 저장 모드</div><div class="sync-user" id="sync-user">Google 로그인하면 기기 간 동기화됩니다.</div></div>
+  <div class="sync-actions"><button class="btn blue" id="login-btn" onclick="signInWithGoogle()">Google 로그인</button><button class="btn" id="sync-btn" onclick="saveCloudNow()" style="display:none">☁️ 지금 동기화</button><button class="btn danger" id="logout-btn" onclick="signOutGoogle()" style="display:none">로그아웃</button></div>
+</div>
+<header>
+  <div class="header-emoji">📊💗</div>
+  <h1>연도별 서머리</h1>
+  <div class="year-nav"><button onclick="changeYear(-1)">◀</button><span id="year-title"></span><button onclick="changeYear(1)">▶</button></div>
+</header>
+<div class="action-bar no-print"><a href="living.html" class="btn">🏠 생활비 정산</a><a href="finance.html" class="btn">💰 재무 관리</a></div>
+
+<div class="section-title" id="summary-title">📌 연간 요약</div>
+<div class="summary-grid">
+  <div class="sum-card"><div class="sum-label">연간 총 정산액</div><div class="sum-amount" id="year-total">¥0</div><div class="sum-sub">저장된 월 기준</div></div>
+  <div class="sum-card purple"><div class="sum-label">월 평균 정산액</div><div class="sum-amount" id="year-avg">¥0</div><div class="sum-sub" id="saved-months">0개월 기록</div></div>
+  <div class="sum-card"><div class="sum-label">완료된 정산</div><div class="sum-amount" id="paid-count">0</div><div class="sum-sub">완료 월수</div></div>
+  <div class="sum-card pink"><div class="sum-label">미완료 정산</div><div class="sum-amount" id="unpaid-count">0</div><div class="sum-sub">확인 필요</div></div>
+</div>
+
+<div class="section-title" id="chart-title">📊 월별 정산 현황</div>
+<div class="chart-wrap" id="chart-wrap"></div>
+
+<div class="section-title" id="pie-title">🥧 항목별 평균 지출 구성</div>
+<div class="pie-wrap">
+  <div id="pie-container"></div>
+</div>
+
+<div class="section-title" id="monthly-title">🗓️ 월별 상세</div>
+<div class="monthly-grid" id="monthly-grid"></div>
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyABPojKMaEJfphyA_MfGaR_vynnHtbhc_k",authDomain:"finance-dashboard-1d9b9.firebaseapp.com",projectId:"finance-dashboard-1d9b9",storageBucket:"finance-dashboard-1d9b9.firebasestorage.app",messagingSenderId:"225945272359",appId:"1:225945272359:web:dda18e82eba722e7f88e02",measurementId:"G-L6NWQJER72"};
+firebase.initializeApp(firebaseConfig);const auth=firebase.auth();const db=firebase.firestore();let currentUser=null;let cloudTimer=null;let currentYear=new Date().getFullYear();const currentMonth=new Date().getMonth();
+function cloudDocRef(){if(!currentUser)return null;return db.collection('users').doc(currentUser.uid).collection('dashboards').doc('pure-asset')}
+function collectLocalData(){const items={};for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key==='couple_history'||key.startsWith('couple_'))items[key]=localStorage.getItem(key)}return items}
+function applyCloudData(items){Object.entries(items||{}).forEach(([key,value])=>{if(key==='couple_history'||key.startsWith('couple_'))localStorage.setItem(key,value)})}
+function updateSyncUI(status,userText){document.getElementById('sync-status').textContent=status;document.getElementById('sync-user').textContent=userText}
+async function saveCloudNow(){const ref=cloudDocRef();if(!ref)return;try{await ref.set({living:{data:collectLocalData()},updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});updateSyncUI('클라우드 동기화 완료',currentUser.email||'로그인됨')}catch(err){console.error(err);updateSyncUI('동기화 실패',err.message)}}
+async function loadCloudData(){const ref=cloudDocRef();if(!ref)return;try{updateSyncUI('클라우드 불러오는 중...',currentUser.email||'로그인됨');const snap=await ref.get();if(snap.exists&&(snap.data()?.living?.data||snap.data()?.data)){applyCloudData(snap.data().living?.data||snap.data().data);render();updateSyncUI('클라우드 불러오기 완료',currentUser.email||'로그인됨')}else{await saveCloudNow();updateSyncUI('첫 클라우드 저장 완료',currentUser.email||'로그인됨')}}catch(err){console.error(err);updateSyncUI('클라우드 불러오기 실패',err.message)}}
+function signInWithGoogle(){const provider=new firebase.auth.GoogleAuthProvider();auth.signInWithPopup(provider).catch(err=>{console.error(err);alert('Google 로그인 실패: '+err.message)})}function signOutGoogle(){auth.signOut()}window.signInWithGoogle=signInWithGoogle;window.signOutGoogle=signOutGoogle;window.saveCloudNow=saveCloudNow;
+function escapeHtml(value){return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#039;')}
+function getHistory(){return JSON.parse(localStorage.getItem('couple_history')||'[]')}
+function saveHistory(h){localStorage.setItem('couple_history',JSON.stringify(h));saveCloudNow()}
+function fmt(n){return '¥'+Math.abs(Math.round(n||0)).toLocaleString('ja-JP')}
+function compactJPY(n){if(!n)return '¥0';if(n>=10000)return `¥${(n/10000).toFixed(n%10000===0?0:1)}만`;return fmt(n)}
+function monthKey(y,m){return `${y}-${String(m+1).padStart(2,'0')}`}
+function monthLabel(y,m){return `${y}년 ${m+1}월`}
+function getYearMonths(){const hist={};getHistory().filter(h=>h.year===currentYear).forEach(h=>{hist[h.key]=h});return Array.from({length:12},(_,m)=>({y:currentYear,m,key:monthKey(currentYear,m),snap:hist[monthKey(currentYear,m)]}))}
+function changeYear(d){currentYear+=d;render()}window.changeYear=changeYear;
+function togglePaid(key){const history=getHistory();const idx=history.findIndex(h=>h.key===key);if(idx<0)return;history[idx].paid=!history[idx].paid;saveHistory(history);render();showToast(history[idx].paid?'✅ 정산 완료로 표시했어요':'↩️ 미완료로 변경했어요')}window.togglePaid=togglePaid;
+function deleteSnapshot(key){if(!confirm('이 정산 기록을 삭제할까요?'))return;saveHistory(getHistory().filter(h=>h.key!==key));render();showToast('삭제됐어요')}window.deleteSnapshot=deleteSnapshot;
+
+function renderSummary(months){
+  const snaps=months.map(x=>x.snap).filter(Boolean);
+  const total=snaps.reduce((s,h)=>s+(h.himOwes||0),0);
+  const avg=snaps.length?total/snaps.length:0;
+  const paid=snaps.filter(h=>h.paid).length;
+  const unpaid=snaps.filter(h=>!h.paid).length;
+  document.getElementById('year-title').textContent=currentYear+'년';
+  document.getElementById('summary-title').childNodes[0].textContent=`📌 ${currentYear}년 연간 요약`;
+  document.getElementById('chart-title').childNodes[0].textContent=`📊 ${currentYear}년 월별 정산 현황`;
+  document.getElementById('pie-title').childNodes[0].textContent=`🥧 ${currentYear}년 항목별 평균 지출 구성`;
+  document.getElementById('monthly-title').childNodes[0].textContent=`🗓️ ${currentYear}년 월별 상세`;
+  document.getElementById('year-total').textContent=fmt(total);
+  document.getElementById('year-avg').textContent=fmt(avg);
+  document.getElementById('saved-months').textContent=snaps.length+'개월 기록';
+  document.getElementById('paid-count').textContent=paid;
+  document.getElementById('unpaid-count').textContent=unpaid;
+}
+
+function renderChart(months){
+  const container=document.getElementById('chart-wrap');
+  const maxVal=Math.max(...months.map(x=>x.snap?x.snap.himOwes:0),0);
+  const axisStep=100000;
+  const maxAxis=Math.max(axisStep,Math.ceil(maxVal/axisStep)*axisStep);
+  const axisLabels=[];
+  for(let v=maxAxis;v>=0;v-=axisStep)axisLabels.push(v);
+  const yAxis=axisLabels.map(v=>`<div>${v===0?'¥0':`¥${Math.round(v/10000)}만`}</div>`).join('');
+  const bars=months.map(({m,snap})=>{
+    const isCurrent=currentYear===new Date().getFullYear()&&m===currentMonth;
+    const label=`${m+1}월`;
+    if(!snap)return `<div class="chart-col${isCurrent?' current':''}"><div class="chart-bar-area"><div class="chart-bar empty" style="height:4px"></div></div><span class="chart-month-label">${m===0?currentYear+' ':''}${label}</span></div>`;
+    const height=Math.max(8,Math.round((snap.himOwes/maxAxis)*170));
+    const cls=snap.paid?'paid':'unpaid';
+    return `<div class="chart-col${isCurrent?' current':''}"><div class="chart-bar-area"><div class="chart-bar ${cls}" style="height:${height}px"><span class="chart-value-label">${compactJPY(snap.himOwes)}</span></div></div><span class="chart-month-label">${m===0?currentYear+' ':''}${label}</span></div>`
+  }).join('');
+  container.innerHTML=`<div class="chart-plot"><div class="chart-y-axis">${yAxis}</div><div class="chart-inner">${bars}</div></div><div class="chart-legend"><div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--him)"></div>완료된 정산</div><div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--shared);opacity:.8"></div>미완료 정산</div><div class="chart-legend-item"><div class="chart-legend-dot" style="background:var(--border)"></div>기록 없음</div></div>`;
+}
+
+// ── 파이차트 ──
+// 카테고리 정의: 색상 + 이름
+const PIE_CATEGORIES = [
+  { key: 'rent',       name: '집세',              emoji: '🏠', color: '#5b8dee' },
+  { key: 'electric',   name: '전기세',             emoji: '💡', color: '#ff9f43' },
+  { key: 'internet',   name: '인터넷',              emoji: '📶', color: '#a78bfa' },
+  { key: 'gas',        name: '가스',               emoji: '🔥', color: '#ff6b9d' },
+  { key: 'water',      name: '수도세',              emoji: '🚿', color: '#26de81' },
+  { key: 'essentials', name: '생필품/식재료',        emoji: '🛒', color: '#fd9644' },
+  { key: 'adhoc',      name: 'Ad hoc',             emoji: '💙', color: '#45aaf2' },
+];
+
+function renderPieChart(months) {
+  const container = document.getElementById('pie-container');
+
+  // 금액이 있는 스냅샷만 수집
+  const snaps = months.map(x => x.snap).filter(Boolean);
+  if (!snaps.length) {
+    container.innerHTML = '<div class="pie-empty">저장된 정산 데이터가 없어요. 생활비 정산에서 먼저 저장해주세요.</div>';
+    return;
+  }
+
+  // 카테고리별 합산 (반반 전 원본 금액)
+  const totals = {};
+  PIE_CATEGORIES.forEach(cat => { totals[cat.key] = 0; });
+
+  let validMonths = 0;
+  snaps.forEach(snap => {
+    const amounts = snap.amounts || {};
+    const essItems = snap.essItems || [];
+    const himItems = snap.himItems || [];
+
+    // 이 달에 하나라도 금액이 있으면 유효한 달로 카운트
+    const rentVal    = Number(amounts.rent || 0);
+    const electricVal= Number(amounts.electric || 0);
+    const internetVal= Number(amounts.internet || 0);
+    const gasVal     = Number(amounts.gas || 0);
+    const waterVal   = Number(amounts.water || 0);
+    const essTotal   = essItems.reduce((s, i) => s + Number(i.amount || 0), 0);
+    const adhocTotal = himItems.reduce((s, i) => s + Number(i.amount || 0), 0);
+
+    const monthHasData = rentVal + electricVal + internetVal + gasVal + waterVal + essTotal + adhocTotal > 0;
+    if (!monthHasData) return;
+
+    validMonths++;
+    totals.rent       += rentVal;
+    totals.electric   += electricVal;
+    totals.internet   += internetVal;
+    totals.gas        += gasVal;
+    totals.water      += waterVal;
+    totals.essentials += essTotal;
+    totals.adhoc      += adhocTotal;
+  });
+
+  if (validMonths === 0) {
+    container.innerHTML = '<div class="pie-empty">금액이 입력된 정산 데이터가 없어요.</div>';
+    return;
+  }
+
+  // 평균 계산 + 0인 항목 제외
+  const avgData = PIE_CATEGORIES
+    .map(cat => ({
+      ...cat,
+      avg: totals[cat.key] / validMonths
+    }))
+    .filter(d => d.avg > 0);
+
+  if (!avgData.length) {
+    container.innerHTML = '<div class="pie-empty">금액이 입력된 항목이 없어요.</div>';
+    return;
+  }
+
+  const grandTotal = avgData.reduce((s, d) => s + d.avg, 0);
+
+  // SVG 파이차트 그리기
+  const cx = 100, cy = 100, r = 80, holeR = 46;
+  const TAU = Math.PI * 2;
+
+  function polarToXY(angle, radius) {
+    return {
+      x: cx + radius * Math.cos(angle - Math.PI / 2),
+      y: cy + radius * Math.sin(angle - Math.PI / 2)
+    };
+  }
+
+  function makeSlicePath(startAngle, endAngle, outerR, innerR) {
+    const large = endAngle - startAngle > Math.PI ? 1 : 0;
+    const s1 = polarToXY(startAngle, outerR);
+    const e1 = polarToXY(endAngle, outerR);
+    const s2 = polarToXY(endAngle, innerR);
+    const e2 = polarToXY(startAngle, innerR);
+    return [
+      `M ${s1.x} ${s1.y}`,
+      `A ${outerR} ${outerR} 0 ${large} 1 ${e1.x} ${e1.y}`,
+      `L ${s2.x} ${s2.y}`,
+      `A ${innerR} ${innerR} 0 ${large} 0 ${e2.x} ${e2.y}`,
+      'Z'
+    ].join(' ');
+  }
+
+  let currentAngle = 0;
+  const slices = avgData.map((d, idx) => {
+    const sliceAngle = (d.avg / grandTotal) * TAU;
+    const startAngle = currentAngle;
+    const endAngle = currentAngle + sliceAngle;
+    currentAngle = endAngle;
+
+    const midAngle = startAngle + sliceAngle / 2;
+    const labelPos = polarToXY(midAngle, (r + holeR) / 2);
+    const pct = Math.round(d.avg / grandTotal * 100);
+
+    return {
+      ...d,
+      path: makeSlicePath(startAngle, endAngle, r, holeR),
+      pct,
+      labelPos,
+      sliceAngle
+    };
+  });
+
+  const svgSlices = slices.map((s, i) => {
+    // 작은 조각(2% 미만)은 레이블 숨김
+    const showLabel = s.pct >= 4;
+    return `
+      <path d="${s.path}" fill="${s.color}" opacity="0.88"
+        style="transition:opacity .15s;cursor:pointer"
+        onmouseenter="this.setAttribute('opacity','1')"
+        onmouseleave="this.setAttribute('opacity','0.88')"
+      />
+      ${showLabel ? `<text x="${s.labelPos.x}" y="${s.labelPos.y}" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="10" font-weight="700">${s.pct}%</text>` : ''}
+    `;
+  }).join('');
+
+  const legendItems = slices.map(s => `
+    <div class="pie-legend-item">
+      <div class="pie-legend-dot" style="background:${s.color}"></div>
+      <div class="pie-legend-info">
+        <div class="pie-legend-name">${s.emoji} ${s.name}</div>
+        <div class="pie-legend-val">월 평균 ${fmt(s.avg)}</div>
+      </div>
+      <div class="pie-legend-pct">${s.pct}%</div>
+    </div>
+  `).join('');
+
+  container.innerHTML = `
+    <div class="pie-layout">
+      <div class="pie-svg-wrap">
+        <svg viewBox="0 0 200 200" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+          ${svgSlices}
+        </svg>
+        <div class="pie-center-label">
+          <div class="pie-center-total">${compactJPY(Math.round(grandTotal))}</div>
+          <div class="pie-center-sub">월 평균</div>
+        </div>
+      </div>
+      <div class="pie-legend">${legendItems}</div>
+    </div>
+    <div class="pie-months-note">※ ${validMonths}개월 데이터 기준 · 반반 전 원본 금액</div>
+  `;
+}
+
+function renderMonthlyGrid(months){
+  const grid=document.getElementById('monthly-grid');
+  grid.innerHTML=months.map(({m,key,snap})=>{
+    if(!snap)return `<div class="month-card"><div class="month-top"><div class="month-title">${m+1}월</div><span class="status empty">기록 없음</span></div><div class="month-amount" style="color:var(--text3)">¥0</div><div class="month-detail">아직 저장된 정산이 없어요.</div><div class="month-actions"><a class="mini-btn" href="living.html">입력하기</a></div></div>`;
+    return `<div class="month-card has-data ${snap.paid?'paid':''}"><div class="month-top"><div class="month-title">${m+1}월</div><span class="status ${snap.paid?'paid':'unpaid'}">${snap.paid?'✅ 완료':'⏳ 미완료'}</span></div><div class="month-amount">${fmt(snap.himOwes)}</div><div class="month-detail">공동 반반 ${fmt(snap.sharedEach)}${snap.himExtra>0?' + 청구 '+fmt(snap.himExtra):''}<br>${new Date(snap.savedAt).toLocaleDateString('ko-KR')} 저장</div><div class="month-actions"><button class="mini-btn" onclick="togglePaid('${key}')">${snap.paid?'↩️ 취소':'✅ 완료'}</button><a class="mini-btn" href="living.html">보기</a><button class="mini-btn" onclick="deleteSnapshot('${key}')">🗑️</button></div></div>`;
+  }).join('');
+}
+
+function render(){
+  const months=getYearMonths();
+  renderSummary(months);
+  renderChart(months);
+  renderPieChart(months);
+  renderMonthlyGrid(months);
+}
+
+let toastTimer;
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600)}
+
+auth.onAuthStateChanged(user=>{
+  currentUser=user;
+  const loginBtn=document.getElementById('login-btn'),logoutBtn=document.getElementById('logout-btn'),syncBtn=document.getElementById('sync-btn');
+  if(user){loginBtn.style.display='none';logoutBtn.style.display='inline-flex';syncBtn.style.display='inline-flex';loadCloudData()}
+  else{loginBtn.style.display='inline-flex';logoutBtn.style.display='none';syncBtn.style.display='none';updateSyncUI('로컬 저장 모드','Google 로그인하면 기기 간 동기화됩니다.')}
+});
+render();
+</script>
+</body>
+</html>
