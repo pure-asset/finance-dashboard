@@ -2565,6 +2565,7 @@ function signInWithGoogle(){
   }
   const provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider).catch(err => {
+    if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') return;
     console.error(err);
     alert('Google 로그인 실패: ' + err.message);
   });
