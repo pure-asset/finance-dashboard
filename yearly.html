@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>연간 서머리</title>
+<title>연도별 서머리</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Gowun+Dodum&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -251,7 +251,7 @@
 </div>
 <header>
   <div class="header-emoji">📊💗</div>
-  <h1>연간 서머리</h1>
+  <h1>연도별 서머리</h1>
   <div class="year-nav"><button onclick="changeYear(-1)">◀</button><span id="year-title"></span><button onclick="changeYear(1)">▶</button></div>
 </header>
 <div class="action-bar no-print"><a href="living.html" class="btn">🏠 생활비 정산</a><a href="finance.html" class="btn">💰 재무 관리</a></div>
@@ -289,7 +289,7 @@ function applyCloudData(items){Object.entries(items||{}).forEach(([key,value])=>
 function updateSyncUI(status,userText){document.getElementById('sync-status').textContent=status;document.getElementById('sync-user').textContent=userText}
 async function saveCloudNow(){const ref=cloudDocRef();if(!ref)return;try{await ref.set({living:{data:collectLocalData()},updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});updateSyncUI('클라우드 동기화 완료',currentUser.email||'로그인됨')}catch(err){console.error(err);updateSyncUI('동기화 실패',err.message)}}
 async function loadCloudData(){const ref=cloudDocRef();if(!ref)return;try{updateSyncUI('클라우드 불러오는 중...',currentUser.email||'로그인됨');const snap=await ref.get();if(snap.exists&&(snap.data()?.living?.data||snap.data()?.data)){applyCloudData(snap.data().living?.data||snap.data().data);render();updateSyncUI('클라우드 불러오기 완료',currentUser.email||'로그인됨')}else{await saveCloudNow();updateSyncUI('첫 클라우드 저장 완료',currentUser.email||'로그인됨')}}catch(err){console.error(err);updateSyncUI('클라우드 불러오기 실패',err.message)}}
-function signInWithGoogle(){const provider=new firebase.auth.GoogleAuthProvider();auth.signInWithPopup(provider).catch(err=>{console.error(err);alert('Google 로그인 실패: '+err.message)})}function signOutGoogle(){auth.signOut()}window.signInWithGoogle=signInWithGoogle;window.signOutGoogle=signOutGoogle;window.saveCloudNow=saveCloudNow;
+function signInWithGoogle(){const provider=new firebase.auth.GoogleAuthProvider();auth.signInWithPopup(provider).catch(err=>{if(err.code==='auth/popup-closed-by-user'||err.code==='auth/cancelled-popup-request')return;console.error(err);alert('Google 로그인 실패: '+err.message)})}function signOutGoogle(){auth.signOut()}window.signInWithGoogle=signInWithGoogle;window.signOutGoogle=signOutGoogle;window.saveCloudNow=saveCloudNow;
 function escapeHtml(value){return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#039;')}
 function getHistory(){return JSON.parse(localStorage.getItem('couple_history')||'[]')}
 function saveHistory(h){localStorage.setItem('couple_history',JSON.stringify(h));saveCloudNow()}
@@ -342,13 +342,13 @@ function renderChart(months){
 // ── 파이차트 ──
 // 카테고리 정의: 색상 + 이름
 const PIE_CATEGORIES = [
-  { key: 'rent',       name: '집세',              emoji: '🏠', color: '#2d1f3d' },
-  { key: 'electric',   name: '전기세',             emoji: '💡', color: '#ff9f43' },
+  { key: 'rent',       name: '집세',              emoji: '🏠', color: '#d97706' },
+  { key: 'electric',   name: '전기세',             emoji: '💡', color: '#c9c9c9' },
   { key: 'internet',   name: '인터넷',              emoji: '📶', color: '#a78bfa' },
   { key: 'gas',        name: '가스',               emoji: '🔥', color: '#ff6b9d' },
-  { key: 'water',      name: '수도세',              emoji: '🚿', color: '#26de81' },
+  { key: 'water',      name: '수도세',              emoji: '🚿', color: '#56ccf2' },
   { key: 'essentials', name: '생필품/식재료',        emoji: '🛒', color: '#20bf6b' },
-  { key: 'adhoc',      name: 'Ad hoc',             emoji: '💙', color: '#45aaf2' },
+  { key: 'adhoc',      name: 'Ad hoc',             emoji: '💙', color: '#1e3a5f' },
 ];
 
 function renderPieChart(months) {
