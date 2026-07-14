@@ -2752,12 +2752,18 @@ if(
   saveAppData();
 }
 
-const STATEMENT_LINKS_VERSION_KEY = 'finance_statement_links_v2';
+const STATEMENT_LINKS_VERSION_KEY = 'finance_statement_links_v3';
 if(localStorage.getItem(STATEMENT_LINKS_VERSION_KEY) !== '1'){
   if(!Array.isArray(appData.global.statementLinks)) appData.global.statementLinks = [];
   defaultStatementLinks.forEach(def => {
-    const exists = appData.global.statementLinks.some(item => item.name === def.name);
-    if(!exists) appData.global.statementLinks.push({...def});
+    const existing = appData.global.statementLinks.find(item => item.name === def.name);
+    if(!existing){
+      appData.global.statementLinks.push({...def});
+    }else{
+      // 이름이 같은 기본 항목은 코드의 최신 URL로 동기화
+      // (직접 추가한, 이름이 다른 커스텀 항목은 건드리지 않음)
+      existing.url = def.url;
+    }
   });
   localStorage.setItem(STATEMENT_LINKS_VERSION_KEY, '1');
   saveAppData();
