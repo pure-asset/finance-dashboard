@@ -2932,9 +2932,23 @@ function ensureGlobalDefaults(){
   if(!appData.global) appData.global = {};
   // 클라우드 데이터로 appData가 통째로 교체되었을 때도 statementLinks 필드가
   // 아예 없으면(undefined/비배열) 기본 카드 명세 링크를 다시 채워 넣는다.
-  // 단, 사용자가 의도적으로 전부 삭제해 빈 배열([])인 경우는 건드리지 않는다.
   if(!Array.isArray(appData.global.statementLinks)){
     appData.global.statementLinks = structuredClone(defaultStatementLinks);
+    return;
+  }
+  // 이름이 코드 기본값과 정확히 일치하는 '고정' 항목은 매 렌더링마다 최신 URL로 동기화한다.
+  // 클라우드에서 예전 데이터를 불러와 덮어써도 항상 최신 상태로 복구됨.
+  // 이름이 다른(사용자가 직접 추가한) 항목은 절대 건드리지 않는다.
+  let changed = false;
+  defaultStatementLinks.forEach(def => {
+    const existing = appData.global.statementLinks.find(item => item.name === def.name);
+    if(existing && existing.url !== def.url){
+      existing.url = def.url;
+      changed = true;
+    }
+  });
+  if(changed && !isApplyingCloud){
+    saveAppData();
   }
 }
 
