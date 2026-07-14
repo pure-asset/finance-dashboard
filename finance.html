@@ -2943,8 +2943,11 @@ function getMonthData(){
       blank.monthBudget = previous.monthBudget || 300000;
       blank.assets = structuredClone(previous.assets || []);
 
-      // 부채 이월: 이전 달 잔액 - 이전 달 상환액
+      // 부채 이월: 리볼빙은 자동 이월 없이 매달 빈칸에서 새로 입력, 분할은 기존대로 잔액-상환액 이월
       blank.debts = (previous.debts || []).map(debt => {
+        if(debt.type === 'ribo'){
+          return { ...debt, amount: 0 };
+        }
         const paidAmount = (previous.payments || [])
           .filter(payment => paymentMatchesDebt(payment, debt))
           .reduce((total, payment) => total + Number(payment.amount || 0), 0);
@@ -3300,12 +3303,23 @@ function getDebtPaymentTotalFor(debt, data=getMonthData()){
 }
 
 function getAdjustedDebtItems(data=getMonthData()){
-  return (data.debts || []).map(debt => ({
-    ...debt,
-    rawAmount:Number(debt.amount || 0),
-    paymentAmount:getDebtPaymentTotalFor(debt, data),
-    amount:Math.max(0, Number(debt.amount || 0) - getDebtPaymentTotalFor(debt, data))
-  }));
+  return (data.debts || []).map(debt => {
+    if(debt.type === 'ribo'){
+      // 리볼빙은 자동 계산(상환액 반영) 없이 입력된 값을 그대로 사용
+      return {
+        ...debt,
+        rawAmount:Number(debt.amount || 0),
+        paymentAmount:0,
+        amount:Number(debt.amount || 0)
+      };
+    }
+    return {
+      ...debt,
+      rawAmount:Number(debt.amount || 0),
+      paymentAmount:getDebtPaymentTotalFor(debt, data),
+      amount:Math.max(0, Number(debt.amount || 0) - getDebtPaymentTotalFor(debt, data))
+    };
+  });
 }
 
 function getAssetTotal(type=null, data=getMonthData()){
