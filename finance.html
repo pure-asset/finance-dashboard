@@ -2895,6 +2895,16 @@ if(localStorage.getItem(DEBT_VERSION_KEY) !== '1'){
   saveAppData();
 }
 
+function ensureGlobalDefaults(){
+  if(!appData.global) appData.global = {};
+  // 클라우드 데이터로 appData가 통째로 교체되었을 때도 statementLinks 필드가
+  // 아예 없으면(undefined/비배열) 기본 카드 명세 링크를 다시 채워 넣는다.
+  // 단, 사용자가 의도적으로 전부 삭제해 빈 배열([])인 경우는 건드리지 않는다.
+  if(!Array.isArray(appData.global.statementLinks)){
+    appData.global.statementLinks = structuredClone(defaultStatementLinks);
+  }
+}
+
 function getMonthData(){
   const key = monthKey();
 
@@ -4024,6 +4034,7 @@ function render(){
   updateUndoButton();
   setDisplayedMonthTitle();
   if(window.appData && window.appData !== appData) appData = window.appData;
+  ensureGlobalDefaults();
 
   // ★ 수정 3: render() 진입 시 현재 달에 linked 항목이 없으면 hidden 상태 자동 해제
   // 효과: 로그인 후 클라우드 데이터 로드 시에도 항목이 정상 복원됨
