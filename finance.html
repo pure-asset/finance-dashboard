@@ -2320,7 +2320,7 @@ document.addEventListener('DOMContentLoaded', function(){
   </section>
 
   <section class="inline-panel" id="inline-debt">
-    <div class="inline-head"><h2>이번 달 부채 현황</h2><span class="inline-note">카드 명세 다운로드 GPT 전용챗 이용</span></div>
+    <div class="inline-head"><h2>이번 달 부채 현황</h2><span class="inline-note">명세서 파일 타입 : 라쿠텐/세종 "PDF", 아멕스 "CVS"</span></div>
     <div class="detail-card" style="margin-bottom:12px">
       <div class="detail-title">카드 명세서 링크</div>
       <div class="input-list" id="statement-link-list"></div>
@@ -2667,7 +2667,7 @@ const defaultStatementLinks = [
   {name:'Amex', url:'https://global.americanexpress.com/activity/statements'},
   {name:'Rakuten Card', url:'https://www.rakuten-card.co.jp/e-navi/members/statement/index.xhtml?l-id=enavi_all_glonavi_statement'},
   {name:'Saison Card', url:'https://netanswerplus.saisoncard.co.jp/WebPc/USC0101BLC01.do#/na-pc/bill/statement'},
-  {name:'명세서 전용', url:'https://chatgpt.com/c/6a22ff8e-f524-83a7-ba94-2657319aba18'}
+  {name:'명세서 전용', url:'https://chatgpt.com/c/6a56082f-6790-83ee-83ce-da8e43f0a84e'}
 ];
 
 const seededMonthKey = currentDate.getFullYear() + '-' + String(currentDate.getMonth() + 1).padStart(2, '0');
@@ -2943,11 +2943,8 @@ function getMonthData(){
       blank.monthBudget = previous.monthBudget || 300000;
       blank.assets = structuredClone(previous.assets || []);
 
-      // 부채 이월: 리볼빙은 자동 이월 없이 매달 빈칸에서 새로 입력, 분할은 기존대로 잔액-상환액 이월
+      // 부채 이월: 이전 달 잔액 - 이전 달 상환액
       blank.debts = (previous.debts || []).map(debt => {
-        if(debt.type === 'ribo'){
-          return { ...debt, amount: 0 };
-        }
         const paidAmount = (previous.payments || [])
           .filter(payment => paymentMatchesDebt(payment, debt))
           .reduce((total, payment) => total + Number(payment.amount || 0), 0);
@@ -3303,23 +3300,12 @@ function getDebtPaymentTotalFor(debt, data=getMonthData()){
 }
 
 function getAdjustedDebtItems(data=getMonthData()){
-  return (data.debts || []).map(debt => {
-    if(debt.type === 'ribo'){
-      // 리볼빙은 자동 계산(상환액 반영) 없이 입력된 값을 그대로 사용
-      return {
-        ...debt,
-        rawAmount:Number(debt.amount || 0),
-        paymentAmount:0,
-        amount:Number(debt.amount || 0)
-      };
-    }
-    return {
-      ...debt,
-      rawAmount:Number(debt.amount || 0),
-      paymentAmount:getDebtPaymentTotalFor(debt, data),
-      amount:Math.max(0, Number(debt.amount || 0) - getDebtPaymentTotalFor(debt, data))
-    };
-  });
+  return (data.debts || []).map(debt => ({
+    ...debt,
+    rawAmount:Number(debt.amount || 0),
+    paymentAmount:getDebtPaymentTotalFor(debt, data),
+    amount:Math.max(0, Number(debt.amount || 0) - getDebtPaymentTotalFor(debt, data))
+  }));
 }
 
 function getAssetTotal(type=null, data=getMonthData()){
