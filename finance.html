@@ -2928,6 +2928,22 @@ if(localStorage.getItem(DEBT_VERSION_KEY) !== '1'){
   saveAppData();
 }
 
+// 2026년 6월부터 저장된 달들의 리볼빙/분할 잔액을 일괄 초기화(빈칸)
+// 그 이전 달은 과거 기록(차트 등) 보존을 위해 건드리지 않음
+const DEBT_RESET_FROM_202606_KEY = 'finance_debt_reset_from_202606_v1';
+if(localStorage.getItem(DEBT_RESET_FROM_202606_KEY) !== '1'){
+  Object.keys(appData.months || {}).forEach(key => {
+    if(key >= '2026-06'){
+      const md = appData.months[key];
+      if(md && Array.isArray(md.debts)){
+        md.debts = md.debts.map(debt => ({ ...debt, amount: 0 }));
+      }
+    }
+  });
+  localStorage.setItem(DEBT_RESET_FROM_202606_KEY, '1');
+  saveAppData();
+}
+
 function ensureGlobalDefaults(){
   if(!appData.global) appData.global = {};
   // 클라우드 데이터로 appData가 통째로 교체되었을 때도 statementLinks 필드가
