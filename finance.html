@@ -462,6 +462,25 @@ button,input{font-family:inherit}
 
 .row span:first-child{color:var(--text2)}
 
+.row .inline-amount-input{
+  min-height:38px;
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  background:var(--bg);
+  color:var(--text);
+  padding:6px 10px;
+  font-size:13px;
+  font-family:inherit;
+  text-align:right;
+  width:140px;
+  min-width:0;
+}
+.row .inline-amount-input::placeholder{color:var(--text3)}
+.row .inline-amount-input:focus{
+  outline:none;
+  border-color:var(--shared);
+}
+
 .input-list{display:grid;gap:8px}
 
 .input-row{
@@ -2289,12 +2308,9 @@ document.addEventListener('DOMContentLoaded', function(){
     <div class="detail-grid">
       <div class="detail-card">
         <div class="detail-title">이번 달 예산</div>
-        <div class="input-list">
-          <div class="input-row budget-input-row">
-            <input value="목표" readonly>
-            <input class="amount" id="budget-input" value="300,000" placeholder="예: 300,000">
-            <button class="x-btn" onclick="saveBudget()">✓</button>
-          </div>
+        <div class="row">
+          <span>목표</span>
+          <input class="inline-amount-input" id="budget-input" placeholder="예산 입력" onchange="saveBudget()">
         </div>
         <div class="row"><span>사용</span><span id="expense-budget-used">¥0</span></div>
         <div class="row"><span>남은 예산</span><span id="expense-budget-remaining">¥0</span></div>
@@ -2317,7 +2333,7 @@ document.addEventListener('DOMContentLoaded', function(){
         <div class="input-list" id="expense-list"></div>
         <div class="input-list" style="margin-top:8px">
           <div class="input-row">
-            <input id="expense-name-input" placeholder="항목명 예: 현금, Suica, Pasmo등으로 부터 추가 지출 및 카드/포인트 조정값" onkeydown="handleExpenseAddKey(event)">
+            <input id="expense-name-input" placeholder="항목명 예: 카드 청구" onkeydown="handleExpenseAddKey(event)">
             <input class="amount" id="expense-amount-input" placeholder="금액" onkeydown="handleExpenseAddKey(event)">
             <button type="button" class="x-btn" onclick="addExpenseItem()">＋</button>
           </div>
@@ -2775,7 +2791,7 @@ function monthKey(year=currentYear, month=currentMonth){
 
 function defaultMonthData(seed=false){
   return {
-    monthBudget: 300000,
+    monthBudget: 0,
     expenses: seed ? [
       {name:'카드 청구', amount:420000},
       {name:'생활비', amount:80000},
@@ -3275,7 +3291,7 @@ function getMonthData(){
     const previous = appData.months[previousKey];
     const blank = defaultMonthData(false);
     if(previous){
-      blank.monthBudget = previous.monthBudget || 300000;
+      blank.monthBudget = 0;
       blank.assets = structuredClone(previous.assets || []);
 
       // 부채 이월: 리볼빙/분할 모두 자동 이월 없이 매달 빈칸에서 새로 입력
@@ -4364,7 +4380,8 @@ function saveBudget(){
   const input = document.getElementById('budget-input');
   if(!input) return;
   getMonthData().monthBudget = parseMoney(input.value);
-  input.value = getMonthData().monthBudget.toLocaleString('ja-JP');
+  const md = getMonthData();
+  input.value = md.monthBudget ? fmt(md.monthBudget) : '';
   saveAppData();
   render();
 }
@@ -4627,7 +4644,7 @@ function render(){
 
   document.getElementById('month-budget').textContent = fmt(md.monthBudget);
   const budgetInput = document.getElementById('budget-input');
-  if(budgetInput && document.activeElement !== budgetInput) budgetInput.value = md.monthBudget.toLocaleString('ja-JP');
+  if(budgetInput && document.activeElement !== budgetInput) budgetInput.value = md.monthBudget ? fmt(md.monthBudget) : '';
 
   document.getElementById('remaining-budget').textContent = fmt(remainingBudget);
   document.getElementById('remaining-rate').textContent = '(' + rate + '%)';
