@@ -2444,6 +2444,7 @@ document.addEventListener('DOMContentLoaded', function(){
         <div class="row"><span>이번 달 입금 / 수입</span><span id="income-row-total">¥0</span></div>
         <div class="row"><span>유동성 자산</span><span id="liquid-asset-row-total">¥0</span></div>
         <div class="row"><span>저축 / 투자</span><span id="saving-invest-row-total">¥0</span></div>
+        <div class="row"><span>이번 달 지출(예정)</span><span id="asset-expected-expense-row-total">¥0</span></div>
         <div class="row"><span>총 자산</span><span id="asset-row-total">¥0</span></div>
       </div>
 
@@ -3683,8 +3684,8 @@ function getNewCardBillTotal(data=getMonthData()){
     + getNewCardBillGeneralTotal(data);
 }
 
-function getNewMonthlyGrandTotal(){
-  return FIXED_RENT + getNewCardBillTotal();
+function getNewMonthlyGrandTotal(data=getMonthData()){
+  return FIXED_RENT + getNewCardBillTotal(data) + getAdjustmentTotal(data);
 }
 
 function hiddenLinkedKey(){
@@ -4314,7 +4315,10 @@ function renderAssets(){
 
   document.getElementById('liquid-asset-row-total').textContent = fmt(getAssetTotal('liquid'));
   document.getElementById('saving-invest-row-total').textContent = fmt(getAssetTotal('investment'));
-  document.getElementById('asset-row-total').textContent = fmt(getAssetTotal());
+  const expectedExpense = getNewMonthlyGrandTotal(md);
+  const expectedExpenseEl = document.getElementById('asset-expected-expense-row-total');
+  if(expectedExpenseEl) expectedExpenseEl.textContent = fmt(-expectedExpense);
+  document.getElementById('asset-row-total').textContent = fmt(getAssetTotal() - expectedExpense);
 }
 
 function updateAssetItem(index, key, value){
