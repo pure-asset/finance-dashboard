@@ -2287,18 +2287,16 @@ document.addEventListener('DOMContentLoaded', function(){
 
     <section class="chart-card">
       <div class="chart-title" id="trend-title">2026년 추이</div>
-      <div class="chart-tabs">
-        <button class="chart-tab active" data-chart="asset" onclick="switchChart('asset')">🏦 자산</button>
-        <button class="chart-tab" data-chart="debt" onclick="switchChart('debt')">💳 부채</button>
-        <button class="chart-tab" data-chart="net" onclick="switchChart('net')">📈 순자산</button>
-      </div>
       <div class="legend" id="chart-legend">
-        <span><i class="dot asset"></i>유동성 자산</span>
+        <span><i class="dot asset"></i>총 자산</span>
+        <span><i class="dot debt"></i>총 부채</span>
+        <span><i class="dot net"></i>순자산</span>
       </div>
       <div class="chart-wrap"><svg class="line-chart" id="trend-chart" viewBox="0 0 680 300" preserveAspectRatio="none"></svg></div>
-      <div class="chart-summary" id="chart-summary-area">
-        <div class="chart-summary-card"><div class="chart-summary-label" id="chart-label-1">현재 자산</div><div class="chart-summary-value" id="current-asset">¥0</div><div class="chart-summary-sub">전월 대비 <span id="asset-change">➖ ¥0</span></div></div>
-        <div class="chart-summary-card"><div class="chart-summary-label" id="chart-label-2">현재 부채</div><div class="chart-summary-value" id="current-debt">¥0</div><div class="chart-summary-sub">전월 대비 <span id="debt-change">➖ ¥0</span></div></div>
+      <div class="chart-summary" id="chart-summary-area" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="chart-summary-card"><div class="chart-summary-label">현재 자산</div><div class="chart-summary-value" id="current-asset">¥0</div><div class="chart-summary-sub">전월 대비 <span id="asset-change">➖ ¥0</span></div></div>
+        <div class="chart-summary-card"><div class="chart-summary-label">현재 부채</div><div class="chart-summary-value" id="current-debt">¥0</div><div class="chart-summary-sub">전월 대비 <span id="debt-change">➖ ¥0</span></div></div>
+        <div class="chart-summary-card"><div class="chart-summary-label">현재 순자산</div><div class="chart-summary-value" id="current-net-worth">¥0</div><div class="chart-summary-sub">전월 대비 <span id="net-worth-change">➖ ¥0</span></div></div>
       </div>
     </section>
   </div>
@@ -4757,64 +4755,31 @@ function getYearSeries(type){
   return arr;
 }
 
-// 현재 활성 차트 타입
-let activeChartType = 'asset';
-
-function switchChart(type){
-  activeChartType = type;
-  document.querySelectorAll('.chart-tab').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.chart === type);
-  });
-  renderChart();
-  updateChartSummary();
-}
-
 function updateChartSummary(){
   const { year: prevYear, month0: prevMonth0, data: previous } = getPreviousMonthContext();
-  const label1 = document.getElementById('chart-label-1');
-  const label2 = document.getElementById('chart-label-2');
+
+  const currentAssetVal = getAssetTotal();
+  const currentDebtVal = getDebtTotal();
+  const currentNetVal = currentAssetVal - currentDebtVal;
+
+  const prevAssetVal = previous ? getAssetTotal(null, previous, prevYear, prevMonth0) : null;
+  const prevDebtVal = previous ? sum(getAdjustedDebtItems(previous)) : null;
+  const prevNetVal = (prevAssetVal !== null && prevDebtVal !== null) ? (prevAssetVal - prevDebtVal) : null;
+
+  const assetChange = prevAssetVal !== null ? currentAssetVal - prevAssetVal : 0;
+  const debtChange = prevDebtVal !== null ? currentDebtVal - prevDebtVal : 0;
+  const netChange = prevNetVal !== null ? currentNetVal - prevNetVal : 0;
+
   const val1 = document.getElementById('current-asset');
   const val2 = document.getElementById('current-debt');
-  const change1 = document.getElementById('asset-change');
-  const change2 = document.getElementById('debt-change');
-  const legend = document.getElementById('chart-legend');
-  const summaryArea = document.getElementById('chart-summary-area');
+  const val3 = document.getElementById('current-net-worth');
+  if(val1) val1.textContent = fmt(currentAssetVal);
+  if(val2) val2.textContent = fmt(currentDebtVal);
+  if(val3) val3.textContent = fmt(currentNetVal);
 
-  if(activeChartType === 'asset'){
-    if(legend) legend.innerHTML = '<span><i class="dot asset"></i>유동성 자산</span>';
-    if(summaryArea) summaryArea.style.gridTemplateColumns = '1fr 1fr';
-    if(label1) label1.textContent = '현재 자산';
-    if(label2){ label2.parentElement.style.display='block'; label2.textContent = '전월 자산'; }
-    if(val1) val1.textContent = fmt(getAssetTotal());
-    const prevAsset = previous ? getAssetTotal(null, previous, prevYear, prevMonth0) : null;
-    if(val2) val2.textContent = prevAsset !== null ? fmt(prevAsset) : '-';
-    const assetChange = previous ? getAssetTotal() - getAssetTotal(null, previous, prevYear, prevMonth0) : 0;
-    setChangeElement('asset-change', assetChange);
-    if(change2) change2.parentElement.style.display = 'none';
-  } else if(activeChartType === 'debt'){
-    if(legend) legend.innerHTML = '<span><i class="dot debt"></i>총 부채</span>';
-    if(summaryArea) summaryArea.style.gridTemplateColumns = '1fr 1fr';
-    if(label1) label1.textContent = '현재 부채';
-    if(label2){ label2.parentElement.style.display='block'; label2.textContent = '전월 부채'; }
-    if(val1) val1.textContent = fmt(getDebtTotal());
-    const prevDebt = previous ? sum(getAdjustedDebtItems(previous)) : null;
-    if(val2) val2.textContent = prevDebt !== null ? fmt(prevDebt) : '-';
-    const debtChange = previous ? getDebtTotal() - sum(getAdjustedDebtItems(previous)) : 0;
-    setChangeElement('asset-change', debtChange);
-    if(change2) change2.parentElement.style.display = 'none';
-  } else if(activeChartType === 'net'){
-    if(legend) legend.innerHTML = '<span><i class="dot net"></i>순자산 (자산 - 부채)</span>';
-    if(summaryArea) summaryArea.style.gridTemplateColumns = '1fr 1fr';
-    const net = getAssetTotal() - getDebtTotal();
-    const prevNet = previous ? getAssetTotal(null, previous, prevYear, prevMonth0) - sum(getAdjustedDebtItems(previous)) : null;
-    if(label1) label1.textContent = '현재 순자산';
-    if(label2){ label2.parentElement.style.display='block'; label2.textContent = '전월 순자산'; }
-    if(val1) val1.textContent = fmt(net);
-    if(val2) val2.textContent = prevNet !== null ? fmt(prevNet) : '-';
-    const netChange = prevNet !== null ? net - prevNet : 0;
-    setChangeElement('asset-change', netChange);
-    if(change2) change2.parentElement.style.display = 'none';
-  }
+  setChangeElement('asset-change', assetChange);
+  setChangeElement('debt-change', debtChange);
+  setChangeElement('net-worth-change', netChange);
 }
 
 function renderTrendChart(){
@@ -4958,20 +4923,21 @@ function renderChart(){
   const left = 68, top = 32, width = 535, height = 205;
   const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
 
-  const rawValues = getYearSeries(activeChartType);
+  const series = [
+    { values: getYearSeries('asset'), lineClass:'asset-line', dotClass:'asset-dot' },
+    { values: getYearSeries('debt'), lineClass:'debt-line', dotClass:'debt-dot' },
+    { values: getYearSeries('net'), lineClass:'net-line', dotClass:'net-dot' }
+  ];
 
-  // 데이터가 존재하는 달만 추려서 포인트 계산
-  const dataPoints = rawValues
-    .map((v, i) => ({ v, i }))
-    .filter(d => d.v !== null);
+  const allVals = [];
+  series.forEach(s => s.values.forEach(v => { if(v !== null) allVals.push(v); }));
 
-  if(dataPoints.length === 0){
+  if(allVals.length === 0){
     svg.innerHTML = '<text x="340" y="150" text-anchor="middle" fill="#9b8aaa" font-size="14">데이터가 없습니다</text>';
     return;
   }
 
   // 순자산은 음수 가능
-  const allVals = dataPoints.map(d => d.v);
   const minVal = Math.min(0, ...allVals);
   const maxVal = Math.max(...allVals, 1);
   const range = maxVal - minVal || 1;
@@ -4982,14 +4948,6 @@ function renderChart(){
   // x 좌표: 12개월 전체 폭에 월 index 기준으로 배치
   const xOf = (monthIdx) => left + (width / 11) * monthIdx;
   const yOf = (v) => top + height - ((v - axisMin) / axisRange) * height;
-
-  // 색상 결정
-  const lineClass = activeChartType === 'asset' ? 'asset-line'
-                  : activeChartType === 'debt'  ? 'debt-line'
-                  : 'net-line';
-  const dotClass  = activeChartType === 'asset' ? 'asset-dot'
-                  : activeChartType === 'debt'  ? 'debt-dot'
-                  : 'net-dot';
 
   // 그리드 ticks (5개)
   const tickCount = 5;
@@ -5007,29 +4965,34 @@ function renderChart(){
     html += '<line stroke="#ff5b69" stroke-width="1" stroke-dasharray="4,3" x1="'+left+'" y1="'+y0+'" x2="'+(left+width)+'" y2="'+y0+'"></line>';
   }
 
-  // 꺾은선 path (연속된 구간만 연결)
-  let pathD = '';
-  dataPoints.forEach((d, idx) => {
-    const x = xOf(d.i);
-    const y = yOf(d.v);
-    // 이전 포인트와 연속인지 확인
-    if(idx === 0 || d.i !== dataPoints[idx-1].i + 1){
-      pathD += 'M'+x+' '+y;
-    } else {
-      pathD += 'L'+x+' '+y;
-    }
-  });
-  html += '<path class="'+lineClass+'" d="'+pathD+'"></path>';
+  // 세 시리즈(자산/부채/순자산) 각각의 꺾은선 + 점 (연속된 구간만 연결)
+  series.forEach(s => {
+    const dataPoints = s.values.map((v, i) => ({ v, i })).filter(d => d.v !== null);
+    if(dataPoints.length === 0) return;
 
-  // 점
-  dataPoints.forEach(d => {
-    html += '<circle class="'+dotClass+'" cx="'+xOf(d.i)+'" cy="'+yOf(d.v)+'" r="4.5"></circle>';
+    let pathD = '';
+    dataPoints.forEach((d, idx) => {
+      const x = xOf(d.i);
+      const y = yOf(d.v);
+      if(idx === 0 || d.i !== dataPoints[idx-1].i + 1){
+        pathD += 'M'+x+' '+y;
+      } else {
+        pathD += 'L'+x+' '+y;
+      }
+    });
+    html += '<path class="'+s.lineClass+'" d="'+pathD+'"></path>';
+
+    dataPoints.forEach(d => {
+      html += '<circle class="'+s.dotClass+'" cx="'+xOf(d.i)+'" cy="'+yOf(d.v)+'" r="4.5"></circle>';
+    });
   });
 
-  // 월 라벨 (데이터 있는 달만)
-  dataPoints.forEach(d => {
-    const isCurrent = d.i === currentMonth && currentYear === new Date().getFullYear();
-    html += '<text class="month-label '+(isCurrent?'current-month':'')+'" x="'+(xOf(d.i)-10)+'" y="276">'+months[d.i]+'</text>';
+  // 월 라벨 (세 시리즈 중 하나라도 데이터가 있는 달만)
+  const labeledMonths = new Set();
+  series.forEach(s => s.values.forEach((v, i) => { if(v !== null) labeledMonths.add(i); }));
+  Array.from(labeledMonths).sort((a,b) => a-b).forEach(i => {
+    const isCurrent = i === currentMonth && currentYear === new Date().getFullYear();
+    html += '<text class="month-label '+(isCurrent?'current-month':'')+'" x="'+(xOf(i)-10)+'" y="276">'+months[i]+'</text>';
   });
 
   svg.innerHTML = html;
