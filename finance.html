@@ -2277,14 +2277,6 @@ document.addEventListener('DOMContentLoaded', function(){
       </div>
     </section>
 
-    <section class="budget-panel">
-      <div class="budget-grid">
-        <div class="budget-card"><div class="budget-icon">💳</div><div class="budget-label">한 달 예산</div><div class="budget-value" id="month-budget">¥0</div></div>
-        <div class="budget-card"><div class="budget-icon">◔</div><div class="budget-label">남은 예산</div><div class="budget-value" id="remaining-budget">¥0</div><div class="budget-sub" id="remaining-rate">(0%)</div></div>
-        <div class="budget-card"><div class="budget-icon">🗓️</div><div class="budget-label">하루 권장 예산</div><div class="budget-value" id="daily-budget">¥0</div><div class="budget-sub" id="daily-base">(30일 기준)</div></div>
-      </div>
-    </section>
-
     <section class="chart-card">
       <div class="chart-title" id="trend-title">2026년 추이</div>
       <div class="legend" id="chart-legend">
@@ -2310,8 +2302,11 @@ document.addEventListener('DOMContentLoaded', function(){
         <span>목표</span>
         <input class="inline-amount-input" id="budget-input" placeholder="예산 입력" onchange="saveBudget()">
       </div>
-      <div class="row"><span>사용</span><span id="expense-budget-used">¥0</span></div>
-      <div class="row"><span>남은 예산</span><span id="expense-budget-remaining">¥0</span></div>
+      <div class="row">
+        <span>고정비</span>
+        <input class="inline-amount-input" id="fixed-costs-input" placeholder="고정비 입력" onchange="saveFixedCosts()">
+      </div>
+      <div class="row"><span>하루 권장 예산</span><span id="expense-daily-recommended">¥0</span></div>
     </div>
 
     <div class="detail-grid">
@@ -2324,7 +2319,13 @@ document.addEventListener('DOMContentLoaded', function(){
         <div class="row" style="padding-left:16px"><span>부채 상환</span><span id="expense-debtpay-filtered-total">¥0</span></div>
         <div class="row" style="padding-left:16px"><span>일반 지출</span><span id="expense-general-new-total">¥0</span></div>
         <div class="row"><span>조정값</span><span id="expense-adjustment-total">¥0</span></div>
-        <div class="row"><span>이번 달 총 지출</span><span id="expense-grand-total">¥0</span></div>
+        <div class="row">
+          <span>이번 달 총 지출</span>
+          <span>
+            <span id="expense-grand-total">¥0</span>
+            <span id="expense-budget-diff-inline" style="font-size:12px;margin-left:4px"></span>
+          </span>
+        </div>
       </div>
 
       <div class="detail-card">
@@ -2821,6 +2822,7 @@ function monthKey(year=currentYear, month=currentMonth){
 function defaultMonthData(seed=false){
   return {
     monthBudget: 0,
+    fixedCosts: 0,
     expenses: seed ? [
       {name:'카드 청구', amount:420000},
       {name:'생활비', amount:80000},
@@ -3433,6 +3435,7 @@ function getMonthData(){
     const blank = defaultMonthData(false);
     if(previous){
       blank.monthBudget = 0;
+      blank.fixedCosts = 0;
       // 자산 이월: 항목(이름/타입)만 이월하고 금액은 부채와 동일하게 매달 빈칸에서 새로 입력
       blank.assets = (previous.assets || []).map(asset => ({ ...asset, amount: 0 }));
 
@@ -3672,7 +3675,7 @@ function getCardBillLabel(){
 const FIXED_RENT = 161000;
 
 // 하루 권장 예산 계산에 쓰이는 고정비 기준 (요약 페이지 KPI 전용)
-const DAILY_BUDGET_FIXED_COSTS = 220000 + 165000;
+const DAILY_BUDGET_FIXED_COSTS = 415000; // 렌트+공과금+구독료+부채상환 대략치
 
 function getNewUtilitiesTotal(year=currentYear, month0=currentMonth){
   // 공동 생활비 합계에서 렌트(161,000)를 제외한 나머지 (전월 living.html 데이터 기준)
@@ -4137,10 +4140,28 @@ function renderExpenses(){
   const grandEl = document.getElementById('expense-grand-total');
   if(grandEl) grandEl.textContent = fmt(grandTotal);
 
-  const budgetUsedEl = document.getElementById('expense-budget-used');
-  if(budgetUsedEl) budgetUsedEl.textContent = fmt(grandTotal);
-  const budgetRemainingEl = document.getElementById('expense-budget-remaining');
-  if(budgetRemainingEl) budgetRemainingEl.textContent = fmt(md.monthBudget - grandTotal);
+  const budgetDiffEl = document.getElementById('expense-budget-diff-inline');
+  if(budgetDiffEl){
+    const budgetDiff = grandTotal - md.monthBudget; // 양수면 초과 지출
+    if(budgetDiff > 0){
+      budgetDiffEl.textContent = '(목표 대비 +' + fmt(budgetDiff) + ')';
+      budgetDiffEl.style.color = 'var(--him)';
+    }else if(budgetDiff < 0){
+      budgetDiffEl.textContent = '(목표 대비 -' + fmt(Math.abs(budgetDiff)) + ')';
+      budgetDiffEl.style.color = 'var(--red)';
+    }else{
+      budgetDiffEl.textContent = '';
+      budgetDiffEl.style.color = '';
+    }
+  }
+
+  const fixedCostsInput = document.getElementById('fixed-costs-input');
+  if(fixedCostsInput && document.activeElement !== fixedCostsInput) fixedCostsInput.value = md.fixedCosts ? fmt(md.fixedCosts) : '';
+
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const dailyRecommended = (md.monthBudget - (md.fixedCosts || 0)) / daysInMonth;
+  const dailyRecommendedEl = document.getElementById('expense-daily-recommended');
+  if(dailyRecommendedEl) dailyRecommendedEl.textContent = fmt(dailyRecommended);
 
   renderCardBillBreakdownChart();
 }
@@ -4658,6 +4679,17 @@ function saveBudget(){
   render();
 }
 
+function saveFixedCosts(){
+  pushUndoState();
+  const input = document.getElementById('fixed-costs-input');
+  if(!input) return;
+  getMonthData().fixedCosts = parseMoney(input.value);
+  const md = getMonthData();
+  input.value = md.fixedCosts ? fmt(md.fixedCosts) : '';
+  saveAppData();
+  render();
+}
+
 
 
 
@@ -4860,10 +4892,6 @@ function render(){
 
   syncLivingExpenseFromLivingPage();
   const md = getMonthData();
-  const today = new Date();
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  const isCurrentMonth = today.getFullYear() === currentYear && today.getMonth() === currentMonth;
-  const remainingDays = isCurrentMonth ? Math.max(1, daysInMonth - today.getDate() + 1) : daysInMonth;
 
   const income = getIncomeTotal();
   const totalExpense = getTotalExpense();
@@ -4871,9 +4899,6 @@ function render(){
   const previousTotalAsset = getPreviousTotalAsset();
   const netChangeMonth = previousTotalAsset === null ? 0 : totalAsset - previousTotalAsset;
   const netChangeYear = totalAsset - getYearStartTotalAsset();
-  const remainingBudget = md.monthBudget - totalExpense;
-  const dailyBudget = (md.monthBudget - DAILY_BUDGET_FIXED_COSTS - totalExpense) / remainingDays;
-  const rate = md.monthBudget > 0 ? Math.round(remainingBudget / md.monthBudget * 1000) / 10 : 0;
 
   document.getElementById('income-total').textContent = fmt(income);
   document.getElementById('expense-total').textContent = fmt(totalExpense);
@@ -4881,14 +4906,8 @@ function render(){
   setNetChangeElement('net-change-month', netChangeMonth);
   setNetChangeElement('net-change-year', netChangeYear);
 
-  document.getElementById('month-budget').textContent = fmt(md.monthBudget);
   const budgetInput = document.getElementById('budget-input');
   if(budgetInput && document.activeElement !== budgetInput) budgetInput.value = md.monthBudget ? fmt(md.monthBudget) : '';
-
-  document.getElementById('remaining-budget').textContent = fmt(remainingBudget);
-  document.getElementById('remaining-rate').textContent = '(' + rate + '%)';
-  document.getElementById('daily-budget').textContent = fmt(dailyBudget);
-  document.getElementById('daily-base').textContent = '(' + remainingDays + '일 기준)';
 
   document.getElementById('current-asset').textContent = fmt(getAssetTotal());
   document.getElementById('current-debt').textContent = fmt(getDebtTotal());
