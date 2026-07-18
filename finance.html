@@ -2489,15 +2489,15 @@ document.addEventListener('DOMContentLoaded', function(){
     <div class="inline-head"><h2>구독 현황</h2></div>
     <div class="subs-layout">
       <div class="detail-card subs-summary-card">
-        <div class="detail-title">이번 달 구독 요약</div>
-        <div class="row"><span>이번 달 반영 합계</span><span id="subs-current-total">¥0</span></div>
+        <div class="detail-title"><span class="subs-month-label">이번 달</span> 구독 요약</div>
+        <div class="row"><span><span class="subs-month-label">이번 달</span> 반영 합계</span><span id="subs-current-total">¥0</span></div>
         <div class="row"><span>월간 구독 합계</span><span id="subs-monthly-total">¥0</span></div>
-        <div class="row"><span>이번 달 연간 갱신</span><span id="subs-annual-total">¥0</span></div>
-        <div class="row"><span>이번 달 반영 항목</span><span id="subs-current-count">0개</span></div>
+        <div class="row"><span><span class="subs-month-label">이번 달</span> 연간 갱신</span><span id="subs-annual-total">¥0</span></div>
+        <div class="row"><span><span class="subs-month-label">이번 달</span> 반영 항목</span><span id="subs-current-count">0개</span></div>
       </div>
 
       <div class="detail-card subs-input-card">
-        <div class="detail-title">이번 달 구독 목록</div>
+        <div class="detail-title"><span class="subs-month-label">이번 달</span> 구독 목록</div>
         <div class="subs-input-list" id="subs-input-list"></div>
 
         <div class="subs-input-list" style="margin-top:8px">
@@ -3509,8 +3509,31 @@ function isSubActiveThisMonth(sub){
   return isSubActiveInMonth(sub, currentYear, currentMonth);
 }
 
+// ── 구독 탭 표시 전용: 카드 명세서가 한 달 늦게 청구되는 것과 맞춰
+// "이번 달 구독 목록"은 실제로는 전월 구독 상태를 보여줌
+function getSubsTargetMonthContext(){
+  const month0 = currentMonth === 0 ? 11 : currentMonth - 1;
+  const year = currentMonth === 0 ? currentYear - 1 : currentYear;
+  return { year, month0 };
+}
+
+function getSubsTargetMonthKey(){
+  const { year, month0 } = getSubsTargetMonthContext();
+  return monthKey(year, month0);
+}
+
+function getSubsTargetMonthLabel(){
+  const { month0 } = getSubsTargetMonthContext();
+  return (month0 + 1) + '월(전월)';
+}
+
+function isSubActiveInSubsTargetMonth(sub){
+  const { year, month0 } = getSubsTargetMonthContext();
+  return isSubActiveInMonth(sub, year, month0);
+}
+
 function getActiveSubscriptions(){
-  return appData.global.subscriptions.filter(isSubActiveThisMonth);
+  return appData.global.subscriptions.filter(isSubActiveInSubsTargetMonth);
 }
 
 function getSubscriptionTotalForMonth(year, month0){
@@ -4078,7 +4101,7 @@ function subscriptionInputRows(){
   const visibleSubs = sortSubscriptionsByDate(
     appData.global.subscriptions
       .map((sub, index) => ({...sub, originalIndex:index}))
-      .filter(isSubActiveThisMonth)
+      .filter(isSubActiveInSubsTargetMonth)
   );
 
   return visibleSubs.map((sub)=>{
@@ -4102,11 +4125,13 @@ function subscriptionInputRows(){
 
 function renderSubscriptions(){
   const active = sortSubscriptionsByDate(getActiveSubscriptions());
-  const monthly = appData.global.subscriptions.filter(s => s.cycle === '월간' && isSubActiveThisMonth(s));
-  const annualThisMonth = appData.global.subscriptions.filter(s => s.cycle === '연간' && isSubActiveThisMonth(s));
+  const monthly = appData.global.subscriptions.filter(s => s.cycle === '월간' && isSubActiveInSubsTargetMonth(s));
+  const annualThisMonth = appData.global.subscriptions.filter(s => s.cycle === '연간' && isSubActiveInSubsTargetMonth(s));
 
   const currentTotalEl = document.getElementById('subs-current-total');
   if(!currentTotalEl) return;
+
+  document.querySelectorAll('.subs-month-label').forEach(el => { el.textContent = getSubsTargetMonthLabel(); });
 
   currentTotalEl.textContent = fmt(sum(active));
   document.getElementById('subs-monthly-total').textContent = fmt(sum(monthly));
@@ -4144,7 +4169,7 @@ function addSubscription(){
     date,
     amount,
     memo:'',
-    addedMonth: monthKey(),
+    addedMonth: getSubsTargetMonthKey(),
     deletedMonth: null
   });
 
@@ -4161,7 +4186,7 @@ function deleteSubscription(index){
   pushUndoState();
   const item = appData.global.subscriptions[index];
   if(!item) return;
-  item.deletedMonth = monthKey();
+  item.deletedMonth = getSubsTargetMonthKey();
   saveAppData();
   render();
 }
