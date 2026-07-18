@@ -2285,25 +2285,29 @@ document.addEventListener('DOMContentLoaded', function(){
   </div>
 
   <section class="inline-panel" id="inline-expense">
-    <div class="inline-head"><h2>이번 달 지출</h2></div>
+    <div class="inline-head"><h2>이번 달 지출 분석</h2></div>
     <div class="detail-grid">
       <div class="detail-card">
         <div class="detail-title">이번 달 예산</div>
         <div class="input-list">
           <div class="input-row budget-input-row">
-            <input value="한 달 예산" readonly>
+            <input value="목표" readonly>
             <input class="amount" id="budget-input" value="300,000" placeholder="예: 300,000">
             <button class="x-btn" onclick="saveBudget()">✓</button>
           </div>
         </div>
+        <div class="row"><span>사용</span><span id="expense-budget-used">¥0</span></div>
+        <div class="row"><span>남은 예산</span><span id="expense-budget-remaining">¥0</span></div>
       </div>
 
       <div class="detail-card">
         <div class="detail-title">지출 요약</div>
-        <div class="row"><span>생활비 (고정비)</span><span id="expense-living-total">¥0</span></div>
-        <div class="row"><span>구독비 (고정비)</span><span id="expense-subscription-total">¥0</span></div>
-        <div class="row"><span id="expense-debt-payment-label">부채 상환 (고정비)</span><span id="expense-debt-payment-total">¥0</span></div>
-        <div class="row"><span>일반 지출</span><span id="expense-normal-total">¥0</span></div>
+        <div class="row"><span>렌트 (고정비)</span><span id="expense-rent-total">¥0</span></div>
+        <div class="row"><span id="expense-cardbill-label">카드값</span><span id="expense-cardbill-total">¥0</span></div>
+        <div class="row" style="padding-left:16px"><span>공과금/생활비</span><span id="expense-utilities-total">¥0</span></div>
+        <div class="row" style="padding-left:16px"><span>구독료</span><span id="expense-sub-prevmonth-total">¥0</span></div>
+        <div class="row" style="padding-left:16px"><span>부채 상환</span><span id="expense-debtpay-filtered-total">¥0</span></div>
+        <div class="row" style="padding-left:16px"><span>일반 지출</span><span id="expense-general-new-total">¥0</span></div>
         <div class="row"><span>이번 달 총 지출</span><span id="expense-grand-total">¥0</span></div>
       </div>
 
@@ -3424,18 +3428,31 @@ function getMonthFromDateText(text){
   return m ? Number(m[1]) : null;
 }
 
-function isSubActiveThisMonth(sub){
+function isSubActiveInMonth(sub, month0){
   if(sub.cycle === '월간') return true;
-  if(sub.cycle === '연간') return getMonthFromDateText(sub.date) === currentMonth + 1;
+  if(sub.cycle === '연간') return getMonthFromDateText(sub.date) === month0 + 1;
   return false;
+}
+
+function isSubActiveThisMonth(sub){
+  return isSubActiveInMonth(sub, currentMonth);
 }
 
 function getActiveSubscriptions(){
   return appData.global.subscriptions.filter(isSubActiveThisMonth);
 }
 
+function getSubscriptionTotalForMonth(month0){
+  return sum(appData.global.subscriptions.filter(s => isSubActiveInMonth(s, month0)));
+}
+
 function getSubscriptionTotal(){
-  return sum(getActiveSubscriptions());
+  return getSubscriptionTotalForMonth(currentMonth);
+}
+
+function getPreviousMonthSubscriptionTotal(){
+  const prevMonth0 = currentMonth === 0 ? 11 : currentMonth - 1;
+  return getSubscriptionTotalForMonth(prevMonth0);
 }
 
 
@@ -3461,6 +3478,45 @@ function getPaymentUsageMonthLabel(){
 function getCardBillLabel(){
   const prevMonthNum = currentMonth === 0 ? 12 : currentMonth;
   return `${prevMonthNum}월 카드값`;
+}
+
+// ── 지출 분석 화면(이번 달 지출) 전용 계산 로직 ──
+// 기존 자동 연동(생활비/구독료/부채상환/일반지출 → expenses 배열) 로직과는 별개이며,
+// 이 화면에 표시되는 요약 수치만을 위한 재계산임.
+const FIXED_RENT = 161000;
+
+function getNewUtilitiesTotal(){
+  // 공동 생활비 합계에서 렌트(161,000)를 제외한 나머지
+  return Math.max(0, calculateLivingExpenseTotal() - FIXED_RENT);
+}
+
+function getNewCardBillDebtPaymentTotal(data=getMonthData()){
+  // '신규'가 들어간 항목은 제외하고, '리보' 또는 '할부'가 들어간 항목만 합산
+  return sum((data.payments || []).filter(p => {
+    const n = p.name || '';
+    if(/신규/.test(n)) return false;
+    return /리보|할부/.test(n);
+  }));
+}
+
+function getNewCardBillNewChargeTotal(data=getMonthData()){
+  // '신규'가 들어간 항목(Rakuten-신규, Amex-신규 등)만 합산
+  return sum((data.payments || []).filter(p => /신규/.test(p.name || '')));
+}
+
+function getNewCardBillGeneralTotal(data=getMonthData()){
+  return getNewCardBillNewChargeTotal(data) - getPreviousMonthSubscriptionTotal() - getNewUtilitiesTotal();
+}
+
+function getNewCardBillTotal(data=getMonthData()){
+  return getNewUtilitiesTotal()
+    + getPreviousMonthSubscriptionTotal()
+    + getNewCardBillDebtPaymentTotal(data)
+    + getNewCardBillGeneralTotal(data);
+}
+
+function getNewMonthlyGrandTotal(){
+  return FIXED_RENT + getNewCardBillTotal();
 }
 
 function hiddenLinkedKey(){
@@ -3776,16 +3832,38 @@ function renderExpenses(){
 
   list.innerHTML = expenseInputRows();
 
-  const livingEl = document.getElementById('expense-living-total');
-  if(livingEl) livingEl.textContent = fmt(getLivingExpenseTotal());
+  const md = getMonthData();
+  const utilitiesTotal = getNewUtilitiesTotal();
+  const prevSubsTotal = getPreviousMonthSubscriptionTotal();
+  const debtPayFiltered = getNewCardBillDebtPaymentTotal(md);
+  const generalNew = getNewCardBillGeneralTotal(md);
+  const cardBillTotal = utilitiesTotal + prevSubsTotal + debtPayFiltered + generalNew;
+  const grandTotal = FIXED_RENT + cardBillTotal;
 
-  document.getElementById('expense-subscription-total').textContent = fmt(getSubscriptionExpenseTotal());
-  const debtPayEl = document.getElementById('expense-debt-payment-total');
-  if(debtPayEl) debtPayEl.textContent = fmt(getDebtPaymentExpenseTotal());
-  const debtPayLabelEl = document.getElementById('expense-debt-payment-label');
-  if(debtPayLabelEl) debtPayLabelEl.textContent = getCardBillLabel() + ' (고정비)';
-  document.getElementById('expense-normal-total').textContent = fmt(getNormalExpenseTotal());
-  document.getElementById('expense-grand-total').textContent = fmt(getTotalExpense());
+  const rentEl = document.getElementById('expense-rent-total');
+  if(rentEl) rentEl.textContent = fmt(FIXED_RENT);
+
+  const cardbillLabelEl = document.getElementById('expense-cardbill-label');
+  if(cardbillLabelEl) cardbillLabelEl.textContent = getCardBillLabel();
+  const cardbillTotalEl = document.getElementById('expense-cardbill-total');
+  if(cardbillTotalEl) cardbillTotalEl.textContent = fmt(cardBillTotal);
+
+  const utilEl = document.getElementById('expense-utilities-total');
+  if(utilEl) utilEl.textContent = fmt(utilitiesTotal);
+  const subEl = document.getElementById('expense-sub-prevmonth-total');
+  if(subEl) subEl.textContent = fmt(prevSubsTotal);
+  const debtEl = document.getElementById('expense-debtpay-filtered-total');
+  if(debtEl) debtEl.textContent = fmt(debtPayFiltered);
+  const genEl = document.getElementById('expense-general-new-total');
+  if(genEl) genEl.textContent = fmt(generalNew);
+
+  const grandEl = document.getElementById('expense-grand-total');
+  if(grandEl) grandEl.textContent = fmt(grandTotal);
+
+  const budgetUsedEl = document.getElementById('expense-budget-used');
+  if(budgetUsedEl) budgetUsedEl.textContent = fmt(grandTotal);
+  const budgetRemainingEl = document.getElementById('expense-budget-remaining');
+  if(budgetRemainingEl) budgetRemainingEl.textContent = fmt(md.monthBudget - grandTotal);
 }
 
 function updateExpenseItem(index, key, value){
