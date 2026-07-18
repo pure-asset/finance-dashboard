@@ -3486,8 +3486,10 @@ function getCardBillLabel(){
 const FIXED_RENT = 161000;
 
 function getNewUtilitiesTotal(){
-  // 공동 생활비 합계에서 렌트(161,000)를 제외한 나머지
-  return Math.max(0, calculateLivingExpenseTotal() - FIXED_RENT);
+  // 공동 생활비 합계에서 렌트(161,000)를 제외한 나머지 (전월 living.html 데이터 기준)
+  const prevMonth0 = currentMonth === 0 ? 11 : currentMonth - 1;
+  const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+  return Math.max(0, calculateLivingExpenseTotal(prevYear, prevMonth0) - FIXED_RENT);
 }
 
 function getNewCardBillDebtPaymentTotal(data=getMonthData()){
@@ -3566,31 +3568,31 @@ function livingKey(suffix, year=currentYear, month=currentMonth){
   return `couple_${year}_${String(month + 1).padStart(2,'0')}_${suffix}`;
 }
 
-function readLivingJson(suffix, fallback){
+function readLivingJson(suffix, fallback, year=currentYear, month=currentMonth){
   try{
-    const raw = localStorage.getItem(livingKey(suffix));
+    const raw = localStorage.getItem(livingKey(suffix, year, month));
     return raw ? JSON.parse(raw) : fallback;
   }catch(e){
     return fallback;
   }
 }
 
-function getLivingEnabled(){
-  const stored = readLivingJson('enabled', null);
+function getLivingEnabled(year=currentYear, month=currentMonth){
+  const stored = readLivingJson('enabled', null, year, month);
   if(stored) return stored;
   const defaults = {};
   LIVING_SHARED_DEF.forEach(def => {
-    defaults[def.key] = def.bimonthly ? (currentMonth % 2 === 0) : true;
+    defaults[def.key] = def.bimonthly ? (month % 2 === 0) : true;
   });
   return defaults;
 }
 
-function calculateLivingExpenseTotal(){
-  const amounts = readLivingJson('shared', {});
+function calculateLivingExpenseTotal(year=currentYear, month=currentMonth){
+  const amounts = readLivingJson('shared', {}, year, month);
   if(!Object.prototype.hasOwnProperty.call(amounts, 'rent')) amounts.rent = 322000;
 
-  const enabled = getLivingEnabled();
-  const essentials = readLivingJson('essentials', []);
+  const enabled = getLivingEnabled(year, month);
+  const essentials = readLivingJson('essentials', [], year, month);
   const essentialsTotal = essentials.reduce((sum, item) => sum + Number(item.amount || 0), 0);
 
   let sharedTotal = 0;
