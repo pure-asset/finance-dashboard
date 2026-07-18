@@ -4762,6 +4762,18 @@ function refreshLinkedExpenses(){
   render();
 }
 
+function monthHasAnyData(md){
+  if(!md) return false;
+  const hasAsset = (md.assets || []).some(a => Number(a.amount || 0) !== 0);
+  const hasIncome = (md.income || []).some(i => Number(i.amount || 0) !== 0);
+  const hasDebt = (md.debts || []).some(d => Number(d.amount || 0) !== 0);
+  const hasExpense = (md.expenses || []).some(e => Number(e.amount || 0) !== 0);
+  const hasPayment = (md.payments || []).some(p => Number(p.amount || 0) !== 0);
+  const hasBudget = Number(md.monthBudget || 0) !== 0;
+  const hasFixedCosts = Number(md.fixedCosts || 0) !== 0;
+  return hasAsset || hasIncome || hasDebt || hasExpense || hasPayment || hasBudget || hasFixedCosts;
+}
+
 function getYearSeries(type){
   // 그래프는 localStorage에 실제 저장된 데이터만 참조
   // 월 이동으로 생성된 임시 메모리 데이터는 제외
@@ -4775,7 +4787,7 @@ function getYearSeries(type){
   const arr = [];
   for(let m=0; m<12; m++){
     const data = savedMonths[monthKey(currentYear, m)];
-    if(data){
+    if(data && monthHasAnyData(data)){
       if(type === 'asset') arr.push(getAssetTotal(null, data, currentYear, m));
       else if(type === 'debt') arr.push(sum(getAdjustedDebtItems(data)));
       else if(type === 'net') arr.push(getAssetTotal(null, data, currentYear, m) - sum(getAdjustedDebtItems(data)));
