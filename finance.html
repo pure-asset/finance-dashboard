@@ -2694,6 +2694,15 @@ async function loadCloudData(){
         localStorage.setItem(CLOUD_RAKUTEN_POINT_PAYMENT_SPLIT_V1_KEY, '1');
       }
 
+      const CLOUD_FUTURE_MONTH_ASSET_RESET_KEY = 'finance_future_month_asset_reset_cloud_v1';
+      if(localStorage.getItem(CLOUD_FUTURE_MONTH_ASSET_RESET_KEY) !== '1'){
+        if(applyFutureMonthAssetReset()){
+          debtFixApplied = true;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        }
+        localStorage.setItem(CLOUD_FUTURE_MONTH_ASSET_RESET_KEY, '1');
+      }
+
       render();
       updateSyncUI('클라우드 동기화 완료', currentUser.email || '로그인됨');
     }else{
@@ -3275,6 +3284,36 @@ const DEBT_RESET_FROM_202606_KEY = 'finance_debt_reset_from_202606_v1';
 if(localStorage.getItem(DEBT_RESET_FROM_202606_KEY) !== '1'){
   applyDebtResetFrom202606();
   localStorage.setItem(DEBT_RESET_FROM_202606_KEY, '1');
+  saveAppData();
+}
+
+function applyFutureMonthAssetReset(){
+  // 실제 오늘 날짜보다 미래인 달은 아직 실제로 일어나지 않았으므로, 그 달의 자산 금액에
+  // 값이 들어있다면 전부 예전 버그(자산 금액을 그대로 이월하던 로직)로 생긴 값임이 확실함
+  // → 안전하게 일괄 0(빈칸)으로 초기화. 오늘 이전/현재 달은 실제 입력값일 수 있으니 건드리지 않음
+  let changed = false;
+  const now = new Date();
+  const realCurrentKey = monthKey(now.getFullYear(), now.getMonth());
+  Object.keys(appData.months || {}).forEach(key => {
+    if(key > realCurrentKey){
+      const md = appData.months[key];
+      if(md && Array.isArray(md.assets)){
+        md.assets.forEach(asset => {
+          if(Number(asset.amount || 0) !== 0){
+            asset.amount = 0;
+            changed = true;
+          }
+        });
+      }
+    }
+  });
+  return changed;
+}
+
+const FUTURE_MONTH_ASSET_RESET_KEY = 'finance_future_month_asset_reset_v1';
+if(localStorage.getItem(FUTURE_MONTH_ASSET_RESET_KEY) !== '1'){
+  applyFutureMonthAssetReset();
+  localStorage.setItem(FUTURE_MONTH_ASSET_RESET_KEY, '1');
   saveAppData();
 }
 
