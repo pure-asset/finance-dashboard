@@ -2302,7 +2302,7 @@ document.addEventListener('DOMContentLoaded', function(){
         <div class="detail-title">지출 요약</div>
         <div class="row"><span>생활비 (고정비)</span><span id="expense-living-total">¥0</span></div>
         <div class="row"><span>구독비 (고정비)</span><span id="expense-subscription-total">¥0</span></div>
-        <div class="row"><span>부채 상환 (고정비)</span><span id="expense-debt-payment-total">¥0</span></div>
+        <div class="row"><span id="expense-debt-payment-label">부채 상환 (고정비)</span><span id="expense-debt-payment-total">¥0</span></div>
         <div class="row"><span>일반 지출</span><span id="expense-normal-total">¥0</span></div>
         <div class="row"><span>이번 달 총 지출</span><span id="expense-grand-total">¥0</span></div>
       </div>
@@ -3458,6 +3458,11 @@ function getPaymentUsageMonthLabel(){
   return `(${prevMonthNum}월 이용분)`;
 }
 
+function getCardBillLabel(){
+  const prevMonthNum = currentMonth === 0 ? 12 : currentMonth;
+  return `${prevMonthNum}월 카드값`;
+}
+
 function hiddenLinkedKey(){
   return 'finance_hidden_linked_' + monthKey();
 }
@@ -3565,7 +3570,8 @@ function syncLivingExpenseFromLivingPage(){
     .filter(item => !(item.name === '부채 상환 자동 반영'))
     .filter(item => !/^\d+월 생활비$/.test(item.name || ''))
     .filter(item => !/^\d+월 구독료$/.test(item.name || ''))
-    .filter(item => !/^\d+월 부채 상환$/.test(item.name || ''));
+    .filter(item => !/^\d+월 부채 상환$/.test(item.name || ''))
+    .filter(item => !/^\d+월 카드값$/.test(item.name || ''));
 
   if(livingTotal > 0 && !isLinkedHidden('living')){
     md.expenses = md.expenses.filter(item => !(item.name === '생활비' && Number(item.amount || 0) === 80000 && !item.source));
@@ -3578,7 +3584,7 @@ function syncLivingExpenseFromLivingPage(){
 
   // 부채 탭의 "이번 달 상환" 총액을 지출 탭의 고정비로 자동 연결
   if(debtPaymentTotal > 0 && !isLinkedHidden('debtPayment')){
-    md.expenses.unshift({name: label + ' 부채 상환', amount: debtPaymentTotal, source:'debtPayment'});
+    md.expenses.unshift({name: getCardBillLabel(), amount: debtPaymentTotal, source:'debtPayment'});
   }
 
   const after = JSON.stringify(md.expenses || []);
@@ -3776,6 +3782,8 @@ function renderExpenses(){
   document.getElementById('expense-subscription-total').textContent = fmt(getSubscriptionExpenseTotal());
   const debtPayEl = document.getElementById('expense-debt-payment-total');
   if(debtPayEl) debtPayEl.textContent = fmt(getDebtPaymentExpenseTotal());
+  const debtPayLabelEl = document.getElementById('expense-debt-payment-label');
+  if(debtPayLabelEl) debtPayLabelEl.textContent = getCardBillLabel() + ' (고정비)';
   document.getElementById('expense-normal-total').textContent = fmt(getNormalExpenseTotal());
   document.getElementById('expense-grand-total').textContent = fmt(getTotalExpense());
 }
@@ -4321,10 +4329,11 @@ function refreshLinkedExpense(source){
       .filter(item => item.source !== 'debtPayment')
       .filter(item => !(item.name === '부채 상환'))
       .filter(item => !(item.name === '부채 상환 자동 반영'))
-      .filter(item => !/^\d+월 부채 상환$/.test(item.name || ''));
+      .filter(item => !/^\d+월 부채 상환$/.test(item.name || ''))
+      .filter(item => !/^\d+월 카드값$/.test(item.name || ''));
 
     if(debtPaymentTotal > 0){
-      md.expenses.unshift({name: label + ' 부채 상환', amount: debtPaymentTotal, source:'debtPayment'});
+      md.expenses.unshift({name: getCardBillLabel(), amount: debtPaymentTotal, source:'debtPayment'});
     }
   }
 
