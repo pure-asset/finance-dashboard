@@ -2255,28 +2255,6 @@ document.addEventListener('DOMContentLoaded', function(){
   </div>
 
   <div class="summary-view">
-    <section class="kpi-grid">
-      <div class="kpi-card">
-        <div class="icon-circle icon-red">↑</div>
-        <div class="kpi-label">총 수입</div>
-        <div class="kpi-value red" id="income-total">¥0</div>
-      </div>
-      <div class="kpi-card">
-        <div class="icon-circle icon-blue">↓</div>
-        <div class="kpi-label">총 지출</div>
-        <div class="kpi-value blue" id="expense-total">¥0</div>
-      </div>
-      <div class="kpi-card">
-        <div class="icon-circle icon-purple">💼</div>
-        <div class="kpi-label">총 자산</div>
-        <div class="kpi-value purple" id="net-worth">¥0</div>
-        <div class="net-meta">
-          <div class="net-line"><span>전월 대비</span><span class="net-change" id="net-change-month">➖ ¥0</span></div>
-          <div class="net-line"><span>연초 대비</span><span class="net-change" id="net-change-year">➖ ¥0</span></div>
-        </div>
-      </div>
-    </section>
-
     <section class="chart-card">
       <div class="chart-title" id="trend-title">2026년 추이</div>
       <div class="legend" id="chart-legend">
@@ -4995,19 +4973,6 @@ function render(){
 
   syncLivingExpenseFromLivingPage();
   const md = getMonthData();
-
-  const income = getIncomeTotal();
-  const totalExpense = getTotalExpense();
-  const totalAsset = getTotalAsset();
-  const previousTotalAsset = getPreviousTotalAsset();
-  const netChangeMonth = previousTotalAsset === null ? 0 : totalAsset - previousTotalAsset;
-  const netChangeYear = totalAsset - getYearStartTotalAsset();
-
-  document.getElementById('income-total').textContent = fmt(income);
-  document.getElementById('expense-total').textContent = fmt(totalExpense);
-  document.getElementById('net-worth').textContent = fmt(totalAsset);
-  setNetChangeElement('net-change-month', netChangeMonth);
-  setNetChangeElement('net-change-year', netChangeYear);
 
   const budgetInput = document.getElementById('budget-input');
   if(budgetInput && document.activeElement !== budgetInput) budgetInput.value = md.monthBudget ? fmt(md.monthBudget) : '';
