@@ -4907,7 +4907,7 @@ function render(){
   const netChangeMonth = previousTotalAsset === null ? 0 : totalAsset - previousTotalAsset;
   const netChangeYear = totalAsset - getYearStartTotalAsset();
   const remainingBudget = md.monthBudget - totalExpense;
-  const dailyBudget = (md.monthBudget - DAILY_BUDGET_FIXED_COSTS) / remainingDays;
+  const dailyBudget = (md.monthBudget - DAILY_BUDGET_FIXED_COSTS - totalExpense) / remainingDays;
   const rate = md.monthBudget > 0 ? Math.round(remainingBudget / md.monthBudget * 1000) / 10 : 0;
 
   document.getElementById('income-total').textContent = fmt(income);
