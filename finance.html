@@ -2305,17 +2305,18 @@ document.addEventListener('DOMContentLoaded', function(){
 
   <section class="inline-panel" id="inline-expense">
     <div class="inline-head"><h2>이번 달 지출 분석</h2></div>
-    <div class="detail-grid">
-      <div class="detail-card">
-        <div class="detail-title">이번 달 예산</div>
-        <div class="row">
-          <span>목표</span>
-          <input class="inline-amount-input" id="budget-input" placeholder="예산 입력" onchange="saveBudget()">
-        </div>
-        <div class="row"><span>사용</span><span id="expense-budget-used">¥0</span></div>
-        <div class="row"><span>남은 예산</span><span id="expense-budget-remaining">¥0</span></div>
-      </div>
 
+    <div class="detail-card" style="margin-bottom:12px">
+      <div class="detail-title">이번 달 예산</div>
+      <div class="row">
+        <span>목표</span>
+        <input class="inline-amount-input" id="budget-input" placeholder="예산 입력" onchange="saveBudget()">
+      </div>
+      <div class="row"><span>사용</span><span id="expense-budget-used">¥0</span></div>
+      <div class="row"><span>남은 예산</span><span id="expense-budget-remaining">¥0</span></div>
+    </div>
+
+    <div class="detail-grid">
       <div class="detail-card">
         <div class="detail-title">지출 요약</div>
         <div class="row"><span>렌트 (고정비)</span><span id="expense-rent-total">¥0</span></div>
@@ -2328,15 +2329,26 @@ document.addEventListener('DOMContentLoaded', function(){
         <div class="row"><span>이번 달 총 지출</span><span id="expense-grand-total">¥0</span></div>
       </div>
 
-      <div class="detail-card" style="grid-column:1 / -1">
-        <div class="detail-title">조정값</div>
-        <div class="input-list" id="expense-list"></div>
-        <div class="input-list" style="margin-top:8px">
-          <div class="input-row">
-            <input id="expense-name-input" placeholder="항목명 예: 현금/Suica/Pasmo등 카드 외 지출, 카드/포인트 조정값" onkeydown="handleExpenseAddKey(event)">
-            <input class="amount" id="expense-amount-input" placeholder="금액" onkeydown="handleExpenseAddKey(event)">
-            <button type="button" class="x-btn" onclick="addExpenseItem()">＋</button>
+      <div class="detail-card">
+        <div class="detail-title">카드값 구성 비중</div>
+        <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:center">
+          <svg id="cardbill-breakdown-svg" viewBox="0 0 180 180" width="180" height="180"></svg>
+          <div style="min-width:160px">
+            <div id="cardbill-breakdown-legend" style="margin-bottom:10px;display:flex;flex-wrap:wrap"></div>
+            <div id="cardbill-breakdown-info" style="min-width:150px;padding:10px 12px;border:1.5px solid var(--border);border-radius:12px;background:var(--bg)"></div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-card" style="grid-column:1 / -1;margin-top:12px">
+      <div class="detail-title">조정값</div>
+      <div class="input-list" id="expense-list"></div>
+      <div class="input-list" style="margin-top:8px">
+        <div class="input-row">
+          <input id="expense-name-input" placeholder="항목명 예: 현금/Suica/Pasmo등 카드 외 지출, 카드/포인트 조정값" onkeydown="handleExpenseAddKey(event)">
+          <input class="amount" id="expense-amount-input" placeholder="금액" onkeydown="handleExpenseAddKey(event)">
+          <button type="button" class="x-btn" onclick="addExpenseItem()">＋</button>
         </div>
       </div>
     </div>
@@ -3844,6 +3856,86 @@ function expenseInputRows(){
   return itemRows(getMonthData().expenses, 'updateExpenseItem', 'deleteExpenseItem');
 }
 
+function renderCardBillBreakdownChart(){
+  const svg = document.getElementById('cardbill-breakdown-svg');
+  const legendBox = document.getElementById('cardbill-breakdown-legend');
+  const infoBox = document.getElementById('cardbill-breakdown-info');
+  if(!svg || !legendBox || !infoBox) return;
+
+  const md = getMonthData();
+  const categories = [
+    { key:'utilities', name:'공과금/생활비', value:getNewUtilitiesTotal(), color:'#5b8dee' },
+    { key:'subscription', name:'구독료', value:getPreviousMonthSubscriptionTotal(), color:'#a78bfa' },
+    { key:'debtpay', name:'부채상환', value:getNewCardBillDebtPaymentTotal(md), color:'#ff8a98' },
+    { key:'general', name:'일반지출', value:getNewCardBillGeneralTotal(md), color:'#67d3b0' }
+  ];
+
+  window._cardBillBreakdownData = {};
+  categories.forEach(c => { window._cardBillBreakdownData[c.key] = c; });
+
+  const grandTotal = categories.reduce((a,c) => a + Math.max(0, c.value), 0);
+
+  if(grandTotal <= 0){
+    svg.innerHTML = '<circle cx="90" cy="90" r="70" fill="none" stroke="#f0eaf5" stroke-width="26"></circle>' +
+      '<text x="90" y="94" text-anchor="middle" font-size="13" fill="#9b8aaa">데이터 없음</text>';
+    legendBox.innerHTML = categories.map(c => `
+      <span class="cardbill-legend-item" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;margin:4px 12px 4px 0;font-size:13px;color:#9b8aaa"
+        onmouseenter="cardBillBreakdownShow('${c.key}')" onclick="cardBillBreakdownShow('${c.key}')">
+        <i style="width:10px;height:10px;border-radius:50%;background:${c.color};display:inline-block"></i>${c.name}
+      </span>`).join('');
+    infoBox.innerHTML = '<div style="font-size:13px;color:var(--text2)">아직 데이터가 없습니다</div>';
+    return;
+  }
+
+  const r = 70, cx = 90, cy = 90;
+  const circumference = 2 * Math.PI * r;
+  let offsetAcc = 0;
+  let svgHtml = '';
+
+  categories.forEach(c => {
+    const value = Math.max(0, c.value);
+    if(value <= 0) return;
+    const frac = value / grandTotal;
+    const segLen = frac * circumference;
+    const dashArray = `${segLen} ${circumference - segLen}`;
+    const dashOffset = -offsetAcc;
+    svgHtml += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${c.color}"
+      stroke-width="26" stroke-dasharray="${dashArray}" stroke-dashoffset="${dashOffset}"
+      transform="rotate(-90 ${cx} ${cy})" style="cursor:pointer;transition:opacity .15s"
+      onmouseenter="cardBillBreakdownShow('${c.key}')" onclick="cardBillBreakdownShow('${c.key}')"
+      id="cardbill-arc-${c.key}"></circle>`;
+    offsetAcc += segLen;
+  });
+  svgHtml += `<text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="12" fill="#9b8aaa">카드값</text>
+              <text x="${cx}" y="${cy+16}" text-anchor="middle" font-size="15" font-weight="700" fill="#2d1f3d">${man(grandTotal)}</text>`;
+  svg.innerHTML = svgHtml;
+
+  legendBox.innerHTML = categories.map(c => `
+    <span class="cardbill-legend-item" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;margin:4px 12px 4px 0;font-size:13px"
+      onmouseenter="cardBillBreakdownShow('${c.key}')" onclick="cardBillBreakdownShow('${c.key}')">
+      <i style="width:10px;height:10px;border-radius:50%;background:${c.color};display:inline-block"></i>${c.name}
+    </span>`).join('');
+
+  const firstWithValue = categories.find(c => Math.max(0, c.value) > 0) || categories[0];
+  cardBillBreakdownShow(firstWithValue.key);
+}
+
+function cardBillBreakdownShow(key){
+  const data = window._cardBillBreakdownData || {};
+  const info = data[key];
+  const infoBox = document.getElementById('cardbill-breakdown-info');
+  if(!infoBox || !info) return;
+  const md = getMonthData();
+  const grandTotal = Object.values(data).reduce((a,c) => a + Math.max(0, c.value), 0);
+  const pct = grandTotal > 0 ? Math.round((Math.max(0, info.value) / grandTotal) * 1000) / 10 : 0;
+  infoBox.innerHTML = `
+    <div style="font-weight:700;margin-bottom:6px">${escapeHtml(info.name)}</div>
+    <div style="font-size:13px;color:var(--text2);display:flex;justify-content:space-between;gap:10px"><span>금액</span><span style="color:var(--text);font-weight:600">${fmt(info.value)}</span></div>
+    <div style="font-size:13px;color:var(--text2);display:flex;justify-content:space-between;gap:10px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)"><span>비중</span><span style="color:var(--shared);font-weight:700">${pct}%</span></div>
+  `;
+}
+window.cardBillBreakdownShow = cardBillBreakdownShow;
+
 function renderExpenses(){
   const list = document.getElementById('expense-list');
   if(!list) return;
@@ -3885,6 +3977,8 @@ function renderExpenses(){
   if(budgetUsedEl) budgetUsedEl.textContent = fmt(grandTotal);
   const budgetRemainingEl = document.getElementById('expense-budget-remaining');
   if(budgetRemainingEl) budgetRemainingEl.textContent = fmt(md.monthBudget - grandTotal);
+
+  renderCardBillBreakdownChart();
 }
 
 function updateExpenseItem(index, key, value){
