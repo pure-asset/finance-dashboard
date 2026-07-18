@@ -2991,17 +2991,35 @@ function ensureMonthlyAssetIncomeDefaults(md){
     md.income.unshift({name:'급여', amount:0});
   }
 
+  // 예전 기본명 MUFG가 남아있으면 새 명칭으로 정리 (기본 항목 존재 체크보다 먼저 실행해야
+  // 아래 exists 체크에서 옛 이름('MUFG')을 못 찾아 중복 생성되는 문제가 없음)
+  md.assets.forEach(item => {
+    if(item.type === 'liquid' && item.name === 'MUFG') item.name = '계좌 (MUFG)';
+  });
+
+  // 이름 앞뒤 공백 차이 등으로 생긴 중복 항목 정리 (같은 타입+이름이면 병합, 금액 있는 쪽 유지)
+  const seen = new Map();
+  const deduped = [];
+  md.assets.forEach(item => {
+    const key = (item.type || '') + '::' + String(item.name || '').trim();
+    if(seen.has(key)){
+      const existingItem = deduped[seen.get(key)];
+      if(Number(existingItem.amount || 0) === 0 && Number(item.amount || 0) !== 0){
+        existingItem.amount = item.amount;
+      }
+    }else{
+      seen.set(key, deduped.length);
+      deduped.push(item);
+    }
+  });
+  md.assets = deduped;
+
   const liquidDefaults = ['계좌 (MUFG)', 'Revolut', '현금'];
   liquidDefaults.slice().reverse().forEach(name => {
-    const exists = md.assets.some(item => item.type === 'liquid' && item.name === name);
+    const exists = md.assets.some(item => item.type === 'liquid' && String(item.name || '').trim() === name);
     if(!exists){
       md.assets.unshift({name, amount:0, type:'liquid'});
     }
-  });
-
-  // 예전 기본명 MUFG가 남아있으면 새 명칭으로 정리
-  md.assets.forEach(item => {
-    if(item.type === 'liquid' && item.name === 'MUFG') item.name = '계좌 (MUFG)';
   });
 }
 
@@ -3343,7 +3361,8 @@ function getMonthData(){
     const blank = defaultMonthData(false);
     if(previous){
       blank.monthBudget = 0;
-      blank.assets = structuredClone(previous.assets || []);
+      // 자산 이월: 항목(이름/타입)만 이월하고 금액은 부채와 동일하게 매달 빈칸에서 새로 입력
+      blank.assets = (previous.assets || []).map(asset => ({ ...asset, amount: 0 }));
 
       // 부채 이월: 리볼빙/분할 모두 자동 이월 없이 매달 빈칸에서 새로 입력
       blank.debts = (previous.debts || []).map(debt => ({ ...debt, amount: 0 }));
