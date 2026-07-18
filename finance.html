@@ -2704,6 +2704,15 @@ async function loadCloudData(){
         localStorage.setItem(CLOUD_FUTURE_MONTH_ASSET_RESET_KEY, '1');
       }
 
+      const CLOUD_FUTURE_MONTH_BUDGET_RESET_KEY = 'finance_future_month_budget_reset_cloud_v1';
+      if(localStorage.getItem(CLOUD_FUTURE_MONTH_BUDGET_RESET_KEY) !== '1'){
+        if(applyFutureMonthBudgetReset()){
+          debtFixApplied = true;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        }
+        localStorage.setItem(CLOUD_FUTURE_MONTH_BUDGET_RESET_KEY, '1');
+      }
+
       render();
       updateSyncUI('클라우드 동기화 완료', currentUser.email || '로그인됨');
     }else{
@@ -3318,6 +3327,31 @@ if(localStorage.getItem(FUTURE_MONTH_ASSET_RESET_KEY) !== '1'){
   saveAppData();
 }
 
+function applyFutureMonthBudgetReset(){
+  // 실제 오늘 날짜보다 미래인 달에 예산 목표(monthBudget)가 남아있다면, 이는 이월/구버전 기본값으로
+  // 생긴 값일 수밖에 없음 → 0(빈칸)으로 초기화하여 매달 직접 입력하도록 함
+  let changed = false;
+  const now = new Date();
+  const realCurrentKey = monthKey(now.getFullYear(), now.getMonth());
+  Object.keys(appData.months || {}).forEach(key => {
+    if(key > realCurrentKey){
+      const md = appData.months[key];
+      if(md && Number(md.monthBudget || 0) !== 0){
+        md.monthBudget = 0;
+        changed = true;
+      }
+    }
+  });
+  return changed;
+}
+
+const FUTURE_MONTH_BUDGET_RESET_KEY = 'finance_future_month_budget_reset_v1';
+if(localStorage.getItem(FUTURE_MONTH_BUDGET_RESET_KEY) !== '1'){
+  applyFutureMonthBudgetReset();
+  localStorage.setItem(FUTURE_MONTH_BUDGET_RESET_KEY, '1');
+  saveAppData();
+}
+
 function ensureGlobalDefaults(){
   if(!appData.global) appData.global = {};
   // 클라우드 데이터로 appData가 통째로 교체되었을 때도 statementLinks 필드가
@@ -3638,6 +3672,9 @@ function getCardBillLabel(){
 // 기존 자동 연동(생활비/구독료/부채상환/일반지출 → expenses 배열) 로직과는 별개이며,
 // 이 화면에 표시되는 요약 수치만을 위한 재계산임.
 const FIXED_RENT = 161000;
+
+// 하루 권장 예산 계산에 쓰이는 고정비 기준 (요약 페이지 KPI 전용)
+const DAILY_BUDGET_FIXED_COSTS = 220000 + 165000;
 
 function getNewUtilitiesTotal(year=currentYear, month0=currentMonth){
   // 공동 생활비 합계에서 렌트(161,000)를 제외한 나머지 (전월 living.html 데이터 기준)
@@ -4870,7 +4907,7 @@ function render(){
   const netChangeMonth = previousTotalAsset === null ? 0 : totalAsset - previousTotalAsset;
   const netChangeYear = totalAsset - getYearStartTotalAsset();
   const remainingBudget = md.monthBudget - totalExpense;
-  const dailyBudget = remainingBudget / remainingDays;
+  const dailyBudget = (md.monthBudget - DAILY_BUDGET_FIXED_COSTS) / remainingDays;
   const rate = md.monthBudget > 0 ? Math.round(remainingBudget / md.monthBudget * 1000) / 10 : 0;
 
   document.getElementById('income-total').textContent = fmt(income);
