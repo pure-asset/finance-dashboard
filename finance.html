@@ -3603,9 +3603,9 @@ function getSubscriptionTotal(){
   return getSubscriptionTotalForMonth(currentYear, currentMonth);
 }
 
-function getPreviousMonthSubscriptionTotal(){
-  const prevMonth0 = currentMonth === 0 ? 11 : currentMonth - 1;
-  const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+function getPreviousMonthSubscriptionTotal(year=currentYear, month0=currentMonth){
+  const prevMonth0 = month0 === 0 ? 11 : month0 - 1;
+  const prevYear = month0 === 0 ? year - 1 : year;
   return getSubscriptionTotalForMonth(prevYear, prevMonth0);
 }
 
@@ -3639,10 +3639,10 @@ function getCardBillLabel(){
 // 이 화면에 표시되는 요약 수치만을 위한 재계산임.
 const FIXED_RENT = 161000;
 
-function getNewUtilitiesTotal(){
+function getNewUtilitiesTotal(year=currentYear, month0=currentMonth){
   // 공동 생활비 합계에서 렌트(161,000)를 제외한 나머지 (전월 living.html 데이터 기준)
-  const prevMonth0 = currentMonth === 0 ? 11 : currentMonth - 1;
-  const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+  const prevMonth0 = month0 === 0 ? 11 : month0 - 1;
+  const prevYear = month0 === 0 ? year - 1 : year;
   return Math.max(0, calculateLivingExpenseTotal(prevYear, prevMonth0) - FIXED_RENT);
 }
 
@@ -3670,22 +3670,22 @@ function getNewCardBillOtherTotal(data=getMonthData()){
   }));
 }
 
-function getNewCardBillGeneralTotal(data=getMonthData()){
+function getNewCardBillGeneralTotal(data=getMonthData(), year=currentYear, month0=currentMonth){
   return getNewCardBillNewChargeTotal(data)
-    - getPreviousMonthSubscriptionTotal()
-    - getNewUtilitiesTotal()
+    - getPreviousMonthSubscriptionTotal(year, month0)
+    - getNewUtilitiesTotal(year, month0)
     + getNewCardBillOtherTotal(data);
 }
 
-function getNewCardBillTotal(data=getMonthData()){
-  return getNewUtilitiesTotal()
-    + getPreviousMonthSubscriptionTotal()
+function getNewCardBillTotal(data=getMonthData(), year=currentYear, month0=currentMonth){
+  return getNewUtilitiesTotal(year, month0)
+    + getPreviousMonthSubscriptionTotal(year, month0)
     + getNewCardBillDebtPaymentTotal(data)
-    + getNewCardBillGeneralTotal(data);
+    + getNewCardBillGeneralTotal(data, year, month0);
 }
 
-function getNewMonthlyGrandTotal(data=getMonthData()){
-  return FIXED_RENT + getNewCardBillTotal(data) + getAdjustmentTotal(data);
+function getNewMonthlyGrandTotal(data=getMonthData(), year=currentYear, month0=currentMonth){
+  return FIXED_RENT + getNewCardBillTotal(data, year, month0) + getAdjustmentTotal(data);
 }
 
 function hiddenLinkedKey(){
@@ -3873,10 +3873,10 @@ function getAdjustedDebtItems(data=getMonthData()){
   }));
 }
 
-function getAssetTotal(type=null, data=getMonthData()){
+function getAssetTotal(type=null, data=getMonthData(), year=currentYear, month0=currentMonth){
   const assets = data.assets || [];
   if(type) return sum(assets.filter(a => a.type === type));
-  return sum(assets) + getIncomeTotal(data);
+  return sum(assets) + getIncomeTotal(data) - getNewMonthlyGrandTotal(data, year, month0);
 }
 
 function getDebtTotal(type=null){
@@ -3892,37 +3892,41 @@ function getTotalAsset(){
   return getAssetTotal();
 }
 
+function getPreviousMonthContext(){
+  const year = currentMonth === 0 ? currentYear - 1 : currentYear;
+  const month0 = currentMonth === 0 ? 11 : currentMonth - 1;
+  return { year, month0, data: appData.months[monthKey(year, month0)] || null };
+}
+
 function getPreviousTotalAsset(){
-  const previous = getPreviousMonthData();
-  if(!previous) return null;
-  return getAssetTotal(null, previous);
+  const { year, month0, data } = getPreviousMonthContext();
+  if(!data) return null;
+  return getAssetTotal(null, data, year, month0);
 }
 
 function getYearStartTotalAsset(){
   for(let m=0; m<12; m++){
     const data = appData.months[monthKey(currentYear, m)];
-    if(data) return getAssetTotal(null, data);
+    if(data) return getAssetTotal(null, data, currentYear, m);
   }
   return getTotalAsset();
 }
 
 
 function getPreviousMonthData(){
-  const y = currentMonth === 0 ? currentYear - 1 : currentYear;
-  const m = currentMonth === 0 ? 11 : currentMonth - 1;
-  return appData.months[monthKey(y, m)] || null;
+  return getPreviousMonthContext().data;
 }
 
 function getPreviousNetWorth(){
-  const previous = getPreviousMonthData();
+  const { year, month0, data: previous } = getPreviousMonthContext();
   if(!previous) return null;
-  return getAssetTotal(null, previous) - sum(getAdjustedDebtItems(previous));
+  return getAssetTotal(null, previous, year, month0) - sum(getAdjustedDebtItems(previous));
 }
 
 function getYearStartNetWorth(){
   for(let m=0; m<12; m++){
     const data = appData.months[monthKey(currentYear, m)];
-    if(data) return getAssetTotal(null, data) - sum(getAdjustedDebtItems(data));
+    if(data) return getAssetTotal(null, data, currentYear, m) - sum(getAdjustedDebtItems(data));
   }
   return getNetWorth();
 }
@@ -4318,7 +4322,7 @@ function renderAssets(){
   const expectedExpense = getNewMonthlyGrandTotal(md);
   const expectedExpenseEl = document.getElementById('asset-expected-expense-row-total');
   if(expectedExpenseEl) expectedExpenseEl.textContent = fmt(-expectedExpense);
-  document.getElementById('asset-row-total').textContent = fmt(getAssetTotal() - expectedExpense);
+  document.getElementById('asset-row-total').textContent = fmt(getAssetTotal());
 }
 
 function updateAssetItem(index, key, value){
@@ -4705,9 +4709,9 @@ function getYearSeries(type){
   for(let m=0; m<12; m++){
     const data = savedMonths[monthKey(currentYear, m)];
     if(data){
-      if(type === 'asset') arr.push(getAssetTotal(null, data));
+      if(type === 'asset') arr.push(getAssetTotal(null, data, currentYear, m));
       else if(type === 'debt') arr.push(sum(getAdjustedDebtItems(data)));
-      else if(type === 'net') arr.push(getAssetTotal(null, data) - sum(getAdjustedDebtItems(data)));
+      else if(type === 'net') arr.push(getAssetTotal(null, data, currentYear, m) - sum(getAdjustedDebtItems(data)));
       else arr.push(null);
     } else {
       arr.push(null);
@@ -4729,7 +4733,7 @@ function switchChart(type){
 }
 
 function updateChartSummary(){
-  const previous = getPreviousMonthData();
+  const { year: prevYear, month0: prevMonth0, data: previous } = getPreviousMonthContext();
   const label1 = document.getElementById('chart-label-1');
   const label2 = document.getElementById('chart-label-2');
   const val1 = document.getElementById('current-asset');
@@ -4745,9 +4749,9 @@ function updateChartSummary(){
     if(label1) label1.textContent = '현재 자산';
     if(label2){ label2.parentElement.style.display='block'; label2.textContent = '전월 자산'; }
     if(val1) val1.textContent = fmt(getAssetTotal());
-    const prevAsset = previous ? getAssetTotal(null, previous) : null;
+    const prevAsset = previous ? getAssetTotal(null, previous, prevYear, prevMonth0) : null;
     if(val2) val2.textContent = prevAsset !== null ? fmt(prevAsset) : '-';
-    const assetChange = previous ? getAssetTotal() - getAssetTotal(null, previous) : 0;
+    const assetChange = previous ? getAssetTotal() - getAssetTotal(null, previous, prevYear, prevMonth0) : 0;
     setChangeElement('asset-change', assetChange);
     if(change2) change2.parentElement.style.display = 'none';
   } else if(activeChartType === 'debt'){
@@ -4765,7 +4769,7 @@ function updateChartSummary(){
     if(legend) legend.innerHTML = '<span><i class="dot net"></i>순자산 (자산 - 부채)</span>';
     if(summaryArea) summaryArea.style.gridTemplateColumns = '1fr 1fr';
     const net = getAssetTotal() - getDebtTotal();
-    const prevNet = previous ? getAssetTotal(null, previous) - sum(getAdjustedDebtItems(previous)) : null;
+    const prevNet = previous ? getAssetTotal(null, previous, prevYear, prevMonth0) - sum(getAdjustedDebtItems(previous)) : null;
     if(label1) label1.textContent = '현재 순자산';
     if(label2){ label2.parentElement.style.display='block'; label2.textContent = '전월 순자산'; }
     if(val1) val1.textContent = fmt(net);
@@ -4783,7 +4787,7 @@ function renderTrendChart(){
   const months = Array.from({length: currentMonth + 1}, (_, i) => i);
   const assetValues = months.map(m => {
     const data = appData.months[monthKey(currentYear, m)];
-    return data ? getAssetTotal(null, data) : 0;
+    return data ? getAssetTotal(null, data, currentYear, m) : 0;
   });
   const debtValues = months.map(m => {
     const data = appData.months[monthKey(currentYear, m)];
@@ -4887,8 +4891,8 @@ function render(){
   document.getElementById('current-asset').textContent = fmt(getAssetTotal());
   document.getElementById('current-debt').textContent = fmt(getDebtTotal());
 
-  const previous = getPreviousMonthData();
-  const assetChange = previous ? getAssetTotal() - getAssetTotal(null, previous) : 0;
+  const { year: prevYear2, month0: prevMonth02, data: previous } = getPreviousMonthContext();
+  const assetChange = previous ? getAssetTotal() - getAssetTotal(null, previous, prevYear2, prevMonth02) : 0;
   const debtChange = previous ? getDebtTotal() - sum(getAdjustedDebtItems(previous)) : 0;
   setChangeElement('asset-change', assetChange);
   setChangeElement('debt-change', debtChange);
