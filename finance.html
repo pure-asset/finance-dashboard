@@ -2712,6 +2712,15 @@ async function loadCloudData(){
         localStorage.setItem(CLOUD_FUTURE_MONTH_BUDGET_RESET_KEY, '1');
       }
 
+      const CLOUD_STALE_LEGACY_BUDGET_CLEANUP_KEY = 'finance_stale_legacy_budget_cleanup_cloud_v1';
+      if(localStorage.getItem(CLOUD_STALE_LEGACY_BUDGET_CLEANUP_KEY) !== '1'){
+        if(applyStaleLegacyBudgetCleanup()){
+          debtFixApplied = true;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        }
+        localStorage.setItem(CLOUD_STALE_LEGACY_BUDGET_CLEANUP_KEY, '1');
+      }
+
       render();
       updateSyncUI('클라우드 동기화 완료', currentUser.email || '로그인됨');
     }else{
@@ -3349,6 +3358,38 @@ const FUTURE_MONTH_BUDGET_RESET_KEY = 'finance_future_month_budget_reset_v1';
 if(localStorage.getItem(FUTURE_MONTH_BUDGET_RESET_KEY) !== '1'){
   applyFutureMonthBudgetReset();
   localStorage.setItem(FUTURE_MONTH_BUDGET_RESET_KEY, '1');
+  saveAppData();
+}
+
+function applyStaleLegacyBudgetCleanup(){
+  // 예전 버전 기본값(monthBudget: 300000)이 과거/현재 달에도 남아있는 경우가 있어서,
+  // "그 달에 다른 실제 데이터가 전혀 없는데 monthBudget만 정확히 300000인" 경우에 한해
+  // 안전하게 0으로 정리한다. 실제로 300000을 입력한 달(다른 데이터도 함께 있는 달)은 건드리지 않음.
+  let changed = false;
+  Object.keys(appData.months || {}).forEach(key => {
+    const md = appData.months[key];
+    if(!md) return;
+    if(Number(md.monthBudget || 0) !== 300000) return;
+
+    const hasAsset = (md.assets || []).some(a => Number(a.amount || 0) !== 0);
+    const hasIncome = (md.income || []).some(i => Number(i.amount || 0) !== 0);
+    const hasDebt = (md.debts || []).some(d => Number(d.amount || 0) !== 0);
+    const hasExpense = (md.expenses || []).some(e => Number(e.amount || 0) !== 0);
+    const hasPayment = (md.payments || []).some(p => Number(p.amount || 0) !== 0);
+    const hasFixedCosts = Number(md.fixedCosts || 0) !== 0;
+
+    if(!hasAsset && !hasIncome && !hasDebt && !hasExpense && !hasPayment && !hasFixedCosts){
+      md.monthBudget = 0;
+      changed = true;
+    }
+  });
+  return changed;
+}
+
+const STALE_LEGACY_BUDGET_CLEANUP_KEY = 'finance_stale_legacy_budget_cleanup_v1';
+if(localStorage.getItem(STALE_LEGACY_BUDGET_CLEANUP_KEY) !== '1'){
+  applyStaleLegacyBudgetCleanup();
+  localStorage.setItem(STALE_LEGACY_BUDGET_CLEANUP_KEY, '1');
   saveAppData();
 }
 
