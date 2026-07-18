@@ -3295,6 +3295,45 @@ function ensureGlobalDefaults(){
   }
 }
 
+// ★ 자산 항목(유동성 자산/저축·투자)을 구독처럼 다루기 위한 전파 로직
+// - 대상: 계좌 (MUFG)/Revolut/현금 3개 기본 항목은 제외 (항상 고정으로 유지되는 기존 방식 그대로)
+// - 추가: 지금 이후로 이미 만들어져 있는 미래 달에도 즉시 항목을 반영(같은 이름+타입이 없을 때만, 금액은 0으로 시작)
+// - 삭제: 지금 이후로 이미 만들어져 있는 미래 달에서도 함께 제거
+// - 과거(이전) 달은 절대 건드리지 않음 → 순자산 추이 등 과거 기록은 그대로 보존
+const DEFAULT_LIQUID_ASSET_NAMES = ['계좌 (MUFG)', 'Revolut', '현금'];
+
+function isDefaultAssetItem(item){
+  return item.type === 'liquid' && DEFAULT_LIQUID_ASSET_NAMES.includes(item.name);
+}
+
+function getFutureMonthKeysAfter(key){
+  return Object.keys(appData.months || {}).filter(k => k > key);
+}
+
+function propagateAssetAddition(item){
+  if(isDefaultAssetItem(item)) return;
+  const currentKey = monthKey();
+  getFutureMonthKeysAfter(currentKey).forEach(k => {
+    const md = appData.months[k];
+    if(!md) return;
+    if(!Array.isArray(md.assets)) md.assets = [];
+    const exists = md.assets.some(a => a.type === item.type && a.name === item.name);
+    if(!exists){
+      md.assets.push({name:item.name, amount:0, type:item.type});
+    }
+  });
+}
+
+function propagateAssetDeletion(item){
+  if(isDefaultAssetItem(item)) return;
+  const currentKey = monthKey();
+  getFutureMonthKeysAfter(currentKey).forEach(k => {
+    const md = appData.months[k];
+    if(!md || !Array.isArray(md.assets)) return;
+    md.assets = md.assets.filter(a => !(a.type === item.type && a.name === item.name));
+  });
+}
+
 function getMonthData(){
   const key = monthKey();
 
@@ -3457,31 +3496,35 @@ function getMonthFromDateText(text){
   return m ? Number(m[1]) : null;
 }
 
-function isSubActiveInMonth(sub, month0){
+function isSubActiveInMonth(sub, year, month0){
+  const mk = monthKey(year, month0);
+  if(sub.addedMonth && mk < sub.addedMonth) return false;
+  if(sub.deletedMonth && mk >= sub.deletedMonth) return false;
   if(sub.cycle === '월간') return true;
   if(sub.cycle === '연간') return getMonthFromDateText(sub.date) === month0 + 1;
   return false;
 }
 
 function isSubActiveThisMonth(sub){
-  return isSubActiveInMonth(sub, currentMonth);
+  return isSubActiveInMonth(sub, currentYear, currentMonth);
 }
 
 function getActiveSubscriptions(){
   return appData.global.subscriptions.filter(isSubActiveThisMonth);
 }
 
-function getSubscriptionTotalForMonth(month0){
-  return sum(appData.global.subscriptions.filter(s => isSubActiveInMonth(s, month0)));
+function getSubscriptionTotalForMonth(year, month0){
+  return sum(appData.global.subscriptions.filter(s => isSubActiveInMonth(s, year, month0)));
 }
 
 function getSubscriptionTotal(){
-  return getSubscriptionTotalForMonth(currentMonth);
+  return getSubscriptionTotalForMonth(currentYear, currentMonth);
 }
 
 function getPreviousMonthSubscriptionTotal(){
   const prevMonth0 = currentMonth === 0 ? 11 : currentMonth - 1;
-  return getSubscriptionTotalForMonth(prevMonth0);
+  const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+  return getSubscriptionTotalForMonth(prevYear, prevMonth0);
 }
 
 
@@ -4059,7 +4102,7 @@ function subscriptionInputRows(){
 
 function renderSubscriptions(){
   const active = sortSubscriptionsByDate(getActiveSubscriptions());
-  const monthly = appData.global.subscriptions.filter(s => s.cycle === '월간');
+  const monthly = appData.global.subscriptions.filter(s => s.cycle === '월간' && isSubActiveThisMonth(s));
   const annualThisMonth = appData.global.subscriptions.filter(s => s.cycle === '연간' && isSubActiveThisMonth(s));
 
   const currentTotalEl = document.getElementById('subs-current-total');
@@ -4100,7 +4143,9 @@ function addSubscription(){
     cycle,
     date,
     amount,
-    memo:''
+    memo:'',
+    addedMonth: monthKey(),
+    deletedMonth: null
   });
 
   nameInput.value = '';
@@ -4114,7 +4159,9 @@ function addSubscription(){
 
 function deleteSubscription(index){
   pushUndoState();
-  appData.global.subscriptions.splice(index, 1);
+  const item = appData.global.subscriptions[index];
+  if(!item) return;
+  item.deletedMonth = monthKey();
   saveAppData();
   render();
 }
@@ -4205,6 +4252,7 @@ function addAssetItem(type){
   const amount = parseMoney(amountInput.value);
   if(!name || !amount) return;
   getMonthData().assets.push({name, amount, type});
+  propagateAssetAddition({name, type});
   nameInput.value = '';
   amountInput.value = '';
   saveAppData();
@@ -4213,7 +4261,11 @@ function addAssetItem(type){
 
 function deleteAssetItem(index){
   pushUndoState();
-  getMonthData().assets.splice(index, 1);
+  const items = getMonthData().assets;
+  const item = items[index];
+  if(!item) return;
+  items.splice(index, 1);
+  propagateAssetDeletion(item);
   saveAppData();
   render();
 }
