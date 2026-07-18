@@ -2308,15 +2308,16 @@ document.addEventListener('DOMContentLoaded', function(){
         <div class="row" style="padding-left:16px"><span>구독료</span><span id="expense-sub-prevmonth-total">¥0</span></div>
         <div class="row" style="padding-left:16px"><span>부채 상환</span><span id="expense-debtpay-filtered-total">¥0</span></div>
         <div class="row" style="padding-left:16px"><span>일반 지출</span><span id="expense-general-new-total">¥0</span></div>
+        <div class="row"><span>조정값</span><span id="expense-adjustment-total">¥0</span></div>
         <div class="row"><span>이번 달 총 지출</span><span id="expense-grand-total">¥0</span></div>
       </div>
 
       <div class="detail-card" style="grid-column:1 / -1">
-        <div class="detail-title">고정/일반 지출</div>
+        <div class="detail-title">조정값</div>
         <div class="input-list" id="expense-list"></div>
         <div class="input-list" style="margin-top:8px">
           <div class="input-row">
-            <input id="expense-name-input" placeholder="항목명 예: 카드 청구" onkeydown="handleExpenseAddKey(event)">
+            <input id="expense-name-input" placeholder="항목명 예: 현금, Suica, Pasmo등으로 부터 추가 지출" onkeydown="handleExpenseAddKey(event)">
             <input class="amount" id="expense-amount-input" placeholder="금액" onkeydown="handleExpenseAddKey(event)">
             <button type="button" class="x-btn" onclick="addExpenseItem()">＋</button>
           </div>
@@ -3506,8 +3507,21 @@ function getNewCardBillNewChargeTotal(data=getMonthData()){
   return sum((data.payments || []).filter(p => /신규/.test(p.name || '')));
 }
 
+function getNewCardBillOtherTotal(data=getMonthData()){
+  // '신규'도 '리보/할부'도 아닌 나머지 항목 (예: 포인트지불처럼 조정/환급성 항목)
+  return sum((data.payments || []).filter(p => {
+    const n = p.name || '';
+    if(/신규/.test(n)) return false;
+    if(/리보|할부/.test(n)) return false;
+    return true;
+  }));
+}
+
 function getNewCardBillGeneralTotal(data=getMonthData()){
-  return getNewCardBillNewChargeTotal(data) - getPreviousMonthSubscriptionTotal() - getNewUtilitiesTotal();
+  return getNewCardBillNewChargeTotal(data)
+    - getPreviousMonthSubscriptionTotal()
+    - getNewUtilitiesTotal()
+    + getNewCardBillOtherTotal(data);
 }
 
 function getNewCardBillTotal(data=getMonthData()){
@@ -3608,13 +3622,12 @@ function calculateLivingExpenseTotal(year=currentYear, month=currentMonth){
 }
 
 function syncLivingExpenseFromLivingPage(){
+  // ★ 변경: 이제 이 목록("조정값")은 완전히 수동 입력 전용으로 바뀜.
+  // 생활비/구독료/부채상환을 더 이상 자동으로 넣지 않고, 예전에 자동으로 들어갔던
+  // 항목이 남아있으면 정리(삭제)만 해준다. (요약 페이지 KPI는 이제 이 목록과 무관하게
+  // getLivingExpenseTotal/getSubscriptionExpenseTotal/getDebtPaymentExpenseTotal이 직접 계산함)
   const md = getMonthData();
   const before = JSON.stringify(md.expenses || []);
-
-  const livingTotal = calculateLivingExpenseTotal();
-  const subscriptionTotal = getSubscriptionTotal();
-  const debtPaymentTotal = getDebtPaymentTotal(md);
-  const label = monthLabel();
 
   md.expenses = (md.expenses || [])
     .filter(item => item.source !== 'living')
@@ -3631,20 +3644,6 @@ function syncLivingExpenseFromLivingPage(){
     .filter(item => !/^\d+월 부채 상환$/.test(item.name || ''))
     .filter(item => !/^\d+월 카드값$/.test(item.name || ''));
 
-  if(livingTotal > 0 && !isLinkedHidden('living')){
-    md.expenses = md.expenses.filter(item => !(item.name === '생활비' && Number(item.amount || 0) === 80000 && !item.source));
-    md.expenses.unshift({name: label + ' 생활비', amount: livingTotal, source:'living'});
-  }
-
-  if(subscriptionTotal > 0 && !isLinkedHidden('subscription')){
-    md.expenses.unshift({name: label + ' 구독료', amount: subscriptionTotal, source:'subscription'});
-  }
-
-  // 부채 탭의 "이번 달 상환" 총액을 지출 탭의 고정비로 자동 연결
-  if(debtPaymentTotal > 0 && !isLinkedHidden('debtPayment')){
-    md.expenses.unshift({name: getCardBillLabel(), amount: debtPaymentTotal, source:'debtPayment'});
-  }
-
   const after = JSON.stringify(md.expenses || []);
   if(before !== after){
     saveAppData();
@@ -3652,11 +3651,12 @@ function syncLivingExpenseFromLivingPage(){
 }
 
 function getLivingExpenseTotal(){
-  return sum((getMonthData().expenses || []).filter(item => item.source === 'living'));
+  // 요약 페이지 KPI용 - 자동주입 리스트가 아니라 직접 계산 (조정값 목록과 무관)
+  return calculateLivingExpenseTotal();
 }
 
 function getSubscriptionExpenseTotal(){
-  return sum((getMonthData().expenses || []).filter(item => item.source === 'subscription'));
+  return getSubscriptionTotal();
 }
 
 function getDebtPaymentTotal(data=getMonthData()){
@@ -3664,15 +3664,15 @@ function getDebtPaymentTotal(data=getMonthData()){
 }
 
 function getDebtPaymentExpenseTotal(){
-  return sum((getMonthData().expenses || []).filter(item => item.source === 'debtPayment'));
+  return getDebtPaymentTotal();
+}
+
+function getAdjustmentTotal(data=getMonthData()){
+  return sum(data.expenses || []);
 }
 
 function getNormalExpenseTotal(){
-  return sum((getMonthData().expenses || [])
-    .filter(item => item.source !== 'living')
-    .filter(item => item.source !== 'subscription')
-    .filter(item => item.source !== 'debtPayment')
-  );
+  return getAdjustmentTotal();
 }
 
 function getTotalExpense(){
@@ -3840,7 +3840,8 @@ function renderExpenses(){
   const debtPayFiltered = getNewCardBillDebtPaymentTotal(md);
   const generalNew = getNewCardBillGeneralTotal(md);
   const cardBillTotal = utilitiesTotal + prevSubsTotal + debtPayFiltered + generalNew;
-  const grandTotal = FIXED_RENT + cardBillTotal;
+  const adjustmentTotal = getAdjustmentTotal(md);
+  const grandTotal = FIXED_RENT + cardBillTotal + adjustmentTotal;
 
   const rentEl = document.getElementById('expense-rent-total');
   if(rentEl) rentEl.textContent = fmt(FIXED_RENT);
@@ -3858,6 +3859,8 @@ function renderExpenses(){
   if(debtEl) debtEl.textContent = fmt(debtPayFiltered);
   const genEl = document.getElementById('expense-general-new-total');
   if(genEl) genEl.textContent = fmt(generalNew);
+  const adjEl = document.getElementById('expense-adjustment-total');
+  if(adjEl) adjEl.textContent = fmt(adjustmentTotal);
 
   const grandEl = document.getElementById('expense-grand-total');
   if(grandEl) grandEl.textContent = fmt(grandTotal);
